@@ -1,0 +1,1 @@
+- [x] Step 3: Started dev server (cmd /c "cd testing & npm run dev" running)
