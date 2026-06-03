@@ -2025,8 +2025,9 @@ ul li:hover {
     opacity: 1 !important;
   }
 
-  .card-price {
-    color: red !important;
+.card-price {
+    /* keep normal product price color on mobile */
+    color: #ff0000 !important;
     font-weight: 700 !important;
   }
 

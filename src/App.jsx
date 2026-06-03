@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/register";
 import CategoryFront from "./pages/CategoryFront";
-import CategoryPage from "./pages/CategoryPage"; // ✅ ADD THIS
+import CategoryPage from "./pages/categoryPage"; // ✅ ADD THIS
 import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/cart";
 

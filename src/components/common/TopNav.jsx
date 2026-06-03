@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../../cartContext/cartprovider";
 import supabase from "../../supabasefol/supabaseClient";
 import emmy from "../../assets/emmy.png";
-import SearchBar from "../../ui/Searchbar";
+import SearchBar from "../../ui/searchbar";
 
 export default function TopNav() {
   const navigate = useNavigate();

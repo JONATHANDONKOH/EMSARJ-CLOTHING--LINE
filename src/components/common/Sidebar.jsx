@@ -1,4 +1,7 @@
 import emmyLogo from "../../assets/emmy.png";
+
+// Ensure sidebar logo import works with bundlers
+
 import { IconGrid, IconPackage, IconShoppingBag, IconUsers, IconCreditCard } from "./Icons";
 
 const NAV = [
