@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/authContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { IconEye, IconEyeOff } from "../components/common/Icons";
 import emmyLogo from "../assets/emmy.png";
 
@@ -42,80 +42,95 @@ export default function SignIn() {
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-
-        {/* Logo */}
-        <div style={styles.logoWrap}>
-          <img src={emmyLogo} alt="EMSarj" style={styles.logo} />
-        </div>
-
-        <p style={styles.subtitle}>Sign in to your account</p>
-
-        {error && <div style={styles.errorBox}>{error}</div>}
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-
-          {/* Email */}
-          <div style={styles.field}>
-            <label htmlFor="email" style={styles.label}>Email</label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              autoComplete="email"
-              placeholder="you@example.com"
-              style={styles.input}
-              onFocus={e => Object.assign(e.target.style, styles.inputFocus)}
-              onBlur={e => Object.assign(e.target.style, styles.input)}
-            />
+    <>
+      <div style={styles.page}>
+        <div style={styles.card}>
+          {/* Logo */}
+          <div style={styles.logoWrap}>
+            <img src={emmyLogo} alt="EMSarj" style={styles.logo} />
           </div>
 
-          {/* Password */}
-          <div style={styles.field}>
-            <label htmlFor="password" style={styles.label}>Password</label>
-            <div style={styles.passwordWrap}>
+          <p style={styles.subtitle}>Sign in to your account</p>
+
+          {error && <div style={styles.errorBox}>{error}</div>}
+
+          <form onSubmit={handleSubmit} style={styles.form}>
+            {/* Email */}
+            <div style={styles.field}>
+              <label htmlFor="email" style={styles.label}>
+                Email
+              </label>
               <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                value={formData.password}
+                type="email"
+                id="email"
+                value={formData.email}
                 onChange={handleChange}
                 required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                style={{ ...styles.input, paddingRight: "42px" }}
-                onFocus={e => Object.assign(e.target.style, { ...styles.inputFocus, paddingRight: "42px" })}
-                onBlur={e => Object.assign(e.target.style, { ...styles.input, paddingRight: "42px" })}
+                autoComplete="email"
+                placeholder="you@example.com"
+                style={styles.input}
+                onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
+                onBlur={(e) => Object.assign(e.target.style, styles.input)}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={styles.eyeBtn}
-              >
-                {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-              </button>
             </div>
-          </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={loading ? { ...styles.submitBtn, opacity: 0.6 } : styles.submitBtn}
-          >
-            {loading ? "Signing in…" : "Sign In"}
-          </button>
+            {/* Password */}
+            <div style={styles.field}>
+              <label htmlFor="password" style={styles.label}>
+                Password
+              </label>
+              <div style={styles.passwordWrap}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  style={{ ...styles.input, paddingRight: "42px" }}
+                  onFocus={(e) =>
+                    Object.assign(e.target.style, {
+                      ...styles.inputFocus,
+                      paddingRight: "42px",
+                    })
+                  }
+                  onBlur={(e) =>
+                    Object.assign(e.target.style, {
+                      ...styles.input,
+                      paddingRight: "42px",
+                    })
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={styles.eyeBtn}
+                >
+                  {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                </button>
+              </div>
+            </div>
 
-        </form>
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={loading ? { ...styles.submitBtn, opacity: 0.6 } : styles.submitBtn}
+            >
+              {loading ? "Signing in…" : "Sign In"}
+            </button>
+          </form>
 
-        <p style={styles.footer}>
-          Don't have an account?{" "}
-          <a href="/signup" style={styles.link}>Register</a>
-        </p>
+          <p style={styles.footer}>
+            Don't have an account?{" "}
+            <Link to="/signup" style={styles.link}>
+              Register
+            </Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -126,7 +141,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f5f5f5",
-    padding: "16px",
+    padding: "96px 16px 16px",
     fontFamily: "'Georgia', serif",
   },
   card: {
@@ -247,3 +262,4 @@ const styles = {
     textUnderlineOffset: "2px",
   },
 };
+

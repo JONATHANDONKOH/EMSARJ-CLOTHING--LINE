@@ -1,0 +1,71 @@
+/* =====================
+   CATEGORY PAGE
+   — used by CategoryPage.jsx
+   ===================== */
+.category-page {
+  min-height: 100vh;
+  background: #fff;
+  padding-top: 160px; /* clears fixed site-header */
+}
+
+.category-page-header {
+  padding: 20px 40px 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 10px;
+}
+
+.category-back-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #888;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.category-back-btn:hover { color: #111; }
+
+.category-page-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #111;
+  margin: 0;
+}
+
+.category-page-count {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0;
+}
+
+.category-page-loading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 60px 40px;
+}
+
+.category-page-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 80px 20px;
+  font-size: 15px;
+  color: #888;
+  text-align: center;
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .category-page          { padding-top: 121px; }
+  .category-page-header   { padding: 16px 16px 10px; flex-wrap: wrap; gap: 10px; }
+  .category-page-title    { font-size: 18px; }
+}
