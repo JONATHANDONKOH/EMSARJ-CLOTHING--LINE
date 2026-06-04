@@ -9,27 +9,31 @@ import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/cart";
 
 import TopNav from "./components/common/TopNav";
+import EmsarjFooter from "./components/Emsarjfooter";
 import AutoPlayAudio from "./components/common/AutoPlayAudio";
 import { CartProvider } from "./cartContext/cartprovider";
 
 function AppContent() {
   const location = useLocation();
-  const hideTopNav = location.pathname === "/signin" || location.pathname === "/signup";
+  const hideNav = location.pathname === "/signin" || location.pathname === "/signup";
 
   return (
-    <>
-      {!hideTopNav && <TopNav />}
+    <div className="app-container">
+      {!hideNav && <TopNav />}
 
-      <Routes>
-        <Route path="/" element={<CategoryFront />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/cart" element={<Cart />} />
+      <main className="app-content">
+        <Routes>
+          <Route path="/" element={<CategoryFront />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/category/:id" element={<CategoryPage />} />
+        </Routes>
+      </main>
 
-        <Route path="/category/:id" element={<CategoryPage />} />
-      </Routes>
-    </>
+      {!hideNav && <EmsarjFooter />}
+    </div>
   );
 }
 

@@ -2814,3 +2814,272 @@ ul li:hover {
 
   .sb-dropdown { padding: 28px 60px 32px; }
 }
+
+
+/* =====================================================================
+   GAP FIX — Remove app-content top padding.
+   Every page (CategoryFront, CategoryPage, Cart) already handles its
+   own top offset via margin-top / padding-top on its root element.
+   The extra padding here was causing the double-gap in screenshot 1.
+   ===================================================================== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1;
+  padding-top: 0;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+/* =====================================================================
+   FOOTER FULL REWRITE
+   Fixes screenshot 2 & 3:
+   - content + character side by side
+   - social icons in proper 3×2 grid
+   - character constrained so it doesn't overflow
+   - speech bubble arrow pointing right toward character
+   ===================================================================== */
+.emsarj-footer {
+  position: relative;
+  width: 100%;
+  background: #fff;
+  border-top: 3px solid #111;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;           /* side by side: content left, character right */
+  align-items: flex-end;         /* both sit on the bottom baseline */
+  justify-content: space-between;
+  padding: 40px 48px 0 48px;
+  box-sizing: border-box;
+  font-family: 'Arial Black', Arial, sans-serif;
+  gap: 0;
+}
+
+/* black curved arc at the very bottom */
+.emsarj-footer::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  background: #111;
+  border-radius: 60% 60% 0 0 / 100% 100% 0 0;
+  z-index: 0;
+}
+
+/* ── Sparkle stars ── */
+.sparkle {
+  position: absolute;
+  color: #cc0000;
+  pointer-events: none;
+  animation: sparkle-pulse 2s ease-in-out infinite;
+  z-index: 1;
+  line-height: 1;
+}
+.sparkle-1 { top: 20px;  left: 32px;  font-size: 14px; animation-delay: 0s; }
+.sparkle-2 { top: 55px;  left: 64px;  font-size: 26px; animation-delay: 0.4s; }
+.sparkle-3 { top: 26px;  left: 108px; font-size: 18px; animation-delay: 0.8s; }
+.sparkle-4 { top: 80px;  left: 28px;  font-size: 12px; animation-delay: 1.2s; }
+
+@keyframes sparkle-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1) rotate(0deg); }
+  50%       { opacity: 1;   transform: scale(1.3) rotate(20deg); }
+}
+
+/* ── Left content column ── */
+.footer-content {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 56px;   /* clear the sparkles */
+  padding-bottom: 60px; /* sit above the black arc */
+  position: relative;
+  z-index: 1;
+}
+
+.footer-headline {
+  font-size: clamp(20px, 2.6vw, 36px);
+  font-weight: 900;
+  color: #111;
+  margin: 0;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.footer-sub {
+  font-size: clamp(12px, 1.3vw, 16px);
+  color: #cc0000;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.footer-sub strong { color: #cc0000; font-weight: 900; }
+
+/* ── Social icons: 3 cols × 2 rows ── */
+.footer-socials {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows:    repeat(2, 44px);
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.social-icon-btn {
+  width: 44px;
+  height: 44px;
+  background: #cc0000;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-decoration: none;
+  transition: background 0.18s, transform 0.18s;
+  box-shadow: 0 2px 8px rgba(204,0,0,0.25);
+  flex-shrink: 0;
+}
+.social-icon-btn:hover {
+  background: #990000;
+  transform: translateY(-2px) scale(1.08);
+}
+
+/* ── Right side: speech bubble + character ── */
+.footer-right {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
+  gap: 0;
+}
+
+/* Speech bubble */
+.speech-bubble {
+  position: relative;
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 20px;
+  padding: 14px 22px;
+  font-size: clamp(15px, 1.6vw, 21px);
+  font-weight: 900;
+  color: #111;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  align-self: center;
+  margin-bottom: 60px;
+  box-shadow: 3px 3px 0 #111;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Arrow → toward character */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 12px 0 12px 18px;
+  border-style: solid;
+  border-color: transparent transparent transparent #111;
+}
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 0 10px 16px;
+  border-style: solid;
+  border-color: transparent transparent transparent #fff;
+  z-index: 1;
+}
+
+.bubble-sale {
+  color: #cc0000;
+  font-style: italic;
+  font-size: 1.15em;
+}
+
+/* Character image — constrained height so it never overflows */
+.footer-character {
+  height: clamp(160px, 20vw, 260px);
+  width: auto;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+  align-self: flex-end;
+  filter: drop-shadow(4px 0 0 rgba(0,0,0,0.06));
+}
+
+/* Copyright strip inside the black arc */
+.footer-bottom {
+  width: 100%;
+  text-align: center;
+  padding: 10px 0 14px;
+  position: relative;
+  z-index: 1;
+}
+.footer-bottom p {
+  margin: 0;
+  font-size: 12px;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Mobile footer ── */
+@media (max-width: 600px) {
+  .emsarj-footer {
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px 0;
+    gap: 16px;
+    text-align: center;
+  }
+  .footer-content {
+    padding-left: 0;
+    padding-bottom: 0;
+    align-items: center;
+  }
+  .footer-socials {
+    justify-content: center;
+  }
+  .footer-right {
+    flex-direction: column;
+    align-items: center;
+  }
+  .speech-bubble {
+    margin-bottom: 12px;
+  }
+  .speech-bubble::after,
+  .speech-bubble::before { display: none; }
+  .footer-character {
+    height: clamp(160px, 55vw, 240px);
+  }
+  .sparkle-1, .sparkle-2, .sparkle-3, .sparkle-4 { display: none; }
+}
+
+/* ── Tablet footer ── */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .emsarj-footer {
+    padding: 30px 32px 0;
+  }
+  .footer-content { padding-left: 24px; }
+  .footer-character { height: clamp(160px, 18vw, 220px); }
+}
