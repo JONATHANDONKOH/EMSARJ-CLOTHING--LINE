@@ -193,8 +193,12 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f5f5f5",
-    padding: "96px 16px 16px",
+    padding: "0 16px 0",
+
+
     fontFamily: "'Georgia', serif",
+
+
   },
   card: {
     backgroundColor: "#ffffff",
