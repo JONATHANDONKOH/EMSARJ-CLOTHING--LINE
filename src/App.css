@@ -15,6 +15,66 @@
   box-sizing: border-box;
 }
 
+/* Top bar background should stay white (but category list + sign-in/up should be black) */
+.site-header .cat-nav,
+.site-header .desc-bar,
+.site-header .top-bar {
+  background: #fff;
+}
+
+/* Category list (scroll + marquee items) black */
+.site-header .cat-nav-scroll.site-header .gendergories-scroll,
+.site-header .cat-flip-item {
+  background: transparent;
+  color: #000000ea;
+}
+
+/* Sign In / Sign Up black */
+.site-header .nav-item {
+  color: #000;
+}
+
+
+/* Make TopNav row text/icons black (except the SearchBar area + logo) */
+.site-header .top-bar,
+.site-header .desc-bar,
+.site-header .cat-nav,
+.site-header .cat-nav-scroll,
+.site-header .cat-flip-item {
+  color: #000;
+}
+
+/* Top-bar links should be black */
+.site-header .nav-item {
+  color: #000;
+}
+
+.site-header .nav-item:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* Mobile drawer background matches the white header */
+.site-header .mobile-search-drawer {
+  background: #fff;
+}
+
+/* Ensure header description text is black */
+.site-header .discription {
+  color: #000;
+}
+
+/* Keep marquee category text black */
+.site-header .cat-flip-item {
+  color: #000;
+}
+
+/* Logo image area should stay as-is (typically an image) */
+.site-header .nav-logo {
+  color: inherit;
+}
+
+
 /* ── Row 1: Cart  Sign In  Sign Up ── */
 .top-bar {
   height: 50px;
@@ -726,6 +786,8 @@ ul li:hover {
   cursor: pointer;
 }
 
+
+
 .card-img-wrap {
   position: relative;
   width: 100%;
@@ -781,43 +843,57 @@ ul li:hover {
   gap: 2px;
 }
 
+
+
 .card-season-tag {
   font-size: 11px;
-  color: #888;
+  color: #666;
   font-weight: 400;
   letter-spacing: 0.02em;
 }
 
+
+
+
 .card-brand {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 300;
   color: #111;
   margin: 0;
   margin-top: 2px;
 }
 
 .card-name {
-  font-size: 13px;
-  font-weight: 400;
-  color: #555;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+
+
+
 .card-price {
   font-size: 14px;
   font-weight: 500;
-  color: #ff0000;
+  color: #111;
   margin: 0;
   margin-top: 6px;
 }
 
-.brand    { display: none; }
+
+
+ .brand    { display: none; }
 .nametype { display: none; }
 .emmyprice { display: none; }
 .addtocart { display: none; }
+
+/* Hide "Emsarj" label on cards (card-brand element) */
+.card-brand { display: none; }
+
 
 .card-container {
   display: flex;
@@ -1976,8 +2052,92 @@ ul li:hover {
    ===================================================================== */
 @media (max-width: 600px) {
 
+  /* ── Cart page: push below fixed header ── */
+  .cart-header {
+    padding: 16px 16px 0 !important;
+    margin-top: 130px !important;
+  }
+
+  .cart-store-title { font-size: 22px; }
+
+  .cart-category-nav {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Cart body: single column, items on top, payment panel below ── */
+  .cart-body {
+    flex-direction: column !important;
+    padding: 16px !important;
+    gap: 24px !important;
+    align-items: stretch !important;
+  }
+
+  /* ── Cart left fills full width ── */
+  .cart-left {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+
+  /* ── Section title + continue link stack vertically ── */
+  .cart-left-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .cart-section-title { font-size: 16px; }
+
+  /* ── Payment sidebar: full width, static, below items ── */
+  .cart-right {
+    flex: none !important;
+    width: 100% !important;
+    position: static !important;
+    top: auto !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+    padding: 20px 16px !important;
+  }
+
+  /* ── Item cards: image left, info middle, meta right ── */
+  .cart-item-card {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+
+  .cart-item-img-wrap {
+    width: 90px !important;
+    height: 110px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .cart-item-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  /* ── Price + remove: column, right-aligned ── */
+  .cart-item-meta {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .cart-item-price { font-size: 14px; }
+
+  .cart-size-chip { padding: 5px 10px; font-size: 12px; }
+
+  /* ── Hide delivery row in summary on mobile (space saving) ── */
   .cart-summary-rows > :nth-child(2) { display: none !important; }
 
+  /* ── Product card rows ── */
   .card-container--row3,
   .card-container--row4,
   .card-container--row5,
@@ -2023,12 +2183,6 @@ ul li:hover {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-  }
-
-.card-price {
-    /* keep normal product price color on mobile */
-    color: #ff0000 !important;
-    font-weight: 700 !important;
   }
 
   .top-bar     { height: 44px; padding: 0 16px; gap: 12px; }
@@ -2141,7 +2295,7 @@ ul li:hover {
 
   .card .card-season-tag {
     font-size: 10px !important;
-    color: #888 !important;
+    color: #666 !important;
     font-weight: 400 !important;
     letter-spacing: 0.02em !important;
     display: block !important;
@@ -2150,19 +2304,13 @@ ul li:hover {
   }
 
   .card .card-brand {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: #111 !important;
-    margin: 2px 0 0 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: none !important;
   }
 
   .card .card-name {
     font-size: 12px !important;
-    font-weight: 400 !important;
-    color: #555 !important;
+    font-weight: 700 !important;
+    color: #000 !important;
     margin: 0 !important;
     display: block !important;
     white-space: nowrap !important;
@@ -2174,8 +2322,8 @@ ul li:hover {
 
   .card .card-price {
     font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #ff0000 !important;
+    font-weight: 500 !important;
+    color: #111 !important;
     margin: 5px 0 0 !important;
     display: block !important;
     visibility: visible !important;
@@ -2183,15 +2331,6 @@ ul li:hover {
   }
 
   .card-container--row2-marquee { display: none !important; }
-
-  .cart-header        { padding: 16px 16px 0; }
-  .cart-store-title   { font-size: 22px; }
-  .cart-category-nav  { gap: 14px; }
-  .cart-item-card     { flex-wrap: wrap; }
-  .cart-item-img-wrap { width: 100px; height: 120px; }
-  .cart-item-meta     { align-items: flex-start; flex-direction: row; flex-wrap: wrap; gap: 8px; width: 100%; }
-  .cart-section-title { font-size: 16px; }
-  .cart-size-chip     { padding: 5px 10px; font-size: 12px; }
 
   .auth-modal  { padding: 40px 24px 32px; border-radius: 12px; max-width: 100%; }
   .auth-title  { font-size: 22px; }
@@ -2218,10 +2357,8 @@ ul li:hover {
    Clean design with 2-column grid, NO black borders
    ===================================================================== */
 
-/* Shared tablet styles for both small and large tablet */
 @media (min-width: 601px) and (max-width: 1024px) {
 
-  /* ── Navbar adjustments ── */
   .top-bar  { height: 48px; padding: 0 24px; gap: 16px; }
   .desc-bar { padding: 6px 24px; }
   .cat-nav  { height: 58px; padding: 0 20px; }
@@ -2232,14 +2369,12 @@ ul li:hover {
 
   .cartsearch { width: 200px; }
 
-  /* ── Category front ── */
   .category-front {
     top: 138px !important;
     margin-top: 138px !important;
     padding: 12px 24px 10px;
   }
 
-  /* ── MAIN CARD CONTAINER — 2-column grid with margins ── */
   .card-container {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
@@ -2249,7 +2384,6 @@ ul li:hover {
     box-sizing: border-box !important;
   }
 
-  /* ── Individual Card ── */
   .card {
     display: flex !important;
     flex-direction: column !important;
@@ -2260,7 +2394,6 @@ ul li:hover {
     border-radius: 0 !important;
   }
 
-  /* ── Image wrapper: NO border (clean like desktop) ── */
   .card .card-img-wrap {
     position: relative !important;
     width: 100% !important;
@@ -2272,7 +2405,6 @@ ul li:hover {
     box-sizing: border-box !important;
   }
 
-  /* ── Product image: fill the box ── */
   .card .girlscrop {
     width: 100% !important;
     height: 100% !important;
@@ -2282,7 +2414,6 @@ ul li:hover {
     transform-origin: top center !important;
   }
 
-  /* ── Add to wardrobe button ── */
   .card .card-hover-btn {
     position: absolute !important;
     bottom: 0 !important;
@@ -2307,7 +2438,6 @@ ul li:hover {
 
   .card:hover .card-hover-btn { transform: translateY(0) !important; }
 
-  /* ── Info block below the image ── */
   .card .card-info {
     display: flex !important;
     flex-direction: column !important;
@@ -2324,7 +2454,7 @@ ul li:hover {
 
   .card .card-season-tag {
     font-size: 11px !important;
-    color: #888 !important;
+    color: #666 !important;
     font-weight: 400 !important;
     display: block !important;
     visibility: visible !important;
@@ -2332,19 +2462,13 @@ ul li:hover {
   }
 
   .card .card-brand {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: #111 !important;
-    margin: 2px 0 0 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: none !important;
   }
 
   .card .card-name {
     font-size: 13px !important;
-    font-weight: 400 !important;
-    color: #555 !important;
+    font-weight: 700 !important;
+    color: #000 !important;
     margin: 0 !important;
     display: block !important;
     white-space: nowrap !important;
@@ -2356,15 +2480,14 @@ ul li:hover {
 
   .card .card-price {
     font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #ff0000 !important;
+    font-weight: 500 !important;
+    color: #111 !important;
     margin: 6px 0 0 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
 
-  /* ── Row 2 — Horizontal scrollable row (for hero images) NO borders ── */
   .card-container--row2 {
     display: flex !important;
     flex-direction: row !important;
@@ -2398,7 +2521,6 @@ ul li:hover {
     display: block !important;
   }
 
-  /* ── Rows 3-7 — same 2-column grid NO borders ── */
   .card-container--row3,
   .card-container--row4,
   .card-container--row5,
@@ -2410,7 +2532,6 @@ ul li:hover {
     padding: 0 24px 20px !important;
   }
 
-  /* Ensure all cards in these rows have NO borders */
   .card-container--row3 .card .card-img-wrap,
   .card-container--row4 .card .card-img-wrap,
   .card-container--row5 .card .card-img-wrap,
@@ -2419,7 +2540,6 @@ ul li:hover {
     border: none !important;
   }
 
-  /* ── Product cards grid (product page) NO borders ── */
   .product-cards {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
@@ -2433,7 +2553,6 @@ ul li:hover {
     aspect-ratio: 3 / 4 !important;
   }
 
-  /* ── Category page grid NO borders ── */
   .category-products-grid {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
@@ -2445,35 +2564,47 @@ ul li:hover {
     border: none !important;
   }
 
-  /* ── Cart page adjustments ── */
-  .cart-body          { flex-direction: column; padding: 24px; gap: 32px; }
-  .cart-right         { flex: none; width: 100%; position: static; }
+  /* ── Cart: column layout on tablet ── */
+  .cart-body {
+    flex-direction: column !important;
+    padding: 24px !important;
+    gap: 32px !important;
+    align-items: stretch !important;
+  }
+
+  .cart-left {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  .cart-right {
+    flex: none !important;
+    width: 100% !important;
+    position: static !important;
+    top: auto !important;
+    box-sizing: border-box !important;
+  }
+
   .cart-section-title { font-size: 18px; }
   .cart-item-img-wrap { border: 1px solid #ddd; }
 
-  /* ── Auth modal ── */
   .auth-modal { padding: 44px 36px 36px; }
 
-  /* ── Payment modal — single column for tablet ── */
   .pm-body        { grid-template-columns: 1fr; }
   .pm-form-col    { padding-right: 0; }
   .pm-summary-col { padding-left: 0; border-left: none; border-top: 1px solid #f0f0f0; padding-top: 20px; }
   .pm-row2        { grid-template-columns: 1fr; }
 
-  /* ── Section divider ── */
   .section-divider { padding: 28px 24px 10px; }
 
-  /* ── Search dropdown ── */
   .sb-dropdown      { top: 138px; padding: 18px 24px 22px; }
   .sb-grid-item     { flex: 0 0 140px; }
   .sb-grid-img-wrap { width: 140px; height: 175px; }
 
-  /* ── Category page ── */
   .category-page        { padding-top: 178px; }
   .category-front       { top: 178px !important; margin-top: 178px !important; }
   .category-page-header { padding: 16px 24px 10px; }
 
-  /* ── Hide any remaining desktop-only rows ── */
   .card-container--row2-marquee { display: none !important; }
 }
 
@@ -2529,16 +2660,11 @@ ul li:hover {
     width: calc(50% - 24px) !important;
     min-width: calc(50% - 24px) !important;
   }
-
-  /* Cart side-by-side for larger tablets */
-  .cart-body  { flex-direction: row; gap: 32px; }
-  .cart-right { flex: 0 0 280px; position: sticky; top: 24px; }
 }
 
 
 /* =====================================================================
    RESPONSIVE — DESKTOP  (1025px – 1440px)
-   Locks all values back to the original design defaults.
    ===================================================================== */
 @media (min-width: 1025px) {
 
@@ -2552,7 +2678,6 @@ ul li:hover {
   .desc-bar { padding: 7px 40px; }
   .cat-nav  { height: 64px; padding: 0 40px; }
 
-  /* ── 4-column flex layout ── */
   .card-container {
     display: flex !important;
     flex-direction: row !important;
@@ -2617,8 +2742,9 @@ ul li:hover {
     border: none !important;
   }
 
-  .cart-body  { gap: 40px; padding: 40px; flex-direction: row; }
-  .cart-right { flex: 0 0 280px; position: sticky; top: 24px; }
+  .cart-body  { gap: 40px; padding: 40px; flex-direction: row; align-items: flex-start; }
+  .cart-left  { flex: 1 1 65%; min-width: 0; }
+  .cart-right { flex: 0 0 280px; position: sticky; top: 24px; width: auto !important; }
 
   .category-front {
     top: 146px !important;
@@ -2636,7 +2762,6 @@ ul li:hover {
 
 /* =====================================================================
    RESPONSIVE — XL DESKTOP  (1441px+)
-   Max-width caps, wider padding, taller images.
    ===================================================================== */
 @media (min-width: 1441px) {
 

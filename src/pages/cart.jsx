@@ -54,6 +54,7 @@ async function insertOrderItems(orderItems) {
 
 function parseSizes(raw) {
   if (!raw) return [];
+
   if (Array.isArray(raw)) return raw;
   if (typeof raw === "string") {
     try {
