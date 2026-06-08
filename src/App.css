@@ -75,15 +75,21 @@
 }
 
 
-/* ── Row 1: Cart  Sign In  Sign Up ── */
+/* ── Row 1: Sign In · Sign Up · [spacer] · mobile-toggle · Cart ── */
 .top-bar {
-  height: 50px;
+  height: 42px;
   padding: 0 40px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
   box-sizing: border-box;
 }
+
+.top-bar-spacer {
+  flex: 1;
+}
+
+
 
 /* ── Row 2: Store description ── */
 .desc-bar {
@@ -92,21 +98,24 @@
   box-sizing: border-box;
 }
 
-/* ── Row 3: Categories left · Logo center · Search right ── */
+/* ── Row 3: [spacer] · Logo center · Search right ── */
+/*   grid: left-spacer | center-logo(absolute) | search-right      */
 .cat-nav {
-  height: 64px;
+  height: 56px;
   padding: 0 40px;
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
+
+  display: flex;
   align-items: center;
   position: relative;
   box-sizing: border-box;
 }
 
+/* Left spacer pushes logo to true center */
 .nav-spacer {
   flex: 1;
 }
 
+/* Logo absolutely centered in the header */
 .nav-logo {
   position: absolute;
   left: 50%;
@@ -116,11 +125,12 @@
   pointer-events: none;
 }
 
+/* Search sits naturally on the right (flex end) */
 .nav-search {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  margin-right: 70px;
+  margin-left: auto;   /* pushes search to the far right */
 }
 
 /* ── Shared nav text links ── */
@@ -139,7 +149,37 @@
   text-decoration: underline;
 }
 
+/* ── Country flag button (beside cart) ── */
+.country-flag-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.country-flag-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.country-flag-img {
+  width: 20px;
+  height: 14px;
+  object-fit: cover;
+  display: block;
+  border-radius: 2px;
+}
+
+/* ── Cart icon button — sits far right in top-bar ── */
 .cart-icon-btn {
+
   position: relative;
   background: none;
   border: none;
@@ -152,7 +192,7 @@
   padding: 0;
   width: 28px;
   height: 28px;
-  order: -1;
+  /* order: -1 REMOVED — DOM order controls position now */
 }
 
 .cart-icon-btn:hover {
@@ -456,11 +496,13 @@
    ===================== */
 ul {
   list-style: none;
-  font-family: Arial, sans-serif;
+  /* inherit the app/site font so marquee/header text matches */
+  font-family: inherit;
   font-size: 15px;
   padding: 0;
   margin: 0;
 }
+
 
 li a {
   font-size: 14px;
@@ -741,7 +783,7 @@ ul li:hover {
 
 .product-card-price {
   font-size: 15px;
-  font-weight: bold;
+  font-weight: normal;
   color: #333;
   margin: 0 0 8px 0;
 }
@@ -865,7 +907,7 @@ ul li:hover {
 
 .card-name {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 300;
   color: #000;
   margin: 0;
   white-space: nowrap;
@@ -876,12 +918,18 @@ ul li:hover {
 
 
 
+
 .card-price {
   font-size: 14px;
   font-weight: 500;
   color: #111;
   margin: 0;
   margin-top: 6px;
+  display: inline-block;
+  padding: 1px 0px;
+  width: fit-content;
+  background: #fafafa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 
@@ -1017,6 +1065,7 @@ ul li:hover {
   border-bottom: 1px solid #e0e0e0;
   padding: 24px 40px 0;
   text-align: center;
+  margin-top: 200px;
 }
 
 .cart-store-title {
@@ -1336,6 +1385,117 @@ ul li:hover {
   color: #c00;
   margin: 10px 0 0;
   text-align: center;
+}
+
+/* ── Cart Recommendations Section ── */
+.cart-recommendations {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-top: 1px solid #f0f0f0;
+}
+
+.cart-recommendations-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 24px;
+}
+
+.cart-recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.cart-product-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.cart-product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.cart-product-img-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.cart-product-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-product-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 12px;
+}
+
+.cart-product-name {
+  font-size: 13px;
+  font-weight: 400;
+  color: #111;
+  padding: 8px 10px 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cart-product-price {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111;
+  padding: 4px 10px;
+  margin: 0;
+}
+
+.cart-product-btn {
+  width: calc(100% - 20px);
+  padding: 8px 10px;
+  margin: 8px 10px 10px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cart-product-btn:hover {
+  background: #333;
+}
+
+@media (max-width: 600px) {
+  .cart-recommendations {
+    padding: 24px 16px;
+  }
+
+  .cart-recommendations-title {
+    font-size: 18px;
+    margin: 0 0 16px;
+  }
+
+  .cart-recommendations-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 }
 
 
@@ -1844,7 +2004,7 @@ ul li:hover {
 }
 
 .gendergories-scroll--animate {
-  animation: catMarquee 22s linear infinite;
+  animation: catMarquee 40s linear infinite;
 }
 
 .cat-nav-scroll:hover .gendergories-scroll--animate {
@@ -1896,7 +2056,6 @@ ul li:hover {
   cursor: pointer;
   color: #333;
   padding: 4px;
-  margin-left: auto;
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
@@ -1926,6 +2085,191 @@ ul li:hover {
 .mobile-search-inner .cartsearch {
   width: 100%;
   max-width: 100%;
+}
+
+
+/* =====================
+   HAMBURGER MENU STYLES
+   ===================== */
+
+/* Utility classes for responsive visibility */
+.mobile-only {
+  display: none !important;
+}
+
+.desktop-only {
+  display: flex !important;
+}
+
+/* Hamburger button */
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hamburger-icon {
+  width: 22px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background-color: #111;
+  border-radius: 2px;
+  transition: all 0.25s ease-in-out;
+}
+
+.hamburger-icon.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger-icon.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-icon.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Mobile logo */
+.mobile-logo {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.mobile-emmy-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+/* Desktop auth links container */
+.desktop-auth {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Mobile Menu Drawer */
+.mobile-menu-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mobile-menu-drawer--open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mobile-menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.mobile-menu-drawer--open .mobile-menu-overlay {
+  opacity: 1;
+}
+
+.mobile-menu-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  z-index: 1;
+  overflow-y: auto;
+}
+
+.mobile-menu-drawer--open .mobile-menu-content {
+  transform: translateX(0);
+}
+
+.mobile-menu-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 20px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-menu-item {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.mobile-menu-item:hover {
+  text-decoration: underline;
+}
+
+.mobile-menu-divider {
+  height: 1px;
+  background: #eee;
+  margin: 12px 20px;
+}
+
+.mobile-menu-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.mobile-menu-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.mobile-menu-cat-item {
+  font-size: 14px;
+  font-weight: 400;
+  color: #333;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.mobile-menu-cat-item:hover {
+  color: #111;
+  text-decoration: underline;
 }
 
 
@@ -2051,6 +2395,61 @@ ul li:hover {
    RESPONSIVE — MOBILE  (max 600px)
    ===================================================================== */
 @media (max-width: 600px) {
+
+  /* Force mobile elements to show, desktop elements to hide */
+
+  .mobile-only {
+    display: flex !important;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+
+  .top-bar {
+    justify-content: space-between;
+  }
+
+  .desktop-auth {
+    display: none !important;
+  }
+
+  .mobile-search-toggle {
+    display: none !important;
+  }
+
+  .nav-logo {
+    position: relative !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    justify-content: center !important;
+    display: flex !important;
+  }
+
+  .nav-search {
+    display: none !important;
+  }
+
+  .cat-nav {
+    flex-direction: column-reverse !important;
+    height: auto !important;
+    padding: 12px 16px !important;
+    gap: 12px !important;
+  }
+
+  .nav-spacer {
+    display: none !important;
+  }
+
+  .desc-bar {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 12px 16px !important;
+  }
+
+  .top-bar-spacer {
+    flex: 1;
+  }
 
   /* ── Cart page: push below fixed header ── */
   .cart-header {
@@ -2185,10 +2584,11 @@ ul li:hover {
     opacity: 1 !important;
   }
 
-  .top-bar     { height: 44px; padding: 0 16px; gap: 12px; }
-  .desc-bar    { padding: 5px 16px; }
+  .top-bar     { height: 38px; padding: 0 16px; gap: 10px; }
+  .desc-bar    { padding: 4px 16px; }
   .discription { font-weight: bolder; font-size: 11px; }
-  .cat-nav     { height: 54px; padding: 0 12px; }
+  .cat-nav     { height: 50px; padding: 0 12px; }
+
 
   .nav-search           { display: none; }
   .mobile-search-toggle { display: flex; }
@@ -2309,7 +2709,7 @@ ul li:hover {
 
   .card .card-name {
     font-size: 12px !important;
-    font-weight: 700 !important;
+    font-weight: 400 !important;
     color: #000 !important;
     margin: 0 !important;
     display: block !important;
@@ -2354,16 +2754,16 @@ ul li:hover {
 
 /* =====================================================================
    RESPONSIVE — TABLET (601px – 1024px)
-   Clean design with 2-column grid, NO black borders
    ===================================================================== */
-
 @media (min-width: 601px) and (max-width: 1024px) {
 
   .top-bar  { height: 48px; padding: 0 24px; gap: 16px; }
   .desc-bar { padding: 6px 24px; }
-  .cat-nav  { height: 58px; padding: 0 20px; }
+  .cat-nav  { height: 52px; padding: 0 20px; }
 
-  .nav-search           { display: flex; margin-right: 40px; }
+
+  .desktop-auth        { display: none !important; }
+  .nav-search           { display: flex; }
   .mobile-search-toggle { display: none !important; }
   .mobile-search-drawer { display: none !important; }
 
@@ -2467,7 +2867,7 @@ ul li:hover {
 
   .card .card-name {
     font-size: 13px !important;
-    font-weight: 700 !important;
+    font-weight: 400 !important;
     color: #000 !important;
     margin: 0 !important;
     display: block !important;
@@ -2668,13 +3068,19 @@ ul li:hover {
    ===================================================================== */
 @media (min-width: 1025px) {
 
-  .mobile-search-toggle { display: none !important; }
-  .mobile-search-drawer { display: none !important; }
+  /* Hide all mobile-only elements on desktop */
+  .hamburger-btn,
+  .mobile-logo,
+  .mobile-search-toggle,
+  .mobile-search-drawer,
+  .mobile-menu-drawer {
+    display: none !important;
+  }
 
-  .nav-search { display: flex !important; margin-right: 70px; }
+  .nav-search { display: flex !important; }
   .cartsearch { width: 300px; }
 
-  .top-bar  { height: 50px; padding: 0 40px; gap: 24px; }
+  .top-bar  { height: 50px; padding: 0 40px; gap: 16px; }
   .desc-bar { padding: 7px 40px; }
   .cat-nav  { height: 64px; padding: 0 40px; }
 
@@ -2745,6 +3151,7 @@ ul li:hover {
   .cart-body  { gap: 40px; padding: 40px; flex-direction: row; align-items: flex-start; }
   .cart-left  { flex: 1 1 65%; min-width: 0; }
   .cart-right { flex: 0 0 280px; position: sticky; top: 24px; width: auto !important; }
+  .cart-header { margin-top: 160px !important; }
 
   .category-front {
     top: 146px !important;
@@ -2817,15 +3224,13 @@ ul li:hover {
 
 
 /* =====================================================================
-   GAP FIX — Remove app-content top padding.
-   Every page (CategoryFront, CategoryPage, Cart) already handles its
-   own top offset via margin-top / padding-top on its root element.
-   The extra padding here was causing the double-gap in screenshot 1.
+   APP CONTAINER
    ===================================================================== */
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-family: 'Arial Black', Arial, sans-serif;
 }
 
 .app-content {
@@ -2835,13 +3240,9 @@ ul li:hover {
   box-sizing: border-box;
 }
 
+
 /* =====================================================================
-   FOOTER FULL REWRITE
-   Fixes screenshot 2 & 3:
-   - content + character side by side
-   - social icons in proper 3×2 grid
-   - character constrained so it doesn't overflow
-   - speech bubble arrow pointing right toward character
+   FOOTER
    ===================================================================== */
 .emsarj-footer {
   position: relative;
@@ -2850,29 +3251,30 @@ ul li:hover {
   border-top: 3px solid #111;
   overflow: hidden;
   display: flex;
-  flex-direction: row;           /* side by side: content left, character right */
-  align-items: flex-end;         /* both sit on the bottom baseline */
+  flex-direction: row;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 40px 48px 0 48px;
+  padding: 60px 48px 0 48px;
   box-sizing: border-box;
-  font-family: 'Arial Black', Arial, sans-serif;
+  font-family: inherit;
   gap: 0;
+  z-index: 50;
 }
 
-/* black curved arc at the very bottom */
+
 .emsarj-footer::before {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 54px;
+  height: 46px;
   background: #111;
   border-radius: 60% 60% 0 0 / 100% 100% 0 0;
   z-index: 0;
 }
 
-/* ── Sparkle stars ── */
+
 .sparkle {
   position: absolute;
   color: #cc0000;
@@ -2891,15 +3293,14 @@ ul li:hover {
   50%       { opacity: 1;   transform: scale(1.3) rotate(20deg); }
 }
 
-/* ── Left content column ── */
 .footer-content {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-left: 56px;   /* clear the sparkles */
-  padding-bottom: 60px; /* sit above the black arc */
+  padding-left: 56px;
+  padding-bottom: 60px;
   position: relative;
   z-index: 1;
 }
@@ -2923,9 +3324,8 @@ ul li:hover {
   letter-spacing: 0.03em;
 }
 
-.footer-sub strong { color: #cc0000; font-weight: 900; }
+.footer-sub strong { color: #cc0000; font-weight: inherit; }
 
-/* ── Social icons: 3 cols × 2 rows ── */
 .footer-socials {
   display: grid;
   grid-template-columns: repeat(3, 44px);
@@ -2953,7 +3353,6 @@ ul li:hover {
   transform: translateY(-2px) scale(1.08);
 }
 
-/* ── Right side: speech bubble + character ── */
 .footer-right {
   flex: 0 0 auto;
   display: flex;
@@ -2964,7 +3363,6 @@ ul li:hover {
   gap: 0;
 }
 
-/* Speech bubble */
 .speech-bubble {
   position: relative;
   background: #fff;
@@ -2985,7 +3383,6 @@ ul li:hover {
   flex-shrink: 0;
 }
 
-/* Arrow → toward character */
 .speech-bubble::after {
   content: '';
   position: absolute;
@@ -3014,18 +3411,19 @@ ul li:hover {
   font-size: 1.15em;
 }
 
-/* Character image — constrained height so it never overflows */
 .footer-character {
-  height: clamp(160px, 20vw, 260px);
+  height: clamp(220px, 26vw, 360px);
   width: auto;
   object-fit: contain;
   display: block;
   flex-shrink: 0;
   align-self: flex-end;
   filter: drop-shadow(4px 0 0 rgba(0,0,0,0.06));
+  position: relative;
+  z-index: 2;
 }
 
-/* Copyright strip inside the black arc */
+
 .footer-bottom {
   width: 100%;
   text-align: center;
@@ -3043,8 +3441,87 @@ ul li:hover {
   text-transform: uppercase;
 }
 
-/* ── Mobile footer ── */
+/* =====================
+   ABOUT SECTION (overlay button text style)
+   ===================== */
+
+.emsarj-about-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 96px 16px 24px;
+  box-sizing: border-box;
+}
+
+.emsarj-about-overlay__modal {
+  width: 100%;
+  max-width: 920px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.emsarj-about-overlay__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.emsarj-about-overlay__title {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  text-transform: uppercase;
+  color: #111;
+  margin: 0;
+}
+
+.emsarj-about-overlay__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: #111;
+  padding: 6px 10px;
+}
+
+.emsarj-about-overlay__body {
+  padding: 18px 20px 22px;
+}
+
+.emsarj-about-overlay__text {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #111;
+  white-space: pre-line;
+  margin: 0;
+}
+
 @media (max-width: 600px) {
+  .emsarj-about-overlay {
+    padding-top: 78px;
+  }
+  .emsarj-about-overlay__header {
+    padding: 16px 14px;
+  }
+  .emsarj-about-overlay__body {
+    padding: 14px;
+  }
+  .emsarj-about-overlay__title {
+    font-size: 20px;
+  }
+}
+
+/* Keep footer mobile behavior */
+@media (max-width: 600px) {
+
   .emsarj-footer {
     flex-direction: column;
     align-items: center;
@@ -3075,7 +3552,6 @@ ul li:hover {
   .sparkle-1, .sparkle-2, .sparkle-3, .sparkle-4 { display: none; }
 }
 
-/* ── Tablet footer ── */
 @media (min-width: 601px) and (max-width: 1024px) {
   .emsarj-footer {
     padding: 30px 32px 0;

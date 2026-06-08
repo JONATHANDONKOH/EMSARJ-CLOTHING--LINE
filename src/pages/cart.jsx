@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../cartContext/cartprovider";
 import supabase from "../supabasefol/supabaseClient";
@@ -276,11 +276,36 @@ export default function Cart() {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, clearCart } = useCart();
 
+  // Redirect to home if cart is empty
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      navigate("/");
+    }
+  }, [cartItems, navigate]);
+
+  // Fetch recommended products
+  useEffect(() => {
+    async function fetchProducts() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, price, image_url, categories(name)")
+        .limit(6);
+      
+      if (!error && data) {
+        setRecommendedProducts(data);
+      }
+      setLoadingProducts(false);
+    }
+    fetchProducts();
+  }, []);
+
   const [selectedSizes, setSelectedSizes]       = useState({});
   const [sizeQtys, setSizeQtys]                 = useState({});
   const [focusedSize, setFocusedSize]           = useState({});
   const [sizeError, setSizeError]               = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   function getItemTotalQty(itemId) {
     const qtys  = sizeQtys[itemId] || {};
@@ -369,7 +394,7 @@ export default function Cart() {
       <main className="cart-body">
         <section className="cart-left">
           <div className="cart-left-top">
-            <h2 className="cart-section-title">ADD TO YOUR WARDROBE</h2>
+            <h2 className="cart-section-title">Your Cart</h2>
             <span className="cart-continue-link" onClick={() => navigate("/")}>Continue shopping</span>
           </div>
 
@@ -509,6 +534,40 @@ export default function Cart() {
           )}
         </aside>
       </main>
+
+      {/* ── Recommended Products Section ── */}
+      {cartItems.length > 0 && (
+        <section className="cart-recommendations">
+          <h2 className="cart-recommendations-title">Shop More Dresses</h2>
+          <div className="cart-recommendations-grid">
+            {loadingProducts ? (
+              <p style={{ textAlign: "center", color: "#666" }}>Loading products...</p>
+            ) : recommendedProducts.length === 0 ? (
+              <p style={{ textAlign: "center", color: "#666" }}>No products available</p>
+            ) : (
+              recommendedProducts.map((product) => (
+                <div key={product.id} className="cart-product-card">
+                  <div className="cart-product-img-wrap">
+                    {product.image_url ? (
+                      <img src={product.image_url} alt={product.name} />
+                    ) : (
+                      <div className="cart-product-img-placeholder">No Image</div>
+                    )}
+                  </div>
+                  <p className="cart-product-name">{product.name}</p>
+                  <p className="cart-product-price">Ghc {product.price}</p>
+                  <button 
+                    className="cart-product-btn"
+                    onClick={() => navigate("/")}
+                  >
+                    View
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
