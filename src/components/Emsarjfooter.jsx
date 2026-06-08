@@ -71,7 +71,7 @@ export default function EmsarjFooter() {
       <span className="sparkle sparkle-4">✦</span>
 
       <div className="footer-content">
-        <h2 className="footer-headline">STAY CONNECTED WITH EMSARJ!</h2>
+        <h2 className="footer-headline">Join the Emsarj Family Here!</h2>
         <p className="footer-sub">
           FOLLOW US &amp; <strong>SUBSCRIBE</strong> FOR <strong>EXCLUSIVE</strong> DEALS
         </p>

@@ -1,24 +1,38 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../../cartContext/cartprovider";
 import supabase from "../../supabasefol/supabaseClient";
 import emmy from "../../assets/emmy.png";
+import ghanaFlag from "../../assets/ghana flag.jpg";
 import SearchBar from "../../ui/searchbar";
 
 export default function TopNav() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { cartCount } = useCart();
   const [categories, setCategories] = useState([]);
 
   /* ── mobile search drawer ── */
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
+  /* ── mobile menu drawer (auth links) ── */
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  /* ── Logo click handler ── */
+  const handleLogoClick = () => {
+    if (location.pathname === "/cart") {
+      navigate("/");
+    }
+    // Do nothing if already on home page
+  };
+
+
   /* ── marquee pause / resume refs ── */
-  const marqueeRef     = useRef(null);   // the <ul>
-  const resumeTimer    = useRef(null);   // setTimeout handle
-  const isDragging     = useRef(false);
-  const dragStartX     = useRef(0);
-  const scrollStart    = useRef(0);
+  const marqueeRef  = useRef(null);
+  const resumeTimer = useRef(null);
+  const isDragging  = useRef(false);
+  const dragStartX  = useRef(0);
+  const scrollStart = useRef(0);
 
   useEffect(() => {
     fetchCategories();
@@ -101,16 +115,135 @@ export default function TopNav() {
   return (
     <header className="site-header">
 
-      {/* ── Row 1: Cart · Sign In · Sign Up ── */}
+      {/* ── Row 1: Menu · [spacer] · mobile-toggle · Cart ── */}
       <div className="top-bar">
+
+        {/* Left side: mobile menu */}
+        <button
+          className="hamburger-btn"
+          aria-label="Open menu"
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <span className={`hamburger-icon${mobileMenuOpen ? " open" : ""}`}>
+            <span />
+            <span />
+            <span />
+          </span>
+        </button>
+
+        {/* Mobile auth menu drawer */}
+        <div
+          className={`mobile-menu-drawer${mobileMenuOpen ? " mobile-menu-drawer--open" : ""}`}
+          aria-hidden={!mobileMenuOpen}
+        >
+          <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />
+          <div className="mobile-menu-content">
+            {/* Close button */}
+            <button
+              className="mobile-menu-close"
+              aria-label="Close menu"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                background: "none",
+                border: "none",
+                fontSize: "28px",
+                cursor: "pointer",
+                color: "#111",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ✕
+            </button>
+            <div className="mobile-menu-auth">
+              <div
+                className="mobile-menu-item"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/signin");
+                }}
+              >
+                Sign In
+              </div>
+              <div
+                className="mobile-menu-item"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/signup");
+                }}
+              >
+                Sign Up
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop auth links (hidden on mobile) */}
+        <div className="desktop-auth">
+          <span className="nav-item" onClick={() => navigate("/signin")}>
+            Sign In
+          </span>
+          <span className="nav-item" onClick={() => navigate("/signup")}>
+            Sign Up
+          </span>
+        </div>
+
+        {/* Push everything after this to the right */}
+        <div className="top-bar-spacer" />
+
+        {/* Mobile-only: search icon toggle */}
+        <button
+          className="mobile-search-toggle"
+          aria-label="Toggle search"
+          onClick={() => setMobileSearchOpen(o => !o)}
+        >
+          {mobileSearchOpen
+            ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6"  x2="6"  y2="18" />
+                <line x1="6"  y1="6"  x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.5" strokeLinecap="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            )
+          }
+        </button>
+
+        {/* Country flag (Ghana) beside Cart */}
+        <button
+          className="country-flag-btn"
+          aria-label="Ghana"
+          onClick={() => {}}
+        >
+          <img
+            className="country-flag-img"
+            src={ghanaFlag}
+            alt="Ghana flag"
+          />
+        </button>
+
+        {/* Cart — far right */}
         <button
           className="cart-icon-btn"
           aria-label={`View cart — ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
           onClick={() => navigate("/cart")}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="9" cy="21" r="1" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="9"  cy="21" r="1" />
             <circle cx="20" cy="21" r="1" />
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
           </svg>
@@ -120,51 +253,38 @@ export default function TopNav() {
           </span>
         </button>
 
-        <span className="nav-item" onClick={() => navigate("/signin")}>
-          Sign In
-        </span>
 
-        <span className="nav-item" onClick={() => navigate("/signup")}>
-          Sign Up
-        </span>
-
-        {/* ── Mobile-only: search icon toggle ── */}
-        <button
-          className="mobile-search-toggle"
-          aria-label="Toggle search"
-          onClick={() => setMobileSearchOpen(o => !o)}
-        >
-          {mobileSearchOpen
-            ? <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="18" y1="6"  x2="6"  y2="18" />
-                <line x1="6"  y1="6"  x2="18" y2="18" />
-              </svg>
-            : <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-          }
-        </button>
       </div>
 
       {/* ── Row 2: Description ── */}
       <div className="desc-bar">
         <p className="discription">
-          Buy from Emsarj and refresh your style effortlessly
+          <span className="mobile-only">
+            <div style={{ width: "100%", padding: "0 10px" }}>
+              <SearchBar />
+            </div>
+          </span>
         </p>
+
       </div>
 
-      {/* ── Row 3: Logo center · Search right ── */}
+
+      {/* ── Row 3: [spacer] · Logo center · Search right ── */}
       <div className="cat-nav">
-        <div className="nav-logo">
+
+        {/* Left spacer to balance logo centering */}
+        <div className="nav-spacer" />
+
+        {/* Logo — absolutely centered */}
+        <div className="nav-logo" onClick={handleLogoClick} style={{ cursor: location.pathname === "/cart" ? "pointer" : "default" }}>
           <img className="emmy-img" src={emmy} alt="Emsarj logo" />
         </div>
 
+        {/* Search — right side */}
         <div className="nav-search">
           <SearchBar />
         </div>
+
       </div>
 
       {/* ── Mobile search drawer (slides open under Row 3) ── */}
@@ -192,7 +312,7 @@ export default function TopNav() {
             <li
               key={`${cat.id}-${i}`}
               className={`cart-di cat-flip-item${categories.length > 0 ? " cat-flip-item--visible" : ""}`}
-              style={{ animationDelay: `${(i % categories.length) * 0.06}s` }}
+              style={{ animationDelay: `${(i % (categories.length || 1)) * 0.06}s` }}
               onClick={() => navigate(`/category/${cat.id}`)}
             >
               {cat.name}
@@ -200,6 +320,7 @@ export default function TopNav() {
           ))}
         </ul>
       </nav>
+
 
     </header>
   );

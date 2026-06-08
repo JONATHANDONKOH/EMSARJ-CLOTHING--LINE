@@ -1,6 +1,7 @@
 import { CategoriesView } from "./categories/CategoriesView";
 import { ProductsView } from "./products/ProductsView";
-import { AllProductsView } from "./products/ProductCard";
+import { ProductsView as AllProductsView } from "./products/ProductsView";
+
 import OrdersView from "./orders/OrdersView";
 import { UsersView } from "./users/UsersView";
 import { PaymentsView } from "./payments/PaymentsView";
