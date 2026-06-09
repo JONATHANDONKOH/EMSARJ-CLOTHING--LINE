@@ -20,7 +20,7 @@ export default function TopNav() {
 
   /* ── Logo click handler ── */
   const handleLogoClick = () => {
-    if (location.pathname === "/cart") {
+    if (location.pathname === "/cart" || location.pathname === "/cart/") {
       navigate("/");
     }
     // Do nothing if already on home page
