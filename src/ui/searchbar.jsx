@@ -97,7 +97,14 @@ export default function SearchBar({ placeholder = "search your style..." }) {
     setShowDropdown(false);
     setProducts([]);
     setQuery("");
-    navigate(`/product/${item.id}`);
+    // Category page already exists; show the product list for this item's category
+    const nextCategoryId = item.category_id ?? item?.categories?.id;
+    if (nextCategoryId) {
+      navigate(`/category/${nextCategoryId}`);
+    } else {
+      // Fallback to home so we don't end up on an empty route
+      navigate(`/`);
+    }
   }
 
   return (

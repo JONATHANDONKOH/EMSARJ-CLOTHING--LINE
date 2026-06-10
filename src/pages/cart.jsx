@@ -380,16 +380,7 @@ export default function Cart() {
         />
       )}
 
-      <header className="cart-header">
-        <h1 className="cart-store-title">MY Closet</h1>
-        <nav className="cart-category-nav">
-          {["Shirt", "Pants", "Sweater", "Caps", "Trousers", "Hoodies", "Shorts", "Jeans"].map(
-            (cat) => (
-              <span key={cat} className="cart-cat-link" onClick={() => navigate("/")}>{cat}</span>
-            )
-          )}
-        </nav>
-      </header>
+      <header className="cart-header" />
 
       <main className="cart-body">
         <section className="cart-left">
