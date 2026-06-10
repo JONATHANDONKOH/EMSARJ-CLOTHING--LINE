@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import supabase from "../supabasefol/supabaseClient";
 import { useCart } from "../cartContext/cartprovider";
 
@@ -17,18 +17,91 @@ import twogirl  from "../assets/twogirl.jpg";
 import tallni   from "../assets/basketball-pic.png";
 import run      from "../assets/run.jpg";
 
-/* duplicated for a seamless marquee loop */
-const ROW2_LOOP = [
+const ROW2_IMAGES = [
   { src: boysdark, alt: "boys dark" },
   { src: twogirl,  alt: "two girls" },
   { src: tallni,   alt: "basketball" },
   { src: run,      alt: "run" },
-  { src: boysdark, alt: "boys dark 2" },
-  { src: twogirl,  alt: "two girls 2" },
-  { src: tallni,   alt: "basketball 2" },
-  { src: run,      alt: "run 2" },
 ];
 
+/* =====================================================================
+   MOBILE AUTO-PLAY CAROUSEL
+   ===================================================================== */
+function Row2MobileCarousel() {
+  const [cur, setCur]   = useState(0);
+  const [prev, setPrev] = useState(null);
+  const [anim, setAnim] = useState("idle");
+  const autoRef         = useRef(null);
+  const total           = ROW2_IMAGES.length;
+
+  function goTo(next) {
+    if (next === cur) return;
+    setPrev(cur);
+    setAnim("exiting");
+    setTimeout(() => {
+      setCur(next);
+      setAnim("entering");
+      setTimeout(() => setAnim("idle"), 500);
+    }, 350);
+  }
+
+  function startAuto() {
+    clearInterval(autoRef.current);
+    autoRef.current = setInterval(() => {
+      setCur(c => {
+        const next = (c + 1) % total;
+        setPrev(c);
+        setAnim("entering");
+        setTimeout(() => setAnim("idle"), 500);
+        return next;
+      });
+    }, 3000);
+  }
+
+  useEffect(() => {
+    startAuto();
+    return () => clearInterval(autoRef.current);
+  }, []);
+
+  function slideClass(i) {
+    const base = "row2-carousel-slide";
+    if (i === cur  && anim === "entering") return `${base} ${base}--entering`;
+    if (i === cur  && anim === "idle")     return `${base} ${base}--active`;
+    if (i === prev && anim === "exiting")  return `${base} ${base}--exiting`;
+    if (i === cur  && anim === "exiting")  return `${base} ${base}--active`;
+    return base;
+  }
+
+  return (
+    <div className="row2-carousel">
+      <div className="row2-carousel-stage">
+        {ROW2_IMAGES.map((img, i) => (
+          <div key={i} className={slideClass(i)}>
+            <img src={img.src} alt={img.alt} className="row2-carousel-img" />
+          </div>
+        ))}
+      </div>
+      <div className="row2-carousel-dots">
+        {ROW2_IMAGES.map((_, i) => (
+          <button
+            key={i}
+            className={`row2-carousel-dot${i === cur ? " row2-carousel-dot--active" : ""}`}
+            onClick={() => {
+              clearInterval(autoRef.current);
+              goTo(i);
+              startAuto();
+            }}
+            aria-label={`Slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
 function mergeWithFallback(backendItems, fallbackItems) {
   return Array.from({ length: 4 }, (_, i) => ({
     isBackend: !!backendItems[i],
@@ -44,11 +117,13 @@ function resolveImageUrl(imageUrl) {
     .getPublicUrl(imageUrl).data.publicUrl;
 }
 
+/* =====================================================================
+   MAIN COMPONENT
+   ===================================================================== */
 export default function CategoryCard() {
   const { addToCart, cartItems } = useCart();
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => { fetchProducts(); }, []);
+  const [products, setProducts]  = useState([]);
+  const [isMobile, setIsMobile]  = useState(window.innerWidth <= 600);
 
   async function fetchProducts() {
     const { data, error } = await supabase
@@ -59,7 +134,18 @@ export default function CategoryCard() {
     setProducts(data || []);
   }
 
-  // ── Fallback data for all product rows ──────────────────
+  useEffect(() => { fetchProducts(); }, []);
+
+  // Handle window resize to toggle between desktop and mobile views
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const fallbackRow1 = [
     { name: "Ladies crop",     price: 200, image: girlscrop },
     { name: "Classic T-Shirt", price: 150, image: tshirt    },
@@ -73,10 +159,10 @@ export default function CategoryCard() {
     { name: "Sheedy",   price: 130, image: sheedy  },
   ];
   const fallbackRow4 = [
-    { name: "Classic T-Shirt", price: 150, image: tshirt    },
-    { name: "Shorts",          price: 120, image: short     },
-    { name: "Hoodies",         price: 250, image: hoodies   },
-    { name: "Jersey",          price: 180, image: jersey    },
+    { name: "Classic T-Shirt", price: 150, image: tshirt  },
+    { name: "Shorts",          price: 120, image: short   },
+    { name: "Hoodies",         price: 250, image: hoodies },
+    { name: "Jersey",          price: 180, image: jersey  },
   ];
   const fallbackRow5 = [
     { name: "Ladies crop", price: 200, image: girlscrop },
@@ -97,7 +183,6 @@ export default function CategoryCard() {
     { name: "Sheedy",  price: 130, image: sheedy  },
   ];
 
-  // ── Slice products into rows ───────────────────────────────
   const row1 = products.slice(0,  4);
   const row3 = products.slice(4,  8);
   const row4 = products.slice(8,  12);
@@ -106,11 +191,11 @@ export default function CategoryCard() {
   const row7 = products.slice(20, 24);
 
   function isInCart(id) {
-    return cartItems.some((item) => item.id === id);
+    return cartItems.some(item => item.id === id);
   }
 
   function renderCard(product, index, fallbackRow) {
-    const id = product.id ?? `${product.name}-${index}`;
+    const id           = product.id ?? `${product.name}-${index}`;
     const alreadyAdded = isInCart(id);
 
     return (
@@ -123,7 +208,7 @@ export default function CategoryCard() {
                 ? resolveImageUrl(product.image_url)
                 : fallbackRow[index].image
             }
-            onError={(e) => { e.target.src = fallbackRow[index].image; }}
+            onError={e => { e.target.src = fallbackRow[index].image; }}
             alt={product.name}
           />
           <button
@@ -144,10 +229,8 @@ export default function CategoryCard() {
             {alreadyAdded ? "✓ In wardrobe" : "Add to wardrobe"}
           </button>
         </div>
-
         <div className="card-info">
           <span className="card-season-tag">New Trend</span>
-          <p className="card-brand">Emsarj</p>
           <p className="card-name">{product.name}</p>
           <p className="card-price">Ghc {product.price}</p>
         </div>
@@ -159,31 +242,32 @@ export default function CategoryCard() {
     <>
       {/* ── ROW 1 ── */}
       <div className="card-container">
-
         {mergeWithFallback(row1, fallbackRow1).map((p, i) => renderCard(p, i, fallbackRow1))}
       </div>
 
-      {/* ── ROW 2 — removed on small screens via CSS */}
-      <div className="card-container card-container--row2 card-container--row2-mobile-hidden">
-
-        <div className="card card--img-only"><img className="card-fullimg" alt="boys dark" src={boysdark} /></div>
-        <div className="card card--img-only"><img className="card-fullimg" alt="two girl"  src={twogirl}  /></div>
-        <div className="card card--img-only"><img className="card-fullimg" alt="tallni"    src={tallni}   /></div>
-        <div className="card card--img-only"><img className="card-fullimg" alt="run"       src={run}      /></div>
-      </div>
-
-
-      {/* ── ROW 2 — Mobile: auto-scrolling marquee (CSS hides on desktop) ── */}
-      <div className="card-container--row2-marquee card-container--row2-mobile-hidden">
-
-        <div className="card-container--row2-marquee-track">
-          {ROW2_LOOP.map((img, i) => (
-            <div className="card card--img-only" key={i}>
-              <img className="card-fullimg" src={img.src} alt={img.alt} />
-            </div>
-          ))}
+      {/* ── ROW 2 — Conditionally render based on screen size ── */}
+      {!isMobile ? (
+        /* Desktop/Tablet: 4 side-by-side lifestyle images */
+        <div className="card-container card-container--row2 row2-desktop-only row2-images-only">
+          <div className="card card--img-only">
+            <img className="card-fullimg" alt="boys dark" src={boysdark} />
+          </div>
+          <div className="card card--img-only">
+            <img className="card-fullimg" alt="two girls" src={twogirl} />
+          </div>
+          <div className="card card--img-only">
+            <img className="card-fullimg" alt="basketball" src={tallni} />
+          </div>
+          <div className="card card--img-only">
+            <img className="card-fullimg" alt="run" src={run} />
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Mobile ONLY: auto-play carousel */
+        <div className="row2-mobile-only">
+          <Row2MobileCarousel />
+        </div>
+      )}
 
       {/* ── ROW 3 ── */}
       <div className="card-container card-container--row3">

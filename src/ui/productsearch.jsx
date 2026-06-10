@@ -102,7 +102,15 @@ export default function ProductSearch() {
   function handleSelectItem(item) {
     setShowDropdown(false);
     setProducts([]);
-    navigate(`/product/${item.id}`);
+
+    // Link product search results to category page (no /product/:id route)
+    // Assumes products table has category_id that matches src/pages/categoryPage.jsx
+    if (item.category_id) {
+      navigate(`/category/${item.category_id}`);
+    } else {
+      // Fallback: go back to home if category_id is missing
+      navigate(`/`);
+    }
   }
 
   return (
