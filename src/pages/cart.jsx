@@ -385,7 +385,7 @@ export default function Cart() {
       <main className="cart-body">
         <section className="cart-left">
           <div className="cart-left-top">
-            <h2 className="cart-section-title">Your Cart</h2>
+            <h2 className="cart-section-title"></h2>
             <span className="cart-continue-link" onClick={() => navigate("/")}>Continue shopping</span>
           </div>
 
