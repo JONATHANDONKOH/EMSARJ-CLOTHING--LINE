@@ -10,12 +10,17 @@ function resolveImageUrl(imageUrl) {
     .getPublicUrl(imageUrl).data.publicUrl;
 }
 
-export default function SearchBar({ placeholder = "search your style..." }) {
+export default function SearchBar({
+  placeholder = "search your style...",
+  onSelect,
+}) {
   const [query, setQuery]               = useState("");
   const [products, setProducts]         = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading]           = useState(false);
   const [noResults, setNoResults]       = useState(false);
+  const [hideInput, setHideInput]     = useState(false);
+
 
   const navigate     = useNavigate();
   const containerRef = useRef(null);
@@ -32,6 +37,11 @@ export default function SearchBar({ placeholder = "search your style..." }) {
   }, []);
 
   useEffect(() => () => clearTimeout(debounceRef.current), []);
+
+  useEffect(() => {
+    // When route changes, show the input again.
+    setHideInput(false);
+  }, [navigate]);
 
   const handleSearch = useCallback((value) => {
     const q = value.trim();
@@ -97,6 +107,9 @@ export default function SearchBar({ placeholder = "search your style..." }) {
     setShowDropdown(false);
     setProducts([]);
     setQuery("");
+    setHideInput(true);
+    onSelect?.(item);
+
     // Category page already exists; show the product list for this item's category
     const nextCategoryId = item.category_id ?? item?.categories?.id;
     if (nextCategoryId) {
@@ -119,6 +132,7 @@ export default function SearchBar({ placeholder = "search your style..." }) {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={() => query.trim() && setShowDropdown(true)}
+        style={{ display: hideInput ? "none" : "block" }}
       />
 
       {/* ── Farfetch-style overlay dropdown ── */}
