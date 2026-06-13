@@ -1,12 +1,12 @@
 import { CategoriesView } from "./categories/CategoriesView";
 import { ProductsView } from "./products/ProductsView";
 import { ProductsView as AllProductsView } from "./products/ProductsView";
-
-import OrdersView from "./orders/OrdersView";
+import OrdersView from "./orderitems";
 import { UsersView } from "./users/UsersView";
 import { PaymentsView } from "./payments/PaymentsView";
 
 export function MainContent({ 
+
   activePage, 
   activeCategory, 
   categories, 
@@ -47,8 +47,12 @@ export function MainContent({
       case "orders":
         return <OrdersView user={user} />;
 
+      case "orderItems":
+        return <OrdersView />;
+
       case "users":
         return <UsersView />;
+
 
       case "payments":
         return <PaymentsView />;

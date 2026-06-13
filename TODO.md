@@ -1,5 +1,8 @@
-# TODO
-- [ ] After clicking productsearch result, hide/disappear the search input/dropdown.
-- [ ] Implement change in `src/ui/searchbar.jsx` (and ensure mobileSearch inline uses it correctly).
-- [ ] Run dev server / quick check for no regressions.
+unc# TODO
+
+## Plan for fixing failed import
+- [ ] Inspect `src/components/products/ProductCard.jsx` and determine incorrect import path/export.
+- [ ] Update import to correctly reference `src/components/categories/CategoriesView.jsx`.
+- [ ] Ensure component is imported with the correct named export (`CategoriesView`).
+- [ ] Run lint/build (if available) to verify the resolution error is gone.
 

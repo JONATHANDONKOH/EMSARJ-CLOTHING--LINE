@@ -1,198 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { IconPlus, IconPackage } from "../common/Icons";
 import { Modal } from "../common/Modal";
 import { ProductCard } from "./ProductCard";
 import { ProductForm } from "./ProductForm";
 import supabase from "../../supabasefol/supabaseClient";
-import "./gallery.css";
 
-import boysdark from "../../assets/boysdark.jpg";
-import twogirl  from "../../assets/twogirl.jpg";
-import tallni   from "../../assets/basketball-pic.png";
-import run      from "../../assets/run.jpg";
-
-/* ── Slides: the 4 row-2 lifestyle images ── */
-const GALLERY_SLIDES = [
-  { src: boysdark, label: "Boys Dark" },
-  { src: twogirl,  label: "Two Girls" },
-  { src: tallni,   label: "Basketball" },
-  { src: run,      label: "Run" },
-];
-
-/* =====================================================================
-   GALLERY SEQUENCER COMPONENT
-   Images appear one at a time, slide-up entrance, auto-advance
-   ===================================================================== */
-function GallerySequencer() {
-  const [cur, setCur]     = useState(0);
-  const [prev, setPrev]   = useState(null);
-  const [phase, setPhase] = useState("idle"); // "idle" | "entering" | "exiting"
-  const [paused, setPaused] = useState(false);
-  const [fill, setFill]   = useState(0);
-
-  const DURATION  = 3500; // ms per slide
-  const autoRef   = useRef(null);
-  const fillRef   = useRef(null);
-  const startRef  = useRef(null);
-
-  const total = GALLERY_SLIDES.length;
-
-  /* ── navigate to a specific index ── */
-  function goTo(idx) {
-    const next = ((idx % total) + total) % total;
-    if (next === cur) return;
-    setPrev(cur);
-    setPhase("exiting");
-    setTimeout(() => {
-      setCur(next);
-      setPhase("entering");
-      setTimeout(() => setPhase("idle"), 600);
-    }, 380);
-  }
-
-  /* ── fill bar ── */
-  function startFill() {
-    clearInterval(fillRef.current);
-    setFill(0);
-    startRef.current = Date.now();
-    fillRef.current = setInterval(() => {
-      const pct = Math.min(((Date.now() - startRef.current) / DURATION) * 100, 100);
-      setFill(pct);
-    }, 40);
-  }
-
-  /* ── auto-advance ── */
-  function startAuto() {
-    clearInterval(autoRef.current);
-    autoRef.current = setInterval(() => {
-      setCur(c => {
-        const next = (c + 1) % total;
-        setPrev(c);
-        setPhase("entering");
-        setTimeout(() => setPhase("idle"), 600);
-        return next;
-      });
-      startFill();
-    }, DURATION);
-  }
-
-  function stopAll() {
-    clearInterval(autoRef.current);
-    clearInterval(fillRef.current);
-  }
-
-  /* restart whenever cur changes or paused toggles */
-  useEffect(() => {
-    if (!paused) {
-      startFill();
-      startAuto();
-    }
-    return () => stopAll();
-  }, [cur, paused]);
-
-  function handleMove(dir) {
-    stopAll();
-    goTo(cur + dir);
-    if (!paused) setTimeout(() => { startFill(); startAuto(); }, 50);
-  }
-
-  function handleBarClick(i) {
-    stopAll();
-    goTo(i);
-    if (!paused) setTimeout(() => { startFill(); startAuto(); }, 50);
-  }
-
-  /* ── derive slide class names ── */
-  function slideClass(i) {
-    const parts = ["gallery-seq-slide"];
-    if (i === cur && phase === "entering") parts.push("gallery-seq-slide--entering");
-    if (i === cur && phase === "idle")     parts.push("gallery-seq-slide--active");
-    if (i === prev && phase === "exiting") parts.push("gallery-seq-slide--exiting");
-    /* keep active visible while next one is entering */
-    if (i === cur && phase === "exiting")  parts.push("gallery-seq-slide--active");
-    return parts.join(" ");
-  }
-
-  return (
-    <div className="gallery-seq-outer">
-
-      {/* ── Header: title + count ── */}
-      <div className="gallery-seq-header">
-        <div>
-          <div className="gallery-seq-eyebrow">Emsarj</div>
-          <div className="gallery-seq-title">Gallery</div>
-        </div>
-        <span className="gallery-seq-count">
-          {cur + 1} of {total}
-        </span>
-      </div>
-
-      {/* ── Stage ── */}
-      <div className="gallery-seq-stage">
-        {GALLERY_SLIDES.map((slide, i) => (
-          <div key={i} className={slideClass(i)}>
-            <img
-              src={slide.src}
-              alt={slide.label}
-              className="gallery-seq-img"
-            />
-            <div className="gallery-seq-caption">
-              <span className="gallery-seq-caption-name">{slide.label}</span>
-              <span className="gallery-seq-caption-num">
-                {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Progress bars ── */}
-      <div className="gallery-seq-progress">
-        {GALLERY_SLIDES.map((_, i) => (
-          <div
-            key={i}
-            className={[
-              "gallery-seq-bar",
-              i < cur   ? "gallery-seq-bar--done"   : "",
-              i === cur ? "gallery-seq-bar--active"  : "",
-            ].filter(Boolean).join(" ")}
-            onClick={() => handleBarClick(i)}
-          >
-            <div
-              className="gallery-seq-bar-fill"
-              style={{
-                width: i === cur ? `${fill}%` : i < cur ? "100%" : "0%",
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* ── Controls ── */}
-      <div className="gallery-seq-controls">
-        <div className="gallery-seq-nav">
-          <button className="gallery-seq-btn" onClick={() => handleMove(-1)} aria-label="Previous">
-            &#8592;
-          </button>
-          <button className="gallery-seq-btn" onClick={() => handleMove(1)} aria-label="Next">
-            &#8594;
-          </button>
-        </div>
-        <button
-          className={`gallery-seq-pause${paused ? " gallery-seq-pause--paused" : ""}`}
-          onClick={() => setPaused(p => !p)}
-        >
-          {paused ? "Resume" : "Pause"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-
-/* =====================================================================
-   PRODUCTS VIEW
-   ===================================================================== */
 export function ProductsView() {
 
   const [products, setProducts]           = useState([]);
@@ -272,55 +84,40 @@ export function ProductsView() {
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
           alignItems: "flex-start",
+          justifyContent: "space-between",
           marginBottom: "1.5rem",
-          gap: "10px",
+          flexWrap: "wrap",
+          gap: "12px",
         }}
       >
-        {/* Gallery sequencer — replaces the old text animation */}
-        <GallerySequencer />
+        <div>
+          <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 700, color: "#f1f5f9" }}>
+            Products
+          </h1>
+          <p style={{ margin: 0, fontSize: "13px", color: "#475569" }}>
+            {products.length} product{products.length !== 1 ? "s" : ""}
+          </p>
+        </div>
 
-        {/* Products count + Add button row */}
-        <div
+        <button
+          onClick={() => setShowAdd(true)}
           style={{
             display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            marginBottom: "0",
-            flexWrap: "wrap",
-            gap: "12px",
-            width: "100%",
+            alignItems: "center",
+            gap: "8px",
+            padding: "9px 16px",
+            borderRadius: "8px",
+            background: "#3b82f6",
+            border: "none",
+            color: "#fff",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: "pointer",
           }}
         >
-          <div>
-            <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 700, color: "#f1f5f9" }}>
-              Products
-            </h1>
-            <p style={{ margin: 0, fontSize: "13px", color: "#475569" }}>
-              {products.length} product{products.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-
-          <button
-            onClick={() => setShowAdd(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "9px 16px",
-              borderRadius: "8px",
-              background: "#3b82f6",
-              border: "none",
-              color: "#fff",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            <IconPlus size={14} /> Add Product
-          </button>
-        </div>
+          <IconPlus size={14} /> Add Product
+        </button>
       </div>
 
       {/* ── PRODUCT GRID ── */}
