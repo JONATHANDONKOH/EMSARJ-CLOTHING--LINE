@@ -8,18 +8,40 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
 
+  // 🔥 Load full user profile (auth + role) into `user`
+  const loadUser = async (authUser) => {
+    if (!authUser) {
+      setUser(null);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("name, email, number, location, role")
+      .eq("id", authUser.id)
+      .single();
+
+    if (error) {
+      console.error("User profile fetch error:", error.message);
+      setUser({ ...authUser, role: "user" });
+      return;
+    }
+
+    setUser({ ...authUser, ...data });
+  };
+
   useEffect(() => {
     // Get current session on load
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      setUser(data.session?.user ?? null);
+      loadUser(data.session?.user ?? null);
     });
 
     // Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        loadUser(session?.user ?? null);
       }
     );
 
@@ -51,6 +73,7 @@ export function AuthProvider({ children }) {
             email,
             number,
             location,
+            role: "user", // 🔥 default role
           },
         ]);
 
@@ -60,7 +83,7 @@ export function AuthProvider({ children }) {
     // 3. Refresh session/user state
     const { data: latest } = await supabase.auth.getSession();
     setSession(latest.session);
-    setUser(latest.session?.user ?? null);
+    await loadUser(latest.session?.user ?? null);
 
     return authUser;
   };
@@ -98,22 +121,40 @@ export function AuthProvider({ children }) {
 
     // Update session/user state
     setSession(data.session);
-    setUser(data.user);
+    await loadUser(data.user);
 
-    return data;
+    // 🔥 Fetch role directly so SignIn page can redirect immediately
+    const { data: profile } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
+    return { ...data, role: profile?.role ?? "user" };
+  };
+
+  // SIGN OUT FUNCTION
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) throw error;
+
+    setSession(null);
+    setUser(null);
   };
 
   // Exposed to all consumers via useAuth()
   const value = {
     signUp,
     signIn,
+    signOut,
     user,
     session,
     supabase,
     refresh: async () => {
       const { data } = await supabase.auth.getSession();
       setSession(data.session);
-      setUser(data.session?.user ?? null);
+      await loadUser(data.session?.user ?? null);
     },
   };
 

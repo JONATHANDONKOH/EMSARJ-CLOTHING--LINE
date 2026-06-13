@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import supabase from "../supabasefol/supabaseClient";
 import { useCart } from "../cartContext/cartprovider";
+import WishlistHeartButton from "../ui/WishlistHeartButton";
 
 import girlscrop from "../assets/girlscrop.png";
 import tshirt    from "../assets/Tshirt-1-removebg-preview.png";
@@ -198,9 +199,19 @@ export default function CategoryCard() {
     const id           = product.id ?? `${product.name}-${index}`;
     const alreadyAdded = isInCart(id);
 
+    const wishlistProduct = {
+      id,
+      name: product.name,
+      price: product.price,
+      image_url: product.isBackend
+        ? resolveImageUrl(product.image_url)
+        : fallbackRow[index].image,
+    };
+
     return (
       <div className="card" key={id}>
         <div className="card-img-wrap">
+          <WishlistHeartButton product={wishlistProduct} />
           <img
             className="girlscrop"
             src={
@@ -211,6 +222,7 @@ export default function CategoryCard() {
             onError={e => { e.target.src = fallbackRow[index].image; }}
             alt={product.name}
           />
+
           <button
             className={`card-hover-btn${alreadyAdded ? " card-hover-btn--added" : ""}`}
             onClick={() => {

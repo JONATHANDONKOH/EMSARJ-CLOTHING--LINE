@@ -7,19 +7,26 @@ import CategoryFront from "./pages/CategoryFront";
 import CategoryPage from "./pages/categoryPage";
 import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/cart";
+import Account from "./pages/accounts";
+import Orders from "./pages/ordder";
 
 import TopNav from "./components/common/TopNav";
 import EmsarjFooter from "./components/Emsarjfooter";
 import AutoPlayAudio from "./components/common/AutoPlayAudio";
 import { CartProvider } from "./cartContext/cartprovider";
+import { WishlistProvider } from "./wishlistContext/wishlistprovider";
 
-function AppContent() {
+function AppContent() { 
   const location = useLocation();
-  const hideNav = location.pathname === "/signin" || location.pathname === "/signup";
+  const hideNav =
+    location.pathname === "/signin" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/dashboard";
 
   return (
     <div className="app-container">
       {!hideNav && <TopNav />}
+
 
       <main className="app-content">
         <Routes>
@@ -29,6 +36,8 @@ function AppContent() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/category/:id" element={<CategoryPage />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/orders" element={<Orders />} />
         </Routes>
       </main>
 
@@ -39,12 +48,13 @@ function AppContent() {
 
 function App() {
   return (
-    <CartProvider>
-      <AutoPlayAudio src="/Lil Baby x Gunna - Drip Too Hard (Official Audio).mp3" />
-      <AppContent />
-    </CartProvider>
+    <WishlistProvider>
+      <CartProvider>
+        <AutoPlayAudio src="/Lil Baby x Gunna - Drip Too Hard (Official Audio).mp3" />
+        <AppContent />
+      </CartProvider>
+    </WishlistProvider>
   );
 }
 
 export default App;
-

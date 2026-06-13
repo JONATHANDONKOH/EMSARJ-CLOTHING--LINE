@@ -7,10 +7,12 @@ import { IconGrid, IconPackage, IconShoppingBag, IconUsers, IconCreditCard } fro
 const NAV = [
   { id: "categories", label: "Categories", Icon: IconGrid },
   { id: "products", label: "Products", Icon: IconPackage },
-  { id: "orders", label: "Orders", Icon: IconShoppingBag },
+  
+  { id: "orderItems", label: "Order Items", Icon: IconShoppingBag },
   { id: "users", label: "Users", Icon: IconUsers },
   { id: "payments", label: "Payments", Icon: IconCreditCard },
 ];
+
 
 export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {
   return (

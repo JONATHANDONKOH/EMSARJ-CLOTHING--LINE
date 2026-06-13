@@ -6,12 +6,15 @@ import emmy from "../../assets/emmy.png";
 import ghanaFlag from "../../assets/ghana flag.jpg";
 import SearchBar from "../../ui/searchbar";
 import { useAuth } from "../../context/authContext";
+import { useWishlist } from "../../wishlistContext/wishlistprovider";
 
 export default function TopNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartCount } = useCart();
-  const { user } = useAuth();
+  const { wishlistCount } = useWishlist();
+  const { user, signOut } = useAuth();
+
   const [categories, setCategories] = useState([]);
 
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -120,6 +123,12 @@ export default function TopNav() {
     pauseMarquee(4000);
   }, [pauseMarquee]);
 
+  const handleLogout = async () => {
+    setProfileMenuOpen(false);
+    await signOut();
+    navigate("/");
+  };
+
   return (
     <header className="site-header">
 
@@ -188,6 +197,22 @@ export default function TopNav() {
           </span>
         </button>
 
+        {/* Wishlist */}
+        <button
+          className="wishlist-icon-btn"
+          aria-label={`View wishlist — ${wishlistCount} item${wishlistCount !== 1 ? "s" : ""}`}
+          onClick={() => navigate("/wishlist")}
+        >
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <span className={`wishlist-badge${wishlistCount === 0 ? " wishlist-badge--empty" : ""}`}>
+            {wishlistCount > 99 ? "99+" : wishlistCount}
+          </span>
+        </button>
+
+
         {/* Ghana flag */}
         <button className="country-flag-btn" aria-label="Ghana" onClick={() => { /* no-op */ }}>
           <img className="country-flag-img" src={ghanaFlag} alt="Ghana flag" />
@@ -210,43 +235,94 @@ export default function TopNav() {
 
           {profileMenuOpen && (
             <div className="profile-menu" role="menu">
-              <>
-                <div
-                  className="profile-menu-item"
-                  role="menuitem"
-                  tabIndex={0}
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-                    navigate("/signin");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+              {user && user.role !== "admin" ? (
+                <>
+                  <div
+                    className="profile-menu-item"
+                    role="menuitem"
+                    tabIndex={0}
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      navigate("/account");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setProfileMenuOpen(false);
+                        navigate("/account");
+                      }
+                    }}
+                  >
+                    Account
+                  </div>
+                  <div
+                    className="profile-menu-item"
+                    role="menuitem"
+                    tabIndex={0}
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      navigate("/orders");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setProfileMenuOpen(false);
+                        navigate("/orders");
+                      }
+                    }}
+                  >
+                    Orders
+                  </div>
+                  <div
+                    className="profile-menu-item"
+                    role="menuitem"
+                    tabIndex={0}
+                    onClick={handleLogout}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        handleLogout();
+                      }
+                    }}
+                  >
+                    Logout
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="profile-menu-item"
+                    role="menuitem"
+                    tabIndex={0}
+                    onClick={() => {
                       setProfileMenuOpen(false);
                       navigate("/signin");
-                    }
-                  }}
-                >
-                  Sign In
-                </div>
-                <div
-                  className="profile-menu-item"
-                  role="menuitem"
-                  tabIndex={0}
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-                    navigate("/signup");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setProfileMenuOpen(false);
+                        navigate("/signin");
+                      }
+                    }}
+                  >
+                    Sign In
+                  </div>
+                  <div
+                    className="profile-menu-item"
+                    role="menuitem"
+                    tabIndex={0}
+                    onClick={() => {
                       setProfileMenuOpen(false);
                       navigate("/signup");
-                    }
-                  }}
-                >
-                  Sign Up
-                </div>
-              </>
-
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setProfileMenuOpen(false);
+                        navigate("/signup");
+                      }
+                    }}
+                  >
+                    Sign Up
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
