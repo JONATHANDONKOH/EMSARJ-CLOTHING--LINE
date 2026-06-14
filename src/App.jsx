@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/cart";
 import Account from "./pages/accounts";
 import Orders from "./pages/ordder";
+import ResetPassword from "./pages/resetpassword";
+
 
 import TopNav from "./components/common/TopNav";
 import EmsarjFooter from "./components/Emsarjfooter";
@@ -21,7 +23,9 @@ function AppContent() {
   const hideNav =
     location.pathname === "/signin" ||
     location.pathname === "/signup" ||
-    location.pathname === "/dashboard";
+    location.pathname === "/dashboard" ||
+    location.pathname === "/resetpassword";
+
 
   return (
     <div className="app-container">
@@ -38,7 +42,9 @@ function AppContent() {
           <Route path="/category/:id" element={<CategoryPage />} />
           <Route path="/account" element={<Account />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/resetpassword" element={<ResetPassword />} />
         </Routes>
+
       </main>
 
       {!hideNav && <EmsarjFooter />}
