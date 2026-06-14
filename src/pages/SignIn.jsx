@@ -76,9 +76,14 @@ export default function SignIn() {
 
             {/* Password */}
             <div style={styles.field}>
-              <label htmlFor="password" style={styles.label}>
-                Password
-              </label>
+              <div style={styles.labelRow}>
+                <label htmlFor="password" style={styles.label}>
+                  Password
+                </label>
+                <Link to="/resetpassword" style={styles.resetLink}>
+                  Forgot password?
+                </Link>
+              </div>
               <div style={styles.passwordWrap}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -142,12 +147,9 @@ const styles = {
     justifyContent: "center",
     backgroundColor: "#f5f5f5",
     padding: "0 16px 0",
-
-
     fontFamily: "'Georgia', serif",
-
-
   },
+
   card: {
     backgroundColor: "#ffffff",
     border: "1px solid #e0e0e0",
@@ -192,6 +194,11 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "5px",
+  },
+  labelRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   label: {
     fontSize: "12px",
@@ -255,9 +262,16 @@ const styles = {
   },
   footer: {
     textAlign: "center",
-    marginTop: "20px",
+    marginTop: "16px",
     fontSize: "13px",
     color: "#888",
+  },
+  resetLink: {
+    fontSize: "12px",
+    color: "#888",
+    fontWeight: "500",
+    textDecoration: "underline",
+    textUnderlineOffset: "2px",
   },
   link: {
     color: "#111",
@@ -266,4 +280,3 @@ const styles = {
     textUnderlineOffset: "2px",
   },
 };
-

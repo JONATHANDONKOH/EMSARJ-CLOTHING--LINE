@@ -9,6 +9,10 @@ export function ProductCard({ product, onEdit, onDelete }) {
   const categoryName = product?.categories?.name || null;
   const productName  = product?.name        || "Unnamed";
   const productPrice = product?.price       ?? 0;
+  const stockQty     = product?.stock_quantity ?? null;
+
+  const isOutOfStock = stockQty !== null && stockQty <= 0;
+  const isLowStock   = stockQty !== null && stockQty > 0 && stockQty <= 10;
 
   return (
     <div
@@ -25,7 +29,7 @@ export function ProductCard({ product, onEdit, onDelete }) {
       }}
     >
       {/* IMAGE */}
-      <div style={{ aspectRatio: "1", background: "#0f172a", overflow: "hidden" }}>
+      <div style={{ aspectRatio: "1", background: "#0f172a", overflow: "hidden", position: "relative" }}>
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -39,6 +43,36 @@ export function ProductCard({ product, onEdit, onDelete }) {
           }}>
             <IconImage size={28} />
           </div>
+        )}
+
+        {/* Stock badges */}
+        {isOutOfStock && (
+          <span style={{
+            position: "absolute", top: "6px", left: "6px",
+            fontSize: "10px", fontWeight: 700, padding: "3px 7px", borderRadius: "4px",
+            background: "rgba(239,68,68,0.15)",
+            border: "1px solid rgba(239,68,68,0.35)",
+            color: "#ef4444",
+            backdropFilter: "blur(4px)",
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+          }}>
+            Out of Stock
+          </span>
+        )}
+        {isLowStock && (
+          <span style={{
+            position: "absolute", top: "6px", left: "6px",
+            fontSize: "10px", fontWeight: 700, padding: "3px 7px", borderRadius: "4px",
+            background: "rgba(245,158,11,0.15)",
+            border: "1px solid rgba(245,158,11,0.35)",
+            color: "#f59e0b",
+            backdropFilter: "blur(4px)",
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+          }}>
+            Low Stock · {stockQty} left
+          </span>
         )}
       </div>
 
