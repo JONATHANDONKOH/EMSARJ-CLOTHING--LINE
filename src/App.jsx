@@ -10,7 +10,7 @@ import Cart from "./pages/cart";
 import Account from "./pages/accounts";
 import Orders from "./pages/ordder";
 import ResetPassword from "./pages/resetpassword";
-
+import WishlistPage from "./pages/WishlistPage"; // Add this import
 
 import TopNav from "./components/common/TopNav";
 import EmsarjFooter from "./components/Emsarjfooter";
@@ -43,6 +43,7 @@ function AppContent() {
           <Route path="/account" element={<Account />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
+          <Route path="/wishlist" element={<WishlistPage />} /> {/* Add this route */}
         </Routes>
 
       </main>
