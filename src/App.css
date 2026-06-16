@@ -226,10 +226,154 @@
 }
 .wishlist-heart-btn:hover { transform: translateY(-1px) scale(1.05); }
 .wishlist-heart-btn--active { background: rgba(255,80,120,0.95); border-color: rgba(255,80,120,0.6); }
+.wishlist-heart-btn--animating {
+  animation: heartBeat 0.3s ease-in-out;
+}
 
 @keyframes badge-pop {
   from { transform: scale(0.4); opacity: 0; }
   to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* =====================
+   WISHLIST PAGE STYLES
+   ===================== */
+.wishlist-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 60vh;
+}
+
+.wishlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.wishlist-header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+.wishlist-clear-btn {
+  padding: 0.5rem 1rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.wishlist-clear-btn:hover {
+  background-color: #c82333;
+}
+
+/* Wishlist legacy card styles (disabled) — wishlist UI now reuses Category card layout/classes. */
+.wishlist-grid { display: contents; }
+.wishlist-card { all: unset; }
+.wishlist-card-image-wrapper { all: unset; }
+.wishlist-img { all: unset; }
+.wishlist-card-info { all: unset; }
+.wishlist-card-name { all: unset; }
+.wishlist-card-price { all: unset; }
+.wishlist-remove-btn { all: unset; }
+
+
+/* Wishlist Empty State */
+.wishlist-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.wishlist-empty-icon {
+  font-size: 5rem;
+  margin: 2rem 0;
+}
+
+.wishlist-empty h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.wishlist-empty p {
+  color: #666;
+  margin: 0.5rem 0;
+}
+
+.wishlist-shop-btn {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  background-color: #2c3e50;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.wishlist-shop-btn:hover {
+  background-color: #1a252f;
+}
+
+/* Wishlist Loading State */
+.wishlist-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Responsive Wishlist */
+@media (max-width: 768px) {
+  .wishlist-page {
+    padding: 1rem;
+  }
+  
+  .wishlist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .wishlist-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wishlist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .wishlist-card-name {
+    font-size: 0.85rem;
+  }
+  
+  .wishlist-card-price {
+    font-size: 0.9rem;
+  }
+  
+  .wishlist-empty h1 {
+    font-size: 1.5rem;
+  }
+  
+  .wishlist-empty-icon {
+    font-size: 3rem;
+  }
 }
 
 /* =====================
@@ -244,7 +388,7 @@
   padding: 16px 40px 10px;
   box-sizing: border-box;
   display: flex; flex-direction: column; align-items: center; gap: 12px;
-  background-color: rgba(219, 189, 238, 0.342);
+  background-color: #f8f8f8;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 .discription {
@@ -373,16 +517,16 @@ ul li:hover { text-decoration: underline; }
 /* =====================
    PRODUCT PAGE
    ===================== */
-.product-page { background-color: white; width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
+.product-page { background-color: #f8f8f8; width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
 .product-wrap { width: 100%; }
 
 /* =====================
    PRODUCT CARDS GRID
    ===================== */
 .product-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; padding: 20px 40px; max-width: 1400px; margin: 40px auto 0; }
-.product-card { border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; transition: border-color 0.2s ease; cursor: pointer; }
+.product-card { background-color: #ffffff; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; transition: border-color 0.2s ease; cursor: pointer; }
 .product-card:hover { border-color: #999; }
-.product-card-image-wrapper { position: relative; width: 100%; height: 300px; overflow: hidden; background-color: #f0f0f0; }
+.product-card-image-wrapper { position: relative; width: 100%; height: 300px; overflow: hidden; background-color: #ffffff; }
 .product-card-image { width: 100%; height: 100%; object-fit: contain; }
 .product-card-favorite { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background-color: rgba(255,255,255,0.8); border: 1px solid #ddd; font-size: 14px; color: #888; cursor: pointer; }
 .product-card-favorite:hover { color: #444; }
@@ -404,7 +548,7 @@ ul li:hover { text-decoration: underline; }
 }
 
 
-.card-img-wrap { position: relative; width: 100%; background-color: #c7c4c4; overflow: hidden;border-radius: 10px; }
+.card-img-wrap { position: relative; width: 100%; background-color: #ffffff; overflow: hidden;border-radius: 10px; }
 .girlscrop { height: 340px; width: 100%; object-fit: contain; display: block; transition: transform 0.4s ease; animation: hang 4s ease-in-out infinite; transform-origin: top center; }
 .card:hover .girlscrop { animation-play-state: paused; transform: scale(1.03); }
 .card:nth-child(1) .girlscrop { animation-delay: 0s; }
@@ -441,7 +585,7 @@ ul li:hover { text-decoration: underline; }
 }
 
 /* =====================
-   ROW 2 — desktop scroll (DEFAULT)
+   ROW 2 — Lifestyle Images Row with Preorder Overlay
    ===================== */
 .card-container--row2 {
   display: flex;
@@ -450,15 +594,126 @@ ul li:hover { text-decoration: underline; }
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 24px;
   padding: 20px 40px 40px;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  cursor: grab;
 }
-.card-container--row2::-webkit-scrollbar { display: none; }
-.card-container--row2 .card--img-only { 
-  flex: 0 0 300px; 
-  scroll-snap-align: start; 
-  min-width: unset; 
+
+.card-container--row2:active {
+  cursor: grabbing;
+}
+
+.card-container--row2::-webkit-scrollbar {
+  height: 4px;
+}
+
+.card-container--row2::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
+}
+
+.card-container--row2::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.card-container--row2::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.card-container--row2 .card--img-only {
+  position: relative;
+  flex: 0 0 380px;
+  width: 380px;
+  min-width: 380px;
+  height: 480px;
+  scroll-snap-align: start;
+  overflow: hidden;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-container--row2 .card--img-only:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.card-container--row2 .card-fullimg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.card-container--row2 .card--img-only:hover .card-fullimg {
+  transform: scale(1.05);
+}
+
+/* Preorder Overlay Styles */
+.card-container--row2 .preorder-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+  color: white;
+  padding: 14px 20px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  font-family: 'Calibri Bold', Arial, sans-serif;
+}
+
+.card-container--row2 .card--img-only:hover .preorder-overlay {
+  transform: translateY(0);
+}
+
+/* Preorder badge (top-left corner) */
+.card-container--row2 .preorder-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #ff6b6b;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  font-family: 'Calibri Bold', Arial, sans-serif;
+}
+
+/* Preorder shimmer effect */
+.card-container--row2 .preorder-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 /* =====================
@@ -486,6 +741,85 @@ ul li:hover { text-decoration: underline; }
     width: 100%;
     box-sizing: border-box;
     position: relative;
+    padding: 0 16px 20px;
+  }
+  
+  .row2-carousel-stage {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+    background: #111;
+    border-radius: 12px;
+  }
+  
+  .row2-carousel-slide {
+    position: relative;
+  }
+  
+  .row2-carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  /* Mobile preorder overlay on carousel */
+  .row2-carousel-slide .preorder-overlay-mobile {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    z-index: 10;
+    font-family: 'Calibri Bold', Arial, sans-serif;
+  }
+  
+  .row2-carousel-slide .preorder-badge-mobile {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #ff6b6b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    z-index: 10;
+    font-family: 'Calibri Bold', Arial, sans-serif;
+  }
+  
+  .row2-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0 6px;
+    background: #fff;
+  }
+  
+  .row2-carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s ease;
+  }
+  
+  .row2-carousel-dot--active {
+    background: #111;
+    transform: scale(1.3);
   }
   
   .row2-desktop-only {
@@ -508,6 +842,28 @@ ul li:hover { text-decoration: underline; }
   
   .row2-desktop-only {
     display: flex !important;
+  }
+}
+
+/* Tablet Row 2 adjustments */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .card-container--row2 .card--img-only {
+    flex: 0 0 320px;
+    width: 320px;
+    min-width: 320px;
+    height: 400px;
+  }
+  
+  .card-container--row2 .preorder-overlay {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+  
+  .card-container--row2 .preorder-badge {
+    padding: 5px 12px;
+    font-size: 11px;
+    top: 12px;
+    left: 12px;
   }
 }
 
@@ -622,7 +978,7 @@ ul li:hover { text-decoration: underline; }
 /* =====================
    CART PAGE
    ===================== */
-.cart-page { min-height: 100vh; background-color: #fff; font-family: "Georgia", serif; color: #111; }
+.cart-page { min-height: 100vh; background-color: #f8f8f8; font-family: "Georgia", serif; color: #111; }
 .cart-header { border-bottom: 1px solid #e0e0e0; padding: 24px 40px 0; text-align: center; margin-top: 200px; }
 .cart-store-title { font-size: 28px; font-weight: 700; letter-spacing: 0.04em; margin: 0 0 18px; }
 .cart-category-nav { display: flex; justify-content: flex-start; gap: 32px; flex-wrap: wrap; padding-bottom: 16px; }
@@ -635,9 +991,9 @@ ul li:hover { text-decoration: underline; }
 .cart-continue-link { font-size: 13px; color: #555; cursor: pointer; text-decoration: underline; transition: color 0.2s; }
 .cart-continue-link:hover { color: #000; }
 .cart-items-list { display: flex; flex-direction: column; gap: 20px; }
-.cart-item-card { display: flex; gap: 20px; align-items: flex-start; background-color: rgba(180,179,179,0.09); border-radius: 10px; padding: 16px; transition: box-shadow 0.2s ease; }
+.cart-item-card { display: flex; gap: 20px; align-items: flex-start; background-color: #ffffff; border-radius: 10px; padding: 16px; transition: box-shadow 0.2s ease; }
 .cart-item-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
-.cart-item-img-wrap { flex-shrink: 0; width: 140px; height: 170px; border-radius: 6px; overflow: hidden; background: #f5f5f5; display: flex; align-items: center; justify-content: center; }
+.cart-item-img-wrap { flex-shrink: 0; width: 140px; height: 170px; border-radius: 6px; overflow: hidden; background: #ffffff; display: flex; align-items: center; justify-content: center; }
 .cart-item-img { width: 100%; height: 100%; object-fit: contain; }
 .cart-item-info { flex: 1; display: flex; flex-direction: column; gap: 5px; }
 .cart-item-tag { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -668,7 +1024,7 @@ ul li:hover { text-decoration: underline; }
 .cart-empty { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 60px 20px; color: #888; font-size: 16px; }
 .cart-shop-btn { padding: 12px 28px; background: #111; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .cart-shop-btn:hover { background: #444; }
-.cart-right { flex: 0 0 280px; border: 1px solid #e0e0e0; border-radius: 10px; padding: 28px 24px; position: sticky; top: 24px; }
+.cart-right { flex: 0 0 280px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 28px 24px; position: sticky; top: 24px; }
 .cart-payment-title { font-size: 20px; font-weight: 600; margin: 0 0 20px; }
 .cart-summary-rows  { display: flex; flex-direction: column; gap: 14px; }
 .cart-summary-row { display: flex; justify-content: space-between; font-size: 14px; color: #333; }
@@ -688,9 +1044,9 @@ ul li:hover { text-decoration: underline; }
 .cart-recommendations { padding: 40px; max-width: 1200px; margin: 0 auto; border-top: 1px solid #f0f0f0; }
 .cart-recommendations-title { font-size: 24px; font-weight: 600; color: #111; margin: 0 0 24px; }
 .cart-recommendations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
-.cart-product-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+.cart-product-card { background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
 .cart-product-card:hover { transform: translateY(-2px); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-.cart-product-img-wrap { width: 100%; aspect-ratio: 3 / 4; background: #f5f5f5; overflow: hidden; }
+.cart-product-img-wrap { width: 100%; aspect-ratio: 3 / 4; background: #ffffff; overflow: hidden; }
 .cart-product-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
 .cart-product-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
 .cart-product-name { font-size: 13px; font-weight: 400; color: #111; padding: 8px 10px 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -930,7 +1286,7 @@ ul li:hover { text-decoration: underline; }
 /* =====================
    CATEGORY PAGE
    ===================== */
-.category-page { min-height: 100vh; background: #fff; padding-top: 196px; }
+.category-page { min-height: 100vh; background: #f8f8f8; padding-top: 196px; }
 .category-page-header { padding: 20px 40px 10px; display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid #f0f0f0; margin-bottom: 10px; }
 .category-back-btn { background: none; border: none; font-size: 13px; color: #888; cursor: pointer; padding: 0; transition: color 0.2s; flex-shrink: 0; }
 .category-back-btn:hover { color: #111; }
@@ -1033,7 +1389,7 @@ ul li:hover { text-decoration: underline; }
   }
 
 
-.card .card-img-wrap { position: relative !important; width: 105% !important; height: 240px !important; overflow: hidden !important; background-color: #c7c4c4 !important; flex-shrink: 0 !important; border: none !important; }
+.card .card-img-wrap { position: relative !important; width: 105% !important; height: 240px !important; overflow: hidden !important; background-color: #ffffff !important; flex-shrink: 0 !important; border: none !important; }
   .card .girlscrop { position: static !important; width: 100% !important; height: 260px !important; object-fit: contain !important; display: block !important; animation: hang 4s ease-in-out infinite !important; transform-origin: top center !important; }
   .card .card-hover-btn { position: absolute !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; height: 40px !important; transform: translateY(100%) !important; background: #111 !important; color: #fff !important; border: none !important; font-size: 12px !important; font-weight: 600 !important; letter-spacing: 0.04em !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 2 !important; transition: transform 0.25s ease, background 0.2s ease !important; }
   .card:hover .card-hover-btn { transform: translateY(0) !important; }
@@ -1054,10 +1410,32 @@ ul li:hover { text-decoration: underline; }
   .category-page-header { padding: 16px 16px 10px; flex-wrap: wrap; gap: 10px; }
   .category-page-title { font-size: 18px; }
   .category-products-grid { grid-template-columns: repeat(2,1fr); padding: 12px 12px 40px; gap: 0; }
+  
+  /* Wishlist responsive for mobile */
+  .wishlist-page {
+    padding: 1rem;
+  }
+  
+  .wishlist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  
+  .wishlist-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .wishlist-card-name {
+    font-size: 0.85rem;
+  }
+  
+  .wishlist-card-price {
+    font-size: 0.9rem;
+  }
 }
 
 /* =====================================================================
-   TABLET  601px – 1024px
+   TABLET  601px – 1024px - FIXED WITH BORDER-RADIUS
    ===================================================================== */
 @media (min-width: 601px) and (max-width: 1024px) {
 
@@ -1078,49 +1456,269 @@ ul li:hover { text-decoration: underline; }
 
   .category-front { top: 138px !important; margin-top: 138px !important; padding: 12px 24px 10px; }
 
-  .card-container { display: grid !important; grid-template-columns: repeat(2,1fr) !important; gap: 20px !important; padding: 20px 24px !important; width: 100% !important; box-sizing: border-box !important; }
-  .card { display: flex !important; flex-direction: column !important; width: 100% !important; min-width: 0 !important; background: #fff !important; overflow: visible !important; border-radius: 0 !important; }
-  .card .card-img-wrap { position: relative !important; width: 100% !important; aspect-ratio: 3 / 4 !important; overflow: hidden !important; background-color: #f5f5f5 !important; border: none !important; flex-shrink: 0 !important; box-sizing: border-box !important; }
-  .card .girlscrop { width: 100% !important; height: 100% !important; object-fit: contain !important; display: block !important; animation: hang 4s ease-in-out infinite !important; transform-origin: top center !important; }
-  .card .card-hover-btn { position: absolute !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; height: 44px !important; transform: translateY(100%) !important; background: #111 !important; color: #fff !important; border: none !important; font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.04em !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 2 !important; transition: transform 0.25s ease, background 0.2s ease !important; }
+  /* Card container - 2 cards per row */
+  .card-container { 
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 20px !important; 
+    padding: 20px 24px 40px !important; 
+    width: 100% !important; 
+    box-sizing: border-box !important; 
+  }
+  
+  /* Individual card styling - matching mobile with border-radius */
+  .card { 
+    display: flex !important; 
+    flex-direction: column !important; 
+    width: 100% !important; 
+    min-width: 0 !important; 
+    background: transparent !important;
+    overflow: hidden !important; 
+    border-radius: 6px !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+  }
+  
+  .card .card-img-wrap { 
+    position: relative !important; 
+    width: 100% !important; 
+    background-color: #ffffff !important; 
+    overflow: hidden !important;
+    border-radius: 10px 10px 0 0 !important;
+  }
+  
+  .card .girlscrop { 
+    width: 100% !important; 
+    height: 280px !important; 
+    object-fit: contain !important; 
+    display: block !important; 
+    animation: hang 4s ease-in-out infinite !important; 
+    transform-origin: top center !important; 
+    transition: transform 0.4s ease !important;
+  }
+  
+  .card:hover .girlscrop {
+    /* Tablet hover fix: no scaling; keep hang animation running */
+    animation-play-state: running !important;
+    transform: none !important;
+  }
+  
+  .card .card-hover-btn { 
+    position: absolute !important; 
+    bottom: 0 !important; 
+    left: 0 !important; 
+    right: 0 !important; 
+    width: 100% !important; 
+    height: 44px !important; 
+    transform: translateY(100%) !important; 
+    background: #111 !important; 
+    color: #fff !important; 
+    border: none !important; 
+    font-size: 13px !important; 
+    font-weight: 600 !important; 
+    letter-spacing: 0.04em !important; 
+    cursor: pointer !important; 
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: center !important; 
+    z-index: 2 !important; 
+    transition: transform 0.25s ease, background 0.2s ease !important; 
+  }
+  
   .card:hover .card-hover-btn { transform: translateY(0) !important; }
-  .card .card-info { display: flex !important; flex-direction: column !important; gap: 4px !important; padding: 12px 4px 8px !important; width: 100% !important; box-sizing: border-box !important; overflow: visible !important; visibility: visible !important; opacity: 1 !important; height: auto !important; max-height: none !important; }
-  .card .card-season-tag { font-size: 11px !important; color: #666 !important; font-weight: 400 !important; display: block !important; visibility: visible !important; opacity: 1 !important; }
+  
+  .card-hover-btn:hover { background: #333 !important; }
+  
+  .card-hover-btn--added { background: #444 !important; cursor: default !important; }
+  
+  .card .card-info { 
+    display: flex !important; 
+    flex-direction: column !important; 
+    gap: 4px !important; 
+    padding: 12px 4px 16px !important; 
+    width: 100% !important; 
+    box-sizing: border-box !important; 
+    overflow: visible !important; 
+    visibility: visible !important; 
+    opacity: 1 !important; 
+    height: auto !important; 
+    max-height: none !important; 
+    background: transparent !important;
+  }
+  
+  .card .card-season-tag { 
+    font-size: 11px !important; 
+    color: #666 !important; 
+    font-weight: 400 !important; 
+    letter-spacing: 0.02em !important;
+    display: block !important; 
+    visibility: visible !important; 
+    opacity: 1 !important; 
+  }
+  
   .card .card-brand { display: none !important; }
-  .card .card-name { font-size: 13px !important; font-weight: 400 !important; color: #000 !important; margin: 0 !important; display: block !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; visibility: visible !important; opacity: 1 !important; }
-  .card .card-price { font-size: 14px !important; font-weight: 500 !important; color: #111 !important; margin: 6px 0 0 !important; display: block !important; visibility: visible !important; opacity: 1 !important; }
+  
+  .card .card-name { 
+    font-size: 17px !important; 
+    font-weight: 700 !important; 
+    color: #000 !important; 
+    margin: 0 !important; 
+    display: block !important; 
+    white-space: nowrap !important; 
+    overflow: hidden !important; 
+    text-overflow: ellipsis !important; 
+    visibility: visible !important; 
+    opacity: 1 !important; 
+    font-family: Calibri, 'Calibri Bold', Arial, sans-serif !important;
+  }
+  
+  .card .card-price { 
+    font-size: 17px !important; 
+    font-weight: 700 !important; 
+    color: #111 !important; 
+    margin: 6px 0 0 !important; 
+    display: inline-block !important;
+    padding: 1px 0 !important;
+    width: fit-content !important;
+    background: #fafafa !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+    font-family: Calibri, 'Calibri Bold', Arial, sans-serif !important;
+    visibility: visible !important; 
+    opacity: 1 !important; 
+  }
 
-  .card-container--row2 { display: flex !important; flex-direction: row !important; overflow-x: auto !important; gap: 16px !important; padding: 0 24px 20px !important; scrollbar-width: none !important; }
+  /* Row 2 specific styles */
+  .card-container--row2 { 
+    display: flex !important; 
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    gap: 16px !important;
+    padding: 20px 24px 40px !important;
+    scrollbar-width: none !important;
+  }
+
+  /* Tablet hover fix: only reveal Add to Cart button; keep image + info static */
+  .card:hover .card-info { 
+    transform: none !important;
+    animation: none !important;
+  }
+
+  /* Ensure tablet hover behaves like mobile: no image scaling (hang animation continues) */
+  .card:hover .girlscrop {
+    animation-play-state: running !important;
+    transform: none !important;
+  }
+  
   .card-container--row2::-webkit-scrollbar { display: none; }
-  .card-container--row2 .card--img-only { flex: 0 0 calc(50% - 20px) !important; width: calc(50% - 20px) !important; min-width: calc(50% - 20px) !important; height: auto !important; aspect-ratio: 3 / 4 !important; display: block !important; overflow: hidden !important; }
-  .card-container--row2 .card-fullimg { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
+  
+  .card-container--row2 .card--img-only { 
+    flex: 0 0 calc(50% - 20px) !important; 
+    width: calc(50% - 20px) !important; 
+    min-width: calc(50% - 20px) !important; 
+    height: auto !important; 
+    aspect-ratio: 3 / 4 !important; 
+    display: block !important; 
+    overflow: hidden !important; 
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  }
+  
+  .card-container--row2 .card--img-only:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+  }
+  
+  .card-container--row2 .card-fullimg { 
+    width: 100% !important; 
+    height: 100% !important; 
+    object-fit: cover !important; 
+    display: block !important; 
+    transition: transform 0.5s ease !important;
+  }
+  
+  .card-container--row2 .card--img-only:hover .card-fullimg {
+    transform: scale(1.05) !important;
+  }
 
+  /* Other card containers - also 2 per row */
   .card-container--row3,
   .card-container--row4,
   .card-container--row5,
   .card-container--row6,
-  .card-container--row7 { display: grid !important; grid-template-columns: repeat(2,1fr) !important; gap: 20px !important; padding: 0 24px 20px !important; }
+  .card-container--row7 { 
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important; 
+    padding: 0 24px 40px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
-  .product-cards { display: grid !important; grid-template-columns: repeat(2,1fr) !important; gap: 20px !important; padding: 20px 24px !important; margin: 0 auto !important; }
+  .product-cards { 
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 20px !important; 
+    padding: 20px 24px !important; 
+    margin: 0 auto !important; 
+  }
+  
+  .product-card { 
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  }
+  
   .product-card-image-wrapper { border: none !important; aspect-ratio: 3 / 4 !important; }
-  .category-products-grid { display: grid !important; grid-template-columns: repeat(2,1fr) !important; gap: 20px !important; padding: 20px 24px 40px !important; }
+  
+  .category-products-grid { 
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 20px !important; 
+    padding: 20px 24px 40px !important; 
+  }
 
   .cart-body { flex-direction: column !important; padding: 24px !important; gap: 32px !important; align-items: stretch !important; }
   .cart-left { width: 100% !important; flex: none !important; }
-  .cart-right { flex: none !important; width: 100% !important; position: static !important; top: auto !important; box-sizing: border-box !important; }
+  .cart-right { flex: none !important; width: 100% !important; position: static !important; top: auto !important; box-sizing: border-box !important; border-radius: 10px !important; }
   .cart-section-title { font-size: 18px; }
-  .auth-modal { padding: 44px 36px 36px; }
+  .auth-modal { padding: 44px 36px 36px; border-radius: 16px !important; }
   .pm-body { grid-template-columns: 1fr; }
   .pm-form-col    { padding-right: 0; }
   .pm-summary-col { padding-left: 0; border-left: none; border-top: 1px solid #f0f0f0; padding-top: 20px; }
   .pm-row2 { grid-template-columns: 1fr; }
   .section-divider { padding: 28px 24px 10px; }
-  .sb-dropdown { top: 138px; padding: 18px 24px 22px; }
+  .sb-dropdown { top: 138px; padding: 18px 24px 22px; border-radius: 0 !important; }
   .sb-grid-item { flex: 0 0 140px; }
-  .sb-grid-img-wrap { width: 140px; height: 175px; }
+  .sb-grid-img-wrap { width: 140px; height: 175px; border-radius: 8px !important; }
   .category-page { padding-top: 178px; }
   .category-front { top: 178px !important; margin-top: 178px !important; }
   .category-page-header { padding: 16px 24px 10px; }
+  
+  /* Wishlist tablet responsive */
+  .wishlist-page {
+    padding: 1.5rem;
+  }
+  
+  .wishlist-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .wishlist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .wishlist-card {
+    border-radius: 12px !important;
+    background: white !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  }
 }
 
 @media (min-width: 601px) and (max-width: 860px) {
@@ -1207,14 +1805,18 @@ ul li:hover { text-decoration: underline; }
 /* =====================================================================
    APP CONTAINER
    ===================================================================== */
-.app-container { display: flex; flex-direction: column; min-height: 100vh; font-family: 'Calibri Light', Calibri, Arial, sans-serif; }
-.app-content   { flex: 1; padding-top: 0; padding-bottom: 0; box-sizing: border-box; }
+.app-container { display: flex; flex-direction: column; min-height: 100vh; font-family: 'Calibri Light', Calibri, Arial, sans-serif; background-color: #f8f8f8; }
+.app-content   { flex: 1; padding-top: 0; padding-bottom: 0; box-sizing: border-box; background-color: #f8f8f8; }
+
+body {
+  background-color: #f8f8f8;
+}
 
 /* =====================================================================
    FOOTER
    ===================================================================== */
 .emsarj-footer {
-  position: relative; width: 100%; background: #fff; border-top: 3px solid #111; overflow: hidden;
+  position: relative; width: 100%; background: #f8f8f8; border-top: 3px solid #111; overflow: hidden;
   display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between;
   padding: 60px 48px 0 48px; box-sizing: border-box; font-family: inherit; gap: 0; z-index: 50;
 }
@@ -1250,17 +1852,6 @@ footer-bottom p {
   position: relative;
   top: -10px; /* lift into the black strip */
 }
-
-
-
-
-
-
-
-
-
-
-
 
 @media (max-width: 600px) {
   .emsarj-footer { flex-direction: column; align-items: center; padding: 28px 20px 0; gap: 16px; text-align: center; }
