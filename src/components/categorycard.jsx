@@ -1,115 +1,86 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import supabase from "../supabasefol/supabaseClient";
 import { useCart } from "../cartContext/cartprovider";
 import WishlistHeartButton from "../ui/WishlistHeartButton";
-
-import girlscrop from "../assets/girlscrop.png";
-import tshirt    from "../assets/Tshirt-1-removebg-preview.png";
-import short     from "../assets/SHORT-1-removebg-preview.png";
-import caps      from "../assets/CAPS-1-removebg-preview.png";
-
-import hoodies from "../assets/hoodies_front.png";
-import jersey  from "../assets/jersey-em.png";
-import capred  from "../assets/capred.png";
-import sheedy  from "../assets/sheedy.png";
 
 import boysdark from "../assets/boysdark.jpg";
 import twogirl  from "../assets/twogirl.jpg";
 import tallni   from "../assets/basketball-pic.png";
 import run      from "../assets/run.jpg";
 
-const ROW2_IMAGES = [
-  { src: boysdark, alt: "boys dark" },
-  { src: twogirl,  alt: "two girls" },
-  { src: tallni,   alt: "basketball" },
-  { src: run,      alt: "run" },
-];
+const HERO_IMAGES = [boysdark, twogirl, tallni, run];
 
 /* =====================================================================
-   MOBILE AUTO-PLAY CAROUSEL
+   HERO SECTION
    ===================================================================== */
-function Row2MobileCarousel() {
-  const [cur, setCur]   = useState(0);
-  const [prev, setPrev] = useState(null);
-  const [anim, setAnim] = useState("idle");
-  const autoRef         = useRef(null);
-  const total           = ROW2_IMAGES.length;
-
-  function goTo(next) {
-    if (next === cur) return;
-    setPrev(cur);
-    setAnim("exiting");
-    setTimeout(() => {
-      setCur(next);
-      setAnim("entering");
-      setTimeout(() => setAnim("idle"), 500);
-    }, 350);
-  }
-
-  function startAuto() {
-    clearInterval(autoRef.current);
-    autoRef.current = setInterval(() => {
-      setCur(c => {
-        const next = (c + 1) % total;
-        setPrev(c);
-        setAnim("entering");
-        setTimeout(() => setAnim("idle"), 500);
-        return next;
-      });
-    }, 3000);
-  }
+function HeroSection() {
+  const [cur, setCur] = useState(0);
 
   useEffect(() => {
-    startAuto();
-    return () => clearInterval(autoRef.current);
+    const timer = setInterval(() => {
+      setCur(c => (c + 1) % HERO_IMAGES.length);
+    }, 4000);
+    return () => clearInterval(timer);
   }, []);
 
-  function slideClass(i) {
-    const base = "row2-carousel-slide";
-    if (i === cur  && anim === "entering") return `${base} ${base}--entering`;
-    if (i === cur  && anim === "idle")     return `${base} ${base}--active`;
-    if (i === prev && anim === "exiting")  return `${base} ${base}--exiting`;
-    if (i === cur  && anim === "exiting")  return `${base} ${base}--active`;
-    return base;
-  }
-
   return (
-    <div className="row2-carousel">
-      <div className="row2-carousel-stage">
-        {ROW2_IMAGES.map((img, i) => (
-          <div key={i} className={slideClass(i)}>
-            <img src={img.src} alt={img.alt} className="row2-carousel-img" />
+    <div className="emsarj-hero">
+      {HERO_IMAGES.map((img, i) => (
+        <img
+          key={i}
+          src={img}
+          alt={`Emsarj Hero ${i + 1}`}
+          className={`emsarj-hero__img${i === cur ? " emsarj-hero__img--active" : ""}`}
+        />
+      ))}
+
+      <div className="emsarj-hero__overlay">
+
+        {/* Badge — absolute top-left */}
+        <span className="emsarj-hero__badge">Preorder</span>
+
+        {/* Left column — heading, tagline, thumbs, button */}
+        <div className="emsarj-hero__left">
+          <h1 className="emsarj-hero__heading">Emsarj<br />Signature<br />Collection</h1>
+          <p className="emsarj-hero__tagline">Limited. Elevated. Yours.</p>
+
+          <div className="emsarj-hero__thumbs">
+            {HERO_IMAGES.map((img, i) => (
+              <button
+                key={i}
+                className={`emsarj-hero__thumb${i === cur ? " emsarj-hero__thumb--active" : ""}`}
+                onClick={() => setCur(i)}
+                aria-label={`Go to slide ${i + 1}`}
+              >
+                <img src={img} alt={`Slide ${i + 1}`} />
+              </button>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="row2-carousel-dots">
-        {ROW2_IMAGES.map((_, i) => (
-          <button
-            key={i}
-            className={`row2-carousel-dot${i === cur ? " row2-carousel-dot--active" : ""}`}
-            onClick={() => {
-              clearInterval(autoRef.current);
-              goTo(i);
-              startAuto();
-            }}
-            aria-label={`Slide ${i + 1}`}
-          />
-        ))}
+
+          <button className="emsarj-hero__btn">Details →</button>
+        </div>
+
+        {/* Dots — pinned bottom-right */}
+        <div className="emsarj-hero__dots">
+          {HERO_IMAGES.map((_, i) => (
+            <button
+              key={i}
+              className={`emsarj-hero__dot${i === cur ? " emsarj-hero__dot--active" : ""}`}
+              onClick={() => setCur(i)}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
+
       </div>
     </div>
   );
 }
 
 /* =====================================================================
-   HELPERS
+   HELPER
    ===================================================================== */
-function mergeWithFallback(backendItems, fallbackItems) {
-  return Array.from({ length: 4 }, (_, i) => ({
-    isBackend: !!backendItems[i],
-    ...(backendItems[i] || fallbackItems[i]),
-  }));
-}
-
 function resolveImageUrl(imageUrl) {
   if (!imageUrl) return null;
   if (imageUrl.startsWith("http")) return imageUrl;
@@ -122,118 +93,73 @@ function resolveImageUrl(imageUrl) {
    MAIN COMPONENT
    ===================================================================== */
 export default function CategoryCard() {
+  const navigate = useNavigate();
   const { addToCart, cartItems } = useCart();
-  const [products, setProducts]  = useState([]);
-  const [isMobile, setIsMobile]  = useState(window.innerWidth <= 600);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading]   = useState(true);
 
-  async function fetchProducts() {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) { console.error("❌ Fetch error:", error.message); return; }
-    setProducts(data || []);
-  }
-
-  useEffect(() => { fetchProducts(); }, []);
-
-  // Handle window resize to toggle between desktop and mobile views
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 600);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    async function fetchProducts() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) console.error("❌ Fetch error:", error.message);
+      setProducts(data || []);
+      setLoading(false);
+    }
+    fetchProducts();
   }, []);
-
-  const fallbackRow1 = [
-    { name: "Ladies crop",     price: 200, image: girlscrop },
-    { name: "Classic T-Shirt", price: 150, image: tshirt    },
-    { name: "Shorts",          price: 120, image: short     },
-    { name: "Caps",            price: 80,  image: caps      },
-  ];
-  const fallbackRow3 = [
-    { name: "Hoodies",  price: 250, image: hoodies },
-    { name: "Jersey",   price: 180, image: jersey  },
-    { name: "Cap Red",  price: 90,  image: capred  },
-    { name: "Sheedy",   price: 130, image: sheedy  },
-  ];
-  const fallbackRow4 = [
-    { name: "Classic T-Shirt", price: 150, image: tshirt  },
-    { name: "Shorts",          price: 120, image: short   },
-    { name: "Hoodies",         price: 250, image: hoodies },
-    { name: "Jersey",          price: 180, image: jersey  },
-  ];
-  const fallbackRow5 = [
-    { name: "Ladies crop", price: 200, image: girlscrop },
-    { name: "Cap Red",     price: 90,  image: capred    },
-    { name: "Caps",        price: 80,  image: caps      },
-    { name: "Sheedy",      price: 130, image: sheedy    },
-  ];
-  const fallbackRow6 = [
-    { name: "Hoodies",         price: 250, image: hoodies   },
-    { name: "Classic T-Shirt", price: 150, image: tshirt    },
-    { name: "Ladies crop",     price: 200, image: girlscrop },
-    { name: "Shorts",          price: 120, image: short     },
-  ];
-  const fallbackRow7 = [
-    { name: "Jersey",  price: 180, image: jersey  },
-    { name: "Caps",    price: 80,  image: caps    },
-    { name: "Cap Red", price: 90,  image: capred  },
-    { name: "Sheedy",  price: 130, image: sheedy  },
-  ];
-
-  const row1 = products.slice(0,  4);
-  const row3 = products.slice(4,  8);
-  const row4 = products.slice(8,  12);
-  const row5 = products.slice(12, 16);
-  const row6 = products.slice(16, 20);
-  const row7 = products.slice(20, 24);
 
   function isInCart(id) {
     return cartItems.some(item => item.id === id);
   }
 
-  function renderCard(product, index, fallbackRow) {
-    const id           = product.id ?? `${product.name}-${index}`;
-    const alreadyAdded = isInCart(id);
+  function renderCard(product, index) {
+    const imgUrl       = resolveImageUrl(product.image_url);
+    const alreadyAdded = isInCart(product.id);
 
     const wishlistProduct = {
-      id,
-      name: product.name,
-      price: product.price,
-      image_url: product.isBackend
-        ? resolveImageUrl(product.image_url)
-        : fallbackRow[index].image,
+      id:        product.id,
+      name:      product.name,
+      price:     product.price,
+      image_url: imgUrl,
     };
 
+    function goToProduct() {
+      navigate(`/product/${product.id}`);
+    }
+
     return (
-      <div className="card" key={id}>
+      <div
+        className="card"
+        key={product.id}
+        onClick={goToProduct}
+        style={{ cursor: "pointer" }}
+      >
         <div className="card-img-wrap">
-          <WishlistHeartButton product={wishlistProduct} />
+          <span onClick={e => e.stopPropagation()}>
+            <WishlistHeartButton product={wishlistProduct} />
+          </span>
+
           <img
             className="girlscrop"
-            src={
-              product.isBackend && product.image_url
-                ? resolveImageUrl(product.image_url)
-                : fallbackRow[index].image
-            }
-            onError={e => { e.target.src = fallbackRow[index].image; }}
+            src={imgUrl}
             alt={product.name}
+            onError={e => { e.target.style.opacity = "0.3"; }}
           />
 
           <button
             className={`card-hover-btn${alreadyAdded ? " card-hover-btn--added" : ""}`}
-            onClick={() => {
+            onClick={e => {
+              e.stopPropagation();
               if (alreadyAdded) return;
               addToCart({
-                id,
+                id:    product.id,
                 name:  product.name,
                 price: product.price,
-                image: product.isBackend
-                  ? resolveImageUrl(product.image_url)
-                  : fallbackRow[index].image,
+                image: imgUrl,
                 sizes: product.sizes,
               });
             }}
@@ -241,70 +167,132 @@ export default function CategoryCard() {
             {alreadyAdded ? "✓ In wardrobe" : "Add to wardrobe"}
           </button>
         </div>
+
         <div className="card-info">
           <span className="card-season-tag">New Trend</span>
           <p className="card-name">{product.name}</p>
-          <p className="card-price">Ghc {product.price}</p>
+          <p className="card-price">₵{product.price}</p>
         </div>
       </div>
     );
   }
 
+  const rows = [];
+  for (let i = 0; i < products.length; i += 4) {
+    rows.push(products.slice(i, i + 4));
+  }
+
+  const rowClasses = [
+    "card-container",
+    "card-container card-container--row3",
+    "card-container card-container--row4",
+    "card-container card-container--row5",
+    "card-container card-container--row6",
+    "card-container card-container--row7",
+  ];
+
+  // Updated style with Times New Roman, smaller font, uppercase
+  const titleStyle = {
+    fontSize: "18px",
+    fontWeight: 600,
+    fontFamily: "'Times New Roman', Times, serif",
+    color: "#1a1a1a",
+    margin: 0,
+    letterSpacing: "0.5px",
+    textTransform: "uppercase",
+  };
+
   return (
     <>
-      {/* ── ROW 1 ── */}
-      <div className="card-container">
-        {mergeWithFallback(row1, fallbackRow1).map((p, i) => renderCard(p, i, fallbackRow1))}
-      </div>
+      <HeroSection />
 
-      {/* ── ROW 2 — Conditionally render based on screen size ── */}
-      {!isMobile ? (
-        /* Desktop/Tablet: 4 side-by-side lifestyle images */
-        <div className="card-container card-container--row2 row2-desktop-only row2-images-only">
-          <div className="card card--img-only">
-            <img className="card-fullimg" alt="boys dark" src={boysdark} />
+      {!loading && products.length > 0 && rows.length > 0 && (
+        <>
+          {/* FIRST ROW TITLE - NEW & FEATURED */}
+          <div style={{
+            width: "100%",
+            padding: "40px 40px 0px",
+            boxSizing: "border-box",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: "0px",
+            marginBottom: "8px", // Small gap between title and first row
+          }}>
+              <h2 style={titleStyle}>
+              <span style={{ textDecoration: "underline" }}>NEW &amp; FEATURED</span>
+            </h2>
+
+            {/* SECOND ROW TITLE - TRENDING NOW (only if there's a second row) */}
+
           </div>
-          <div className="card card--img-only">
-            <img className="card-fullimg" alt="two girls" src={twogirl} />
+
+          {/* FIRST ROW */}
+          <div
+            className={rowClasses[0] || "card-container"}
+            style={{ 
+              marginTop: 0,
+              marginBottom: 0
+            }}
+          >
+            {rows[0].map((product, i) => renderCard(product, i))}
           </div>
-          <div className="card card--img-only">
-            <img className="card-fullimg" alt="basketball" src={tallni} />
+
+          {/* SECOND ROW TITLE - TRENDING NOW (only if there's a second row) */}
+          {rows.length > 1 && (
+            <div style={{
+              width: "100%",
+              padding: "20px 40px 0px", // Reduced padding-top from 30px to 20px to close the gap
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "0px",
+              marginTop: 0,
+              marginBottom: "8px", // Same gap as first title to its row
+            }}>
+              <h2 style={titleStyle}>
+                <span style={{ textDecoration: "underline" }}>TRENDING NOW</span>
+              </h2>
+            </div>
+          )}
+
+          {/* REMAINING ROWS (from index 1 onwards) - NO HEADERS AFTER TRENDING NOW */}
+          {rows.slice(1).map((row, rowIndex) => (
+            <div
+              key={rowIndex + 1}
+              className={rowClasses[rowIndex + 1] || `card-container card-container--row${rowIndex + 3}`}
+              style={{ 
+                marginTop: 0, // Changed from -10px to 0 for consistent spacing
+                marginBottom: 0
+              }}
+            >
+              {row.map((product, i) => renderCard(product, i))}
+            </div>
+          ))}
+        </>
+      )}
+
+      {loading && (
+        <div className="pd-loading" style={{ minHeight: "40vh" }}>
+          <div className="pd-loading-dots">
+            <span /><span /><span />
           </div>
-          <div className="card card--img-only">
-            <img className="card-fullimg" alt="run" src={run} />
-          </div>
-        </div>
-      ) : (
-        /* Mobile ONLY: auto-play carousel */
-        <div className="row2-mobile-only">
-          <Row2MobileCarousel />
         </div>
       )}
 
-      {/* ── ROW 3 ── */}
-      <div className="card-container card-container--row3">
-        {mergeWithFallback(row3, fallbackRow3).map((p, i) => renderCard(p, i, fallbackRow3))}
-      </div>
-
-      {/* ── ROW 4 ── */}
-      <div className="card-container card-container--row4">
-        {mergeWithFallback(row4, fallbackRow4).map((p, i) => renderCard(p, i, fallbackRow4))}
-      </div>
-
-      {/* ── ROW 5 ── */}
-      <div className="card-container card-container--row5">
-        {mergeWithFallback(row5, fallbackRow5).map((p, i) => renderCard(p, i, fallbackRow5))}
-      </div>
-
-      {/* ── ROW 6 ── */}
-      <div className="card-container card-container--row6">
-        {mergeWithFallback(row6, fallbackRow6).map((p, i) => renderCard(p, i, fallbackRow6))}
-      </div>
-
-      {/* ── ROW 7 ── */}
-      <div className="card-container card-container--row7">
-        {mergeWithFallback(row7, fallbackRow7).map((p, i) => renderCard(p, i, fallbackRow7))}
-      </div>
+      {!loading && products.length === 0 && (
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "80px 20px",
+          fontSize: "15px",
+          color: "#888",
+        }}>
+          No products available yet.
+        </div>
+      )}
     </>
   );
 }

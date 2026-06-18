@@ -141,50 +141,12 @@ export default function TopNav() {
           </span>
         </button>
 
-        {/* Mobile menu drawer */}
-        <div className={`mobile-menu-drawer${mobileMenuOpen ? " mobile-menu-drawer--open" : ""}`} aria-hidden={!mobileMenuOpen}>
-          <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />
-          <div className="mobile-menu-content">
-
-            <button className="mobile-menu-close-btn" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)}>✕</button>
-
-            {/* Auth items moved to profile dropdown */}
-            <div className="mobile-menu-divider" />
-
-
-            <div className="mobile-menu-categories">
-              <div className="mobile-menu-section-title">Categories</div>
-              {categories.length === 0 && (
-                <div className="mobile-menu-cat-item" style={{ color: "#999", cursor: "default" }}>Loading...</div>
-              )}
-              {categories.map((cat) => (
-                <div
-                  key={cat.id}
-                  className="mobile-menu-cat-item"
-                  onClick={() => { setMobileMenuOpen(false); navigate(`/category/${cat.id}`); }}
-                >
-                  {cat.name}
-                </div>
-              ))}
-            </div>
-
-          </div>
-        </div>
-
         <div className="top-bar-spacer" />
 
-        {/* Mobile search toggle */}
-        <button className="mobile-search-toggle" aria-label="Toggle search" onClick={() => setMobileSearchOpen((o) => !o)}>
-          {mobileSearchOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6"  x2="6"  y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          )}
-        </button>
+        {/* Mobile search - show directly on small devices */}
+        <div className="mobile-search-container">
+          <SearchBar />
+        </div>
 
         {/* Cart */}
         <button className="cart-icon-btn" aria-label={`View cart — ${cartCount} item${cartCount !== 1 ? "s" : ""}`} onClick={() => navigate("/cart")}>
@@ -211,14 +173,8 @@ export default function TopNav() {
           </span>
         </button>
 
-
-        {/* Ghana flag */}
-        <button className="country-flag-btn" aria-label="Ghana" onClick={() => { /* no-op */ }}>
-          <img className="country-flag-img" src={ghanaFlag} alt="Ghana flag" />
-        </button>
-
-        {/* Profile */}
-        <div className="profile-menu-wrap" ref={profileMenuRef}>
+        {/* Profile - hidden on mobile, shown on desktop */}
+        <div className="profile-menu-wrap desktop-only" ref={profileMenuRef}>
           <button
             className="profile-icon-btn"
             aria-label="Profile"
@@ -326,23 +282,94 @@ export default function TopNav() {
           )}
         </div>
 
+        {/* Mobile menu drawer */}
+        <div className={`mobile-menu-drawer${mobileMenuOpen ? " mobile-menu-drawer--open" : ""}`} aria-hidden={!mobileMenuOpen}>
+          <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />
+          <div className="mobile-menu-content">
 
-      </div>
+            <button className="mobile-menu-close-btn" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)}>✕</button>
 
-      {/* Row 2: description / mobile search */}
-      <div className="desc-bar">
-        <p className="discription">
-          <span className="mobile-only">
-            <div style={{ width: "100%", padding: "0 10px" }}>
-              <SearchBar />
+            <div className="mobile-menu-auth-section">
+              {user && user.role !== "admin" ? (
+                <>
+                  <div
+                    className="mobile-menu-auth-item"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate("/account");
+                    }}
+                  >
+                    Account
+                  </div>
+                  <div
+                    className="mobile-menu-auth-item"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate("/orders");
+                    }}
+                  >
+                    Orders
+                  </div>
+                  <div
+                    className="mobile-menu-auth-item mobile-menu-auth-item--logout"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="mobile-menu-auth-item"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate("/signin");
+                    }}
+                  >
+                    Sign In
+                  </div>
+                  <div
+                    className="mobile-menu-auth-item"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate("/signup");
+                    }}
+                  >
+                    Sign Up
+                  </div>
+                </>
+              )}
             </div>
-          </span>
-        </p>
+
+            <div className="mobile-menu-divider" />
+
+            <div className="mobile-menu-categories">
+              <div className="mobile-menu-section-title">Categories</div>
+              {categories.length === 0 && (
+                <div className="mobile-menu-cat-item" style={{ color: "#999", cursor: "default" }}>Loading...</div>
+              )}
+              {categories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="mobile-menu-cat-item"
+                  onClick={() => { setMobileMenuOpen(false); navigate(`/category/${cat.id}`); }}
+                >
+                  {cat.name}
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
       </div>
 
-      {/* Row 3: Logo + Search */}
+      {/* Row 2: Empty - kept for spacing */}
+      <div className="desc-bar">
+        {/* Intentionally empty */}
+      </div>
+
+      {/* Row 3: Logo on top, Search below */}
       <div className="cat-nav">
-        <div className="nav-spacer" />
         <div className="nav-logo" onClick={handleLogoClick} style={{ cursor: location.pathname === "/cart" ? "pointer" : "default" }}>
           <img className="emmy-img" src={emmy} alt="Emsarj logo" />
         </div>
@@ -350,14 +377,6 @@ export default function TopNav() {
           <SearchBar />
         </div>
       </div>
-
-      {/* Mobile search (inline under logo) */}
-      {mobileSearchOpen && (
-        <div className="mobile-search-inline">
-          <SearchBar onSelect={() => setMobileSearchOpen(false)} />
-        </div>
-      )}
-
 
       {/* Row 4: Categories marquee */}
       <nav
