@@ -2,21 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../cartContext/cartprovider";
 import supabase from "../supabasefol/supabaseClient";
+import TopNav from "../components/common/TopNav";
+
 
 const DELIVERY_FEE = 50;
 
-
-// ─── INSERT: orders table ─────────────────────────────────────
-// Columns: user_id · status · total_amount · payment_reference
-// NOTE: your form collects first_name, last_name, phone
-// Add those 3 columns to your orders table in Supabase so they save too.
-// SQL:
-//   ALTER TABLE orders ADD COLUMN first_name text;
-//   ALTER TABLE orders ADD COLUMN last_name  text;
-//   ALTER TABLE orders ADD COLUMN phone      text;
-
 async function insertOrder({ first_name, last_name, phone, total_amount }) {
-  // Get logged-in user (null if not using Auth yet — guest checkout)
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
@@ -28,17 +19,14 @@ async function insertOrder({ first_name, last_name, phone, total_amount }) {
       phone,
       total_amount,
       status:            "pending",
-      payment_reference: null,       // Paystack fills this later
+      payment_reference: null,
     })
     .select()
     .single();
 
   if (error) throw new Error(`Order insert failed: ${error.message}`);
-  return data;   // data.id is the order_id we pass to orderItems
+  return data;
 }
-
-// ─── INSERT: orderItems table ─────────────────────────────────
-// Columns: order_id · product_name · size · quantity · created_at
 
 async function insertOrderItems(orderItems) {
   const { data, error } = await supabase
@@ -49,8 +37,6 @@ async function insertOrderItems(orderItems) {
   if (error) throw new Error(`Order items insert failed: ${error.message}`);
   return data;
 }
-
-// ─── UTILITIES ────────────────────────────────────────────────
 
 function parseSizes(raw) {
   if (!raw) return [];
@@ -66,8 +52,6 @@ function parseSizes(raw) {
   }
   return [];
 }
-
-// ─── PAYMENT MODAL ────────────────────────────────────────────
 
 function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onClose, onSuccess }) {
   const [form, setForm]     = useState({ firstName: "", lastName: "", phone: "" });
@@ -94,7 +78,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
 
     setLoading(true);
     try {
-      // ── Step 1: Insert into orders → get back order.id ──────
       const order = await insertOrder({
         first_name:   form.firstName.trim(),
         last_name:    form.lastName.trim(),
@@ -102,7 +85,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
         total_amount: total,
       });
 
-      // ── Step 2: Build orderItems rows using order.id ─────────
       const rows = [];
       cartItems.forEach((item) => {
         const activeSizes = selectedSizes[item.id] || [];
@@ -111,14 +93,13 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
           activeSizes.forEach((size) => {
             const qty = sizeQtys[item.id]?.[size] ?? 1;
             rows.push({
-              order_id:     order.id,       // ← links to the order
+              order_id:     order.id,
               product_name: item.name,
               size,
               quantity:     qty,
             });
           });
         } else {
-          // No size selected — still saves the item
           rows.push({
             order_id:     order.id,
             product_name: item.name,
@@ -128,7 +109,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
         }
       });
 
-      // ── Step 3: Insert all orderItems at once ────────────────
       await insertOrderItems(rows);
 
       console.log("✅ Order saved. ID:", order.id);
@@ -167,7 +147,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
         ) : (
           <div className="pm-body">
 
-            {/* ── Customer details form ── */}
             <div className="pm-form-col">
               <p className="pm-section-label">Customer details</p>
 
@@ -214,7 +193,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
               )}
             </div>
 
-            {/* ── Order summary ── */}
             <div className="pm-summary-col">
               <p className="pm-section-label">Order summary</p>
 
@@ -270,42 +248,21 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
   );
 }
 
-// ─── CART COMPONENT ───────────────────────────────────────────
-
 export default function Cart() {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, clearCart } = useCart();
 
-  // Redirect to home if cart is empty
   useEffect(() => {
     if (cartItems.length === 0) {
       navigate("/");
     }
   }, [cartItems, navigate]);
 
-  // Fetch recommended products
-  useEffect(() => {
-    async function fetchProducts() {
-      const { data, error } = await supabase
-        .from("products")
-        .select("id, name, price, image_url, categories(name)")
-        .limit(6);
-      
-      if (!error && data) {
-        setRecommendedProducts(data);
-      }
-      setLoadingProducts(false);
-    }
-    fetchProducts();
-  }, []);
-
   const [selectedSizes, setSelectedSizes]       = useState({});
   const [sizeQtys, setSizeQtys]                 = useState({});
   const [focusedSize, setFocusedSize]           = useState({});
   const [sizeError, setSizeError]               = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
 
   function getItemTotalQty(itemId) {
     const qtys  = sizeQtys[itemId] || {};
@@ -365,8 +322,13 @@ export default function Cart() {
     navigate("/");
   }
 
+  // Get the first cart item's image for the left side
+  const mainImage = cartItems.length > 0 ? cartItems[0].image : null;
+
   return (
     <div className="cart-page">
+      <TopNav />
+
 
       {showPaymentModal && (
         <PaymentModal
@@ -380,185 +342,163 @@ export default function Cart() {
         />
       )}
 
-      <header className="cart-header" />
-
-      <main className="cart-body">
-        <section className="cart-left">
-          <div className="cart-left-top">
-            <h2 className="cart-section-title"></h2>
-            <span className="cart-continue-link" onClick={() => navigate("/")}>Continue shopping</span>
-          </div>
-
-          {cartItems.length === 0 ? (
-            <div className="cart-empty">
-              <p>Your wardrobe is empty.</p>
-              <button className="cart-shop-btn" onClick={() => navigate("/")}>Start shopping</button>
-            </div>
-          ) : (
-            <div className="cart-items-list">
-              {cartItems.map((item) => {
-                const sizes       = parseSizes(item?.sizes);
-                const activeSizes = selectedSizes[item.id] || [];
-                const focused     = focusedSize[item.id];
-                const currentQty  = focused ? (sizeQtys[item.id]?.[focused] ?? 1) : 1;
-
-                return (
-                  <div className="cart-item-card" key={item.id}>
-                    <div className="cart-item-img-wrap">
-                      <img className="cart-item-img" src={item.image} alt={item.name} />
-                    </div>
-
-                    <div className="cart-item-info">
-                      <span className="cart-item-tag">New trend</span>
-                      <p className="cart-item-brand">Emsarj</p>
-                      <p className="cart-item-name">{item.name}</p>
-
-                      {activeSizes.length === 0 && (
-                        <span className="cart-item-stock">Last 1 left</span>
-                      )}
-
-                      <div className="cart-size-section">
-                        <p className="cart-size-heading">
-                          Size
-                          {focused && <span className="cart-size-chosen">&nbsp;—&nbsp;editing {focused}</span>}
-                        </p>
-                        <div className="cart-size-chips">
-                          {sizes.length > 0 ? (
-                            sizes.map((s) => (
-                              <button
-                                key={s}
-                                className={`cart-size-chip${activeSizes.includes(s) ? " cart-size-chip--active" : ""}${focused === s ? " cart-size-chip--focused" : ""}`}
-                                onClick={() => handleSizeToggle(item.id, s)}
-                              >
-                                {s}
-                                {activeSizes.includes(s) && (sizeQtys[item.id]?.[s] ?? 1) > 1 && (
-                                  <span className="cart-chip-qty">&nbsp;{sizeQtys[item.id][s]}</span>
-                                )}
-                              </button>
-                            ))
-                          ) : (
-                            <span className="cart-size-na">One size</span>
-                          )}
-                        </div>
-                        {sizeError[item.id] && (
-                          <p className="cart-size-error">⚠ Please select a size</p>
-                        )}
-                      </div>
-
-                      <div className="cart-qty-row">
-                        <span className="cart-qty-label">Qty{focused ? ` (${focused})` : ""}</span>
-                        <button className="cart-qty-btn" onClick={() => handleQtyChange(item.id, -1)}>−</button>
-                        <span className="cart-qty-num">{currentQty}</span>
-                        <button className="cart-qty-btn" onClick={() => handleQtyChange(item.id, +1)}>+</button>
-                      </div>
-                    </div>
-
-                    <div className="cart-item-meta">
-                      <p className="cart-item-price">Ghc {item.price * getItemTotalQty(item.id)}</p>
-                      <button className="cart-remove-btn" onClick={() => removeFromCart(item.id, item.selectedSize)}>
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {cartItems.length > 1 && (
-                <button className="cart-clear-btn" onClick={clearCart}>Clear wardrobe</button>
-              )}
-            </div>
+      <div className="cart-split-layout">
+        {/* Left side - Product Image */}
+        <div className="cart-image-side">
+          {mainImage && (
+            <img src={mainImage} alt="Product" className="cart-main-image" />
           )}
-        </section>
+        </div>
 
-        <aside className="cart-right">
-          <h3 className="cart-payment-title">Payment</h3>
+        {/* Right side - Cart Content */}
+        <div className="cart-content-side">
+          <header className="cart-header-split">
+            <div className="cart-header-top">
+              <span className="cart-continue-link-split" onClick={() => navigate("/")}>Continue shopping →</span>
+            </div>
+          </header>
 
-          <div className="cart-summary-rows">
-            <div className="cart-summary-row"><span>Subtotal</span><span>Ghc {subtotal}</span></div>
-            <div className="cart-summary-row"><span>Delivery</span><span>Ghc {cartItems.length > 0 ? DELIVERY_FEE : 0}</span></div>
-            <div className="cart-summary-divider" />
-            <div className="cart-summary-row cart-summary-total"><span>Total</span><span>Ghc {total}</span></div>
-          </div>
+          <main className="cart-body-split">
+            {cartItems.length === 0 ? (
+              <div className="cart-empty-split">
+                <p>Your wardrobe is empty.</p>
+                <button className="cart-shop-btn-split" onClick={() => navigate("/")}>Start shopping</button>
+              </div>
+            ) : (
+              <>
+                <div className="cart-items-list-split">
+                  {cartItems.map((item) => {
+                    const sizes       = parseSizes(item?.sizes);
+                    const activeSizes = selectedSizes[item.id] || [];
+                    const focused     = focusedSize[item.id];
+                    const currentQty  = focused ? (sizeQtys[item.id]?.[focused] ?? 1) : 1;
 
-          {cartItems.length > 0 && (
-            <div className="cart-order-summary">
-              <p className="cart-order-summary-title">Your order</p>
-              {cartItems.map((item) => {
-                const activeSizes = selectedSizes[item.id] || [];
-                return (
-                  <div key={item.id}>
-                    {activeSizes.length > 0 ? (
-                      activeSizes.map((size) => {
-                        const qty = sizeQtys[item.id]?.[size] ?? 1;
+                    return (
+                      <div className="cart-item-card-split" key={item.id}>
+                        <div className="cart-item-img-wrap-split">
+                          <img className="cart-item-img-split" src={item.image} alt={item.name} />
+                        </div>
+
+                        <div className="cart-item-info-split">
+                          <span className="cart-item-tag-split">New trend</span>
+                          <p className="cart-item-brand-split">Emsarj</p>
+                          <p className="cart-item-name-split">{item.name}</p>
+
+                          {activeSizes.length === 0 && (
+                            <span className="cart-item-stock-split">Last 1 left</span>
+                          )}
+
+                          <div className="cart-size-section-split">
+                            <p className="cart-size-heading-split">
+                              Size
+                              {focused && <span className="cart-size-chosen-split">&nbsp;—&nbsp;editing {focused}</span>}
+                            </p>
+                            <div className="cart-size-chips-split">
+                              {sizes.length > 0 ? (
+                                sizes.map((s) => (
+                                  <button
+                                    key={s}
+                                    className={`cart-size-chip-split${activeSizes.includes(s) ? " cart-size-chip--active-split" : ""}${focused === s ? " cart-size-chip--focused-split" : ""}`}
+                                    onClick={() => handleSizeToggle(item.id, s)}
+                                  >
+                                    {s}
+                                    {activeSizes.includes(s) && (sizeQtys[item.id]?.[s] ?? 1) > 1 && (
+                                      <span className="cart-chip-qty-split">&nbsp;{sizeQtys[item.id][s]}</span>
+                                    )}
+                                  </button>
+                                ))
+                              ) : (
+                                <span className="cart-size-na-split">One size</span>
+                              )}
+                            </div>
+                            {sizeError[item.id] && (
+                              <p className="cart-size-error-split">⚠ Please select a size</p>
+                            )}
+                          </div>
+
+                          <div className="cart-qty-row-split">
+                            <span className="cart-qty-label-split">Qty{focused ? ` (${focused})` : ""}</span>
+                            <button className="cart-qty-btn-split" onClick={() => handleQtyChange(item.id, -1)}>−</button>
+                            <span className="cart-qty-num-split">{currentQty}</span>
+                            <button className="cart-qty-btn-split" onClick={() => handleQtyChange(item.id, +1)}>+</button>
+                          </div>
+                        </div>
+
+                        <div className="cart-item-meta-split">
+                          <p className="cart-item-price-split">Ghc {item.price * getItemTotalQty(item.id)}</p>
+                          <button className="cart-remove-btn-split" onClick={() => removeFromCart(item.id, item.selectedSize)}>
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {cartItems.length > 1 && (
+                    <button className="cart-clear-btn-split" onClick={clearCart}>Clear wardrobe</button>
+                  )}
+                </div>
+
+                {/* Payment Summary */}
+                <aside className="cart-right-split">
+                  <h3 className="cart-payment-title-split">Payment</h3>
+
+                  <div className="cart-summary-rows-split">
+                    <div className="cart-summary-row-split"><span>Subtotal</span><span>Ghc {subtotal}</span></div>
+                    <div className="cart-summary-row-split"><span>Delivery</span><span>Ghc {cartItems.length > 0 ? DELIVERY_FEE : 0}</span></div>
+                    <div className="cart-summary-divider-split" />
+                    <div className="cart-summary-row-split cart-summary-total-split"><span>Total</span><span>Ghc {total}</span></div>
+                  </div>
+
+                  {cartItems.length > 0 && (
+                    <div className="cart-order-summary-split">
+                      <p className="cart-order-summary-title-split">Your order</p>
+                      {cartItems.map((item) => {
+                        const activeSizes = selectedSizes[item.id] || [];
                         return (
-                          <div className="cart-order-row" key={`${item.id}-${size}`}>
-                            <span className="cart-order-name">{item.name}</span>
-                            <span className="cart-order-size">
-                              <strong>{size}</strong>
-                              {qty > 1 && <strong className="cart-order-qty">&nbsp;×{qty}</strong>}
-                            </span>
+                          <div key={item.id}>
+                            {activeSizes.length > 0 ? (
+                              activeSizes.map((size) => {
+                                const qty = sizeQtys[item.id]?.[size] ?? 1;
+                                return (
+                                  <div className="cart-order-row-split" key={`${item.id}-${size}`}>
+                                    <span className="cart-order-name-split">{item.name}</span>
+                                    <span className="cart-order-size-split">
+                                      <strong>{size}</strong>
+                                      {qty > 1 && <strong className="cart-order-qty-split">&nbsp;×{qty}</strong>}
+                                    </span>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <div className="cart-order-row-split">
+                                <span className="cart-order-name-split">{item.name}</span>
+                                <span className="cart-order-no-size-split">No size selected</span>
+                              </div>
+                            )}
                           </div>
                         );
-                      })
-                    ) : (
-                      <div className="cart-order-row">
-                        <span className="cart-order-name">{item.name}</span>
-                        <span className="cart-order-no-size">No size selected</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                      })}
+                    </div>
+                  )}
 
-          <button
-            className="cart-payout-btn"
-            onClick={handlePayout}
-            disabled={cartItems.length === 0}
-          >
-            Pay out
-          </button>
-
-          {Object.values(sizeError).some(Boolean) && (
-            <p className="cart-payout-error">Please select a size for every item before paying.</p>
-          )}
-        </aside>
-      </main>
-
-      {/* ── Recommended Products Section ── */}
-      {cartItems.length > 0 && (
-        <section className="cart-recommendations">
-          <h2 className="cart-recommendations-title">Shop More Dresses</h2>
-          <div className="cart-recommendations-grid">
-            {loadingProducts ? (
-              <p style={{ textAlign: "center", color: "#666" }}>Loading products...</p>
-            ) : recommendedProducts.length === 0 ? (
-              <p style={{ textAlign: "center", color: "#666" }}>No products available</p>
-            ) : (
-              recommendedProducts.map((product) => (
-                <div key={product.id} className="cart-product-card">
-                  <div className="cart-product-img-wrap">
-                    {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} />
-                    ) : (
-                      <div className="cart-product-img-placeholder">No Image</div>
-                    )}
-                  </div>
-                  <p className="cart-product-name">{product.name}</p>
-                  <p className="cart-product-price">Ghc {product.price}</p>
-                  <button 
-                    className="cart-product-btn"
-                    onClick={() => navigate("/")}
+                  <button
+                    className="cart-payout-btn-split"
+                    onClick={handlePayout}
+                    disabled={cartItems.length === 0}
                   >
-                    View
+                    Pay out
                   </button>
-                </div>
-              ))
+
+                  {Object.values(sizeError).some(Boolean) && (
+                    <p className="cart-payout-error-split">Please select a size for every item before paying.</p>
+                  )}
+                </aside>
+              </>
             )}
-          </div>
-        </section>
-      )}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

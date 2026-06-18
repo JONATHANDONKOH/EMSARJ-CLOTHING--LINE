@@ -56,6 +56,12 @@ export default function CategoryPage() {
     return cartItems.some((item) => item.id === productId);
   }
 
+  // Split products into rows of 4 like CategoryCard
+  const rows = [];
+  for (let i = 0; i < products.length; i += 4) {
+    rows.push(products.slice(i, i + 4));
+  }
+
   return (
     <div className="category-page">
 
@@ -85,19 +91,40 @@ export default function CategoryPage() {
         </div>
       )}
 
-      {/* ── Products — fixed 4-column grid, same cards as home page ── */}
-      {!loading && !notFound && (
-        <div className="category-products-grid">
-          {products.map((product) => {
+      {/* ── Products — using flex with fixed width to prevent expansion ── */}
+      {!loading && !notFound && rows.map((row, rowIndex) => (
+        <div
+          key={rowIndex}
+          style={{ 
+            display: "flex",
+            flexWrap: "nowrap",
+            gap: "24px",
+            padding: rowIndex === 0 ? "20px 40px 40px" : "0px 40px 40px",
+            width: "100%",
+            boxSizing: "border-box",
+            justifyContent: "flex-start"
+          }}
+        >
+          {row.map((product) => {
             const alreadyAdded = isInCart(product.id);
+            const imgUrl = resolveImageUrl(product.image_url);
+
             return (
-              <div className="card" key={product.id}>
+              <div 
+                className="card" 
+                key={product.id} 
+                style={{ 
+                  flex: "0 0 calc(25% - 18px)",
+                  maxWidth: "calc(25% - 18px)",
+                  minWidth: "calc(25% - 18px)"
+                }}
+              >
                 <div className="card-img-wrap">
                   <img
                     className="girlscrop"
-                    src={resolveImageUrl(product.image_url)}
+                    src={imgUrl}
                     alt={product.name}
-                    onError={(e) => { e.target.style.display = "none"; }}
+                    onError={(e) => { e.target.style.opacity = "0.3"; }}
                   />
                   <button
                     className={`card-hover-btn${alreadyAdded ? " card-hover-btn--added" : ""}`}
@@ -107,7 +134,7 @@ export default function CategoryPage() {
                         id:    product.id,
                         name:  product.name,
                         price: product.price,
-                        image: resolveImageUrl(product.image_url),
+                        image: imgUrl,
                         sizes: product.sizes,
                       });
                     }}
@@ -118,15 +145,14 @@ export default function CategoryPage() {
 
                 <div className="card-info">
                   <span className="card-season-tag">New Trend</span>
-                  <p className="card-brand">Emsarj</p>
                   <p className="card-name">{product.name}</p>
-                  <p className="card-price">Ghc {product.price}</p>
+                  <p className="card-price">₵{product.price}</p>
                 </div>
               </div>
             );
           })}
         </div>
-      )}
+      ))}
     </div>
   );
 }

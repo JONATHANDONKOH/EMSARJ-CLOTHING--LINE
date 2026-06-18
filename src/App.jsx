@@ -11,6 +11,7 @@ import Account from "./pages/accounts";
 import Orders from "./pages/ordder";
 import ResetPassword from "./pages/resetpassword";
 import WishlistPage from "./pages/WishlistPage"; // Add this import
+import Shop from "./pages/shop";
 
 import TopNav from "./components/common/TopNav";
 import EmsarjFooter from "./components/Emsarjfooter";
@@ -24,7 +25,8 @@ function AppContent() {
     location.pathname === "/signin" ||
     location.pathname === "/signup" ||
     location.pathname === "/dashboard" ||
-    location.pathname === "/resetpassword";
+    location.pathname === "/resetpassword" ||
+    location.pathname === "/cart";
 
 
   return (
@@ -44,6 +46,7 @@ function AppContent() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/wishlist" element={<WishlistPage />} /> {/* Add this route */}
+          <Route path="/shop" element={<Shop />} />
         </Routes>
 
       </main>

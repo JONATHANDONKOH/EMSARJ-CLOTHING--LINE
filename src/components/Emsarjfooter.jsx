@@ -1,4 +1,4 @@
-import footImage from "../assets/foot-image.png";
+import footImage from "../assets/emsy.PNG";
 
 
 const socials = [
@@ -45,9 +45,7 @@ export default function EmsarjFooter() {
 
       <div className="footer-content">
         <h2 className="footer-headline">Join the Emsarj Family Here!</h2>
-        <p className="footer-sub">
-          FOLLOW US &amp; <strong>SUBSCRIBE</strong> FOR <strong>EXCLUSIVE</strong> DEALS
-        </p>
+        
         <div className="footer-socials">
           {socials.map((s) => (
             <a key={s.label} href={s.href} className="social-icon-btn"
