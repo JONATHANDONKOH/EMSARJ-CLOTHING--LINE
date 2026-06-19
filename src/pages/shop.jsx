@@ -42,6 +42,7 @@ export default function Shop() {
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizeError, setSizeError] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   const quantity = DEFAULT_QTY;
 
@@ -114,7 +115,11 @@ export default function Shop() {
       quantity: DEFAULT_QTY,
     });
     
-    navigate('/cart');
+    // Show feedback that item was added
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
+    
+    // REMOVED: navigate('/cart'); - This was causing the auto-navigation
   }
 
   function renderCategoryProduct(product) {
@@ -301,7 +306,9 @@ export default function Shop() {
                   maxHeight: isMobile ? "400px" : "600px",
                   minHeight: isMobile ? "250px" : "300px",
                   objectFit: "contain",
-                  display: "block"
+                  display: "block",
+                  position: "relative",
+                  right: "25px",
                 }}
               />
               
@@ -311,7 +318,9 @@ export default function Shop() {
                 marginTop: isMobile ? "20px" : "32px",
                 textAlign: isMobile ? "center" : "left",
                 maxWidth: isMobile ? "100%" : "500px",
-                padding: isMobile ? "0 15px" : "0"
+                padding: isMobile ? "0 15px" : "0",
+                position: "relative",
+                right: "25px",
               }}>
                 <span className="cart-item-tag-split" style={{ 
                   fontSize: isMobile ? "12px" : "14px",
@@ -456,7 +465,7 @@ export default function Shop() {
                     maxWidth: isMobile ? "100%" : "350px",
                     width: isMobile ? "78%" : "auto",
                     padding: isMobile ? "14px 24px" : "16px 32px",
-                    backgroundColor: isOut ? "#ccc" : "#000",
+                    backgroundColor: addedToCart ? "#28a745" : (isOut ? "#ccc" : "#000"),
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
@@ -466,7 +475,7 @@ export default function Shop() {
                     transition: "all 0.3s ease"
                   }}
                 >
-                  {isOut ? "Out of stock" : alreadyIn ? "✓ In wardrobe" : "Add to wardrobe"}
+                  {addedToCart ? "✓ Added!" : (isOut ? "Out of stock" : alreadyIn ? "✓ In wardrobe" : "Add to wardrobe")}
                 </button>
               </div>
             </div>
@@ -523,8 +532,6 @@ export default function Shop() {
                   </div>
                 )}
               </div>
-
-
             </main>
           </div>
         </div>
