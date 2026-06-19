@@ -163,19 +163,19 @@ export default function Shop() {
         </div>
         <div className="cart-item-info-split" style={{ flex: 1, minWidth: 0 }}>
           <p className="cart-item-name-split" style={{ 
-            fontSize: isMobile ? "10px" : "20px", 
+            fontSize: isMobile ? "12px" : "20px", 
             fontWeight: "300",
             margin: "0 0 4px 0",
             fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif"
           }}>{product.name}</p>
           <p className="cart-item-price-split" style={{ 
-            fontSize: isMobile ? "10px" : "20px",
+            fontSize: isMobile ? "12px" : "20px",
             margin: "0",
             fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif",
             fontWeight: "300"
           }}>₵{product.price}</p>
           {isOut && (
-            <span style={{ fontSize: isMobile ? "10px" : "20px", color: "#c00", fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif", fontWeight: "300" }}>Out of stock</span>
+            <span style={{ fontSize: isMobile ? "12px" : "20px", color: "#c00", fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif", fontWeight: "300" }}>Out of stock</span>
           )}
         </div>
         <button
@@ -193,7 +193,7 @@ export default function Shop() {
           }}
           disabled={isOut}
           style={{ 
-            fontSize: isMobile ? "10px" : "20px",
+            fontSize: isMobile ? "12px" : "20px",
             padding: isMobile ? "4px 8px" : "6px 12px",
             flexShrink: 0,
             fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif",
@@ -320,7 +320,7 @@ export default function Shop() {
                 }}
               />
               
-              {/* Product details under image - 20px desktop, 10px mobile */}
+              {/* Product details under image - 20px desktop, 12px mobile */}
               <div style={{ 
                 width: "100%", 
                 marginTop: isMobile ? "20px" : "32px",
@@ -332,7 +332,7 @@ export default function Shop() {
                 fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif"
               }}>
                 <span className="cart-item-tag-split" style={{ 
-                  fontSize: isMobile ? "10px" : "20px",
+                  fontSize: isMobile ? "12px" : "20px",
                   display: "block",
                   marginBottom: "4px",
                   color: "#666",
@@ -341,14 +341,14 @@ export default function Shop() {
                 }}>New trend</span>
                 
                 <p style={{ 
-                  fontSize: isMobile ? "10px" : "20px", 
+                  fontSize: isMobile ? "12px" : "20px", 
                   fontWeight: "300", 
                   margin: "2px 0",
                   fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif"
                 }}>Emsarj</p>
                 
                 <p style={{ 
-                  fontSize: isMobile ? "10px" : "20px", 
+                  fontSize: isMobile ? "12px" : "20px", 
                   fontWeight: "300", 
                   margin: "2px 0",
                   fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif"
@@ -363,7 +363,7 @@ export default function Shop() {
                   flexWrap: "wrap"
                 }}>
                   <p style={{ 
-                    fontSize: isMobile ? "10px" : "20px", 
+                    fontSize: isMobile ? "12px" : "20px", 
                     fontWeight: "300", 
                     margin: "0",
                     fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif"
@@ -372,7 +372,7 @@ export default function Shop() {
                   </p>
                   {isDiscount && (
                     <p style={{ 
-                      fontSize: isMobile ? "10px" : "20px", 
+                      fontSize: isMobile ? "12px" : "20px", 
                       color: "#bbb", 
                       textDecoration: "line-through", 
                       margin: "0",
@@ -384,7 +384,7 @@ export default function Shop() {
                   )}
                   {isDiscount && (
                     <span className="shop-discount-tag" style={{
-                      fontSize: isMobile ? "10px" : "20px",
+                      fontSize: isMobile ? "12px" : "20px",
                       padding: isMobile ? "2px 8px" : "4px 12px",
                       backgroundColor: "#c00",
                       color: "#fff",
@@ -400,7 +400,7 @@ export default function Shop() {
                 {isOut && (
                   <span style={{ 
                     display: "inline-block", 
-                    fontSize: isMobile ? "10px" : "20px", 
+                    fontSize: isMobile ? "12px" : "20px", 
                     color: "#c00", 
                     border: "1px solid #c00", 
                     padding: isMobile ? "2px 8px" : "4px 12px", 
@@ -415,7 +415,7 @@ export default function Shop() {
                 {!isOut && product.stock_quantity <= 5 && (
                   <span style={{ 
                     display: "inline-block", 
-                    fontSize: isMobile ? "10px" : "20px", 
+                    fontSize: isMobile ? "12px" : "20px", 
                     color: "#b33", 
                     border: "1px solid #b33", 
                     padding: isMobile ? "2px 8px" : "4px 12px", 
@@ -432,7 +432,7 @@ export default function Shop() {
                 {sizes.length > 0 && (
                   <div style={{ marginTop: isMobile ? "10px" : "16px" }}>
                     <p style={{ 
-                      fontSize: isMobile ? "10px" : "20px", 
+                      fontSize: isMobile ? "12px" : "20px", 
                       fontWeight: "300", 
                       margin: "0 0 6px",
                       textAlign: isMobile ? "center" : "left",
@@ -457,7 +457,7 @@ export default function Shop() {
                             border: selectedSize === s ? "2px solid #000" : "1px solid #ddd",
                             borderRadius: "4px",
                             cursor: "pointer",
-                            fontSize: isMobile ? "10px" : "20px",
+                            fontSize: isMobile ? "12px" : "20px",
                             backgroundColor: selectedSize === s ? "#000" : "transparent",
                             color: selectedSize === s ? "#fff" : "#000",
                             transition: "all 0.2s ease",
@@ -475,7 +475,7 @@ export default function Shop() {
                     </div>
                     {sizeError && (
                       <p style={{ 
-                        fontSize: isMobile ? "10px" : "20px", 
+                        fontSize: isMobile ? "12px" : "20px", 
                         color: "#c00", 
                         margin: isMobile ? "4px 0 0" : "6px 0 0",
                         textAlign: isMobile ? "center" : "left",
@@ -500,7 +500,7 @@ export default function Shop() {
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
-                    fontSize: isMobile ? "10px" : "20px",
+                    fontSize: isMobile ? "12px" : "20px",
                     fontWeight: "300",
                     cursor: isOut ? "not-allowed" : "pointer",
                     transition: "all 0.3s ease",
@@ -536,14 +536,14 @@ export default function Shop() {
                   onClick={() => navigate(-1)}
                   style={{
                     cursor: "pointer",
-                    fontSize: isMobile ? "10px" : "20px",
+                    fontSize: isMobile ? "12px" : "20px",
                     color: "#000",
                     fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif",
                     fontWeight: "300"
                   }}
                 >← Back to shopping</span>
                 <span style={{ 
-                  fontSize: isMobile ? "10px" : "20px", 
+                  fontSize: isMobile ? "12px" : "20px", 
                   color: "#888",
                   fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif",
                   fontWeight: "300"
@@ -562,7 +562,7 @@ export default function Shop() {
                     padding: "40px 20px", 
                     textAlign: "center", 
                     color: "#888",
-                    fontSize: isMobile ? "10px" : "20px",
+                    fontSize: isMobile ? "12px" : "20px",
                     fontFamily: "'Calibri Light', 'Calibri', Arial, sans-serif",
                     fontWeight: "300"
                   }}>

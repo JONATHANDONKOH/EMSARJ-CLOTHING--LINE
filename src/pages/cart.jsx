@@ -384,9 +384,11 @@ export default function Cart() {
                           <p className="cart-item-brand-split">Emsarj</p>
                           <p className="cart-item-name-split">{item.name}</p>
 
-                          {activeSizes.length === 0 && (
+                          {/* Removed stock text: "Last 1 left" (per request) */}
+                          {/* {activeSizes.length === 0 && (
                             <span className="cart-item-stock-split">Last 1 left</span>
-                          )}
+                          )} */}
+
 
                           <div className="cart-size-section-split">
                             <p className="cart-size-heading-split">
