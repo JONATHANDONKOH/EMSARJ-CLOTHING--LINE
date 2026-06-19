@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import footImage from "../assets/emsy.PNG";
+import { insertEmail } from "../context/emailfunction";
 
 const socials = [
   {
@@ -33,34 +34,84 @@ const socials = [
   },
 ];
 
+function IconMail({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+      <path d="M3 7l9 6 9-6" />
+    </svg>
+  );
+}
+
+function IconSend({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13" />
+      <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+    </svg>
+  );
+}
+
 export default function EmsarjFooter() {
+  const [email, setEmail] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+
+  const buttonIcon = useMemo(() => {
+    if (isSending) return "...";
+    return isTyping ? <IconSend /> : <IconMail />;
+  }, [isSending, isTyping]);
+
+  const onSubmitEmail = async () => {
+    if (isSending) return;
+    const trimmed = email.trim();
+    if (!trimmed) return;
+    try {
+      setIsSending(true);
+      await insertEmail(trimmed, "");
+      setEmail("");
+      setIsTyping(false);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
     <footer className="emsarj-footer">
-      <div className="footer-main">
-        <div className="footer-left">
+      <div className="footer-inner">
+
+        {/* LEFT: bordered content box */}
+        <div className="footer-box">
           <h2 className="footer-headline">JOIN THE EMSARJ FAMILY HERE.</h2>
-          
+
           <div className="footer-email-section">
             <span className="email-label">EMAIL</span>
-            <input 
-              type="email" 
+            <input
+              type="email"
               className="footer-email-input"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setIsTyping(true); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onSubmitEmail(); } }}
+              placeholder="send your message here"
+              disabled={isSending}
             />
-            <button className="footer-submit-btn">✉</button>
+            <button
+              className="footer-submit-btn"
+              type="button"
+              onClick={onSubmitEmail}
+              disabled={isSending}
+              aria-label="Send email"
+              style={isSending ? { cursor: "not-allowed", opacity: 0.7 } : undefined}
+            >
+              {buttonIcon}
+            </button>
           </div>
 
           <div className="footer-social-section">
             <span className="social-label">SOCIAL PAGES</span>
             <div className="footer-socials">
               {socials.map((s) => (
-                <a 
-                  key={s.label} 
-                  href={s.href} 
-                  className="social-icon-btn"
-                  aria-label={s.label} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
+                <a key={s.label} href={s.href} className="social-icon-btn" aria-label={s.label} target="_blank" rel="noopener noreferrer">
                   {s.icon}
                 </a>
               ))}
@@ -68,248 +119,16 @@ export default function EmsarjFooter() {
           </div>
 
           <div className="footer-copyright">
-            <p>© {new Date().getFullYear()} EMSARJ. ALL RIGHTS RESERVE.</p>
+            <p>© {new Date().getFullYear()} EMSARJ. ALL RIGHTS RESERVED.</p>
           </div>
         </div>
 
-        <div className="footer-right">
-          <div className="footer-character-wrapper">
-            <img 
-              src={footImage} 
-              alt="Emsarj character" 
-              className="footer-character" 
-            />
-          </div>
+        {/* RIGHT: character image, pushed far right */}
+        <div className="footer-character-col">
+          <img src={footImage} alt="Emsarj character" className="footer-character" />
         </div>
+
       </div>
-
-      <style jsx>{`
-        .emsarj-footer {
-          background: #f5f0eb;
-          padding: 40px 60px 20px;
-          font-family: 'Arial', sans-serif;
-          border-top: 1px solid #e0d8d0;
-          position: relative;
-          width: 100%;
-        }
-
-        .footer-main {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          max-width: 1200px;
-          margin: 0 auto;
-          gap: 40px;
-        }
-
-        .footer-left {
-          flex: 1;
-          max-width: 60%;
-        }
-
-        .footer-headline {
-          font-size: 22px;
-          font-weight: 400;
-          color: #1a1a1a;
-          margin: 0 0 25px 0;
-          letter-spacing: 0.5px;
-          font-family: 'Georgia', 'Times New Roman', serif;
-        }
-
-        .footer-email-section {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          margin-bottom: 25px;
-          border-bottom: 1px solid #1a1a1a;
-          padding-bottom: 8px;
-          max-width: 400px;
-        }
-
-        .email-label {
-          font-size: 14px;
-          font-weight: 400;
-          color: #1a1a1a;
-          letter-spacing: 2px;
-          min-width: 60px;
-        }
-
-        .footer-email-input {
-          flex: 1;
-          padding: 8px 0;
-          border: none;
-          background: transparent;
-          font-size: 13px;
-          letter-spacing: 0.5px;
-          outline: none;
-          color: #1a1a1a;
-        }
-
-        .footer-email-input::placeholder {
-          color: #999;
-          font-weight: 300;
-          font-style: italic;
-        }
-
-        .footer-submit-btn {
-          background: none;
-          border: none;
-          font-size: 18px;
-          cursor: pointer;
-          color: #1a1a1a;
-          padding: 0 0 0 10px;
-          transition: transform 0.2s ease;
-        }
-
-        .footer-submit-btn:hover {
-          transform: translateX(3px);
-        }
-
-        .footer-social-section {
-          margin-bottom: 25px;
-        }
-
-        .social-label {
-          display: block;
-          font-size: 14px;
-          font-weight: 400;
-          color: #1a1a1a;
-          margin-bottom: 12px;
-          letter-spacing: 2px;
-        }
-
-        .footer-socials {
-          display: flex;
-          gap: 20px;
-          align-items: center;
-        }
-
-        .social-icon-btn {
-          color: #1a1a1a;
-          transition: transform 0.2s ease, color 0.2s ease;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          text-decoration: none;
-          opacity: 0.8;
-        }
-
-        .social-icon-btn:hover {
-          transform: scale(1.15);
-          color: #c0392b;
-          opacity: 1;
-        }
-
-        .social-icon-btn svg {
-          display: block;
-          width: 22px;
-          height: 22px;
-        }
-
-        .footer-copyright {
-          margin-top: 25px;
-        }
-
-        .footer-copyright p {
-          font-size: 11px;
-          color: #666;
-          letter-spacing: 0.5px;
-          font-weight: 300;
-          margin: 0;
-        }
-
-        .footer-right {
-          flex: 0 0 auto;
-          display: flex;
-          align-items: flex-end;
-          justify-content: flex-end;
-        }
-
-        .footer-character-wrapper {
-          position: relative;
-        }
-
-        .footer-character {
-          width: 100px;
-          height: auto;
-          display: block;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .emsarj-footer {
-            padding: 30px 20px 20px;
-          }
-
-          .footer-main {
-            flex-direction: column;
-            gap: 30px;
-          }
-
-          .footer-left {
-            max-width: 100%;
-            width: 100%;
-          }
-
-          .footer-headline {
-            font-size: 20px;
-          }
-
-          .footer-email-section {
-            max-width: 100%;
-          }
-
-          .footer-right {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .footer-character {
-            width: 80px;
-          }
-
-          .footer-socials {
-            gap: 15px;
-          }
-
-          .social-icon-btn svg {
-            width: 20px;
-            height: 20px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .emsarj-footer {
-            padding: 20px 15px 15px;
-          }
-
-          .footer-headline {
-            font-size: 18px;
-          }
-
-          .footer-email-input {
-            font-size: 12px;
-          }
-
-          .email-label {
-            font-size: 12px;
-            min-width: 50px;
-          }
-
-          .footer-character {
-            width: 60px;
-          }
-
-          .social-label {
-            font-size: 12px;
-          }
-
-          .social-icon-btn svg {
-            width: 18px;
-            height: 18px;
-          }
-        }
-      `}</style>
     </footer>
   );
 }

@@ -2,17 +2,17 @@ import emmyLogo from "../../assets/emmy.png";
 
 // Ensure sidebar logo import works with bundlers
 
-import { IconGrid, IconPackage, IconShoppingBag, IconUsers, IconCreditCard } from "./Icons";
+import { IconGrid, IconPackage, IconShoppingBag, IconUsers, IconCreditCard, IconMail } from "./Icons";
+
 
 const NAV = [
   { id: "categories", label: "Categories", Icon: IconGrid },
   { id: "products", label: "Products", Icon: IconPackage },
-  
   { id: "orderItems", label: "Order Items", Icon: IconShoppingBag },
   { id: "users", label: "Users", Icon: IconUsers },
   { id: "payments", label: "Payments", Icon: IconCreditCard },
+  { id: "emails", label: "Emails", Icon: IconMail }, // ✅ ADDED EMAILS
 ];
-
 
 export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {
   return (
@@ -29,8 +29,8 @@ export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {
       )}
 
       <aside style={{
-        width: "220px", minWidth: "220px", background: "#ffffff",
-        borderRight: "1px solid rgba(0,0,0,0.1)",
+        width: "220px", minWidth: "220px", background: "#1e293b",
+        borderRight: "1px solid rgba(255,255,255,0.06)",
         display: "flex", flexDirection: "column", height: "100vh",
         position: "sticky", top: 0
       }}>
@@ -54,7 +54,7 @@ export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {
         <nav style={{ flex: 1, padding: "0.75rem 0.75rem" }}>
           <p style={{
             margin: "0 0 6px", padding: "0 8px", fontSize: "10px",
-            fontWeight: 600, color: "#334155", letterSpacing: "0.08em", textTransform: "uppercase"
+            fontWeight: 600, color: "#64748b", letterSpacing: "0.08em", textTransform: "uppercase"
           }}>
             Main Menu
           </p>
@@ -66,7 +66,7 @@ export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {
                 width: "100%", display: "flex", alignItems: "center", gap: "10px",
                 padding: "8px 10px", borderRadius: "8px", border: "none", cursor: "pointer",
                 background: active === id ? "rgba(59,130,246,0.15)" : "transparent",
-                color: active === id ? "#60a5fa" : "#475569",
+                color: active === id ? "#60a5fa" : "#94a3b8",
                 fontSize: "13px", fontWeight: active === id ? 600 : 400, marginBottom: "2px",
                 transition: "all 0.15s", textAlign: "left"
               }}
@@ -97,7 +97,7 @@ export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {
                 margin: 0, fontSize: "13px", fontWeight: 600, color: "#e2e8f0",
                 whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
               }}>Admin</p>
-              <p style={{ margin: 0, fontSize: "11px", color: "#475569" }}>admin@clothify.com</p>
+              <p style={{ margin: 0, fontSize: "11px", color: "#94a3b8" }}>admin@clothify.com</p>
             </div>
           </div>
         </div>

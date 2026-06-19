@@ -115,11 +115,8 @@ export default function Shop() {
       quantity: DEFAULT_QTY,
     });
     
-    // Show feedback that item was added
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
-    
-    // REMOVED: navigate('/cart'); - This was causing the auto-navigation
   }
 
   function renderCategoryProduct(product) {
@@ -165,16 +162,16 @@ export default function Shop() {
         </div>
         <div className="cart-item-info-split" style={{ flex: 1, minWidth: 0 }}>
           <p className="cart-item-name-split" style={{ 
-            fontSize: isMobile ? "12px" : "13px", 
+            fontSize: "15px", 
             fontWeight: "600",
             margin: "0 0 4px 0"
           }}>{product.name}</p>
           <p className="cart-item-price-split" style={{ 
-            fontSize: isMobile ? "13px" : "14px",
+            fontSize: "15px",
             margin: "0"
           }}>₵{product.price}</p>
           {isOut && (
-            <span style={{ fontSize: "10px", color: "#c00" }}>Out of stock</span>
+            <span style={{ fontSize: "15px", color: "#c00" }}>Out of stock</span>
           )}
         </div>
         <button
@@ -192,7 +189,7 @@ export default function Shop() {
           }}
           disabled={isOut}
           style={{ 
-            fontSize: isMobile ? "10px" : "11px",
+            fontSize: "15px",
             padding: isMobile ? "4px 8px" : "6px 12px",
             flexShrink: 0
           }}
@@ -262,7 +259,6 @@ export default function Shop() {
     <>
       <TopNav />
       <div className="shop-page" style={{ paddingTop: "180px", fontFamily: "Calibri, 'Calibri Bold', Arial, sans-serif" }}>
-        {/* Split Layout - Matches Cart Page */}
         <div className="cart-split-layout" style={{ 
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
@@ -323,19 +319,22 @@ export default function Shop() {
                 right: "25px",
               }}>
                 <span className="cart-item-tag-split" style={{ 
-                  fontSize: isMobile ? "12px" : "14px",
+                  fontSize: "20px",
                   display: "block",
-                  marginBottom: "6px"
+                  marginBottom: "4px",
+                  color: "#666"
                 }}>New trend</span>
+                
                 <p style={{ 
-                  fontSize: isMobile ? "20px" : "26px", 
+                  fontSize: "20px", 
                   fontWeight: "700", 
-                  margin: "4px 0" 
+                  margin: "2px 0" 
                 }}>Emsarj</p>
+                
                 <p style={{ 
-                  fontSize: isMobile ? "18px" : "22px", 
+                  fontSize: "20px", 
                   fontWeight: "600", 
-                  margin: "4px 0" 
+                  margin: "2px 0" 
                 }}>{product.name}</p>
                 
                 <div style={{ 
@@ -343,11 +342,11 @@ export default function Shop() {
                   alignItems: "center", 
                   justifyContent: isMobile ? "center" : "flex-start",
                   gap: "14px", 
-                  marginTop: "10px",
+                  marginTop: "8px",
                   flexWrap: "wrap"
                 }}>
                   <p style={{ 
-                    fontSize: isMobile ? "22px" : "28px", 
+                    fontSize: "20px", 
                     fontWeight: "700", 
                     margin: "0" 
                   }}>
@@ -355,7 +354,7 @@ export default function Shop() {
                   </p>
                   {isDiscount && (
                     <p style={{ 
-                      fontSize: isMobile ? "16px" : "20px", 
+                      fontSize: "20px", 
                       color: "#bbb", 
                       textDecoration: "line-through", 
                       margin: "0" 
@@ -365,7 +364,7 @@ export default function Shop() {
                   )}
                   {isDiscount && (
                     <span className="shop-discount-tag" style={{
-                      fontSize: isMobile ? "13px" : "15px",
+                      fontSize: "20px",
                       padding: "4px 12px",
                       backgroundColor: "#c00",
                       color: "#fff",
@@ -379,12 +378,12 @@ export default function Shop() {
                 {isOut && (
                   <span style={{ 
                     display: "inline-block", 
-                    fontSize: isMobile ? "13px" : "14px", 
+                    fontSize: "20px", 
                     color: "#c00", 
                     border: "1px solid #c00", 
                     padding: "4px 12px", 
                     borderRadius: "4px", 
-                    marginTop: "10px" 
+                    marginTop: "8px" 
                   }}>
                     Out of stock
                   </span>
@@ -392,24 +391,24 @@ export default function Shop() {
                 {!isOut && product.stock_quantity <= 5 && (
                   <span style={{ 
                     display: "inline-block", 
-                    fontSize: isMobile ? "13px" : "14px", 
+                    fontSize: "20px", 
                     color: "#b33", 
                     border: "1px solid #b33", 
                     padding: "4px 12px", 
                     borderRadius: "4px", 
-                    marginTop: "10px" 
+                    marginTop: "8px" 
                   }}>
                     Last {product.stock_quantity} left
                   </span>
                 )}
 
-                {/* Size Selection */}
+                {/* Size Selection - 10px */}
                 {sizes.length > 0 && (
-                  <div style={{ marginTop: "20px" }}>
+                  <div style={{ marginTop: "16px" }}>
                     <p style={{ 
-                      fontSize: isMobile ? "14px" : "16px", 
+                      fontSize: "20px", 
                       fontWeight: "600", 
-                      margin: "0 0 10px",
+                      margin: "0 0 8px",
                       textAlign: isMobile ? "center" : "left"
                     }}>
                       Size {selectedSize && <span style={{ fontWeight: "700" }}>— {selectedSize}</span>}
@@ -417,7 +416,7 @@ export default function Shop() {
 
                     <div style={{ 
                       display: "flex", 
-                      gap: "10px", 
+                      gap: "6px", 
                       flexWrap: "wrap",
                       justifyContent: isMobile ? "center" : "flex-start"
                     }}>
@@ -427,11 +426,11 @@ export default function Shop() {
                           className={`cart-size-chip-split${selectedSize === s ? " cart-size-chip--active-split" : ""}`}
                           style={{ 
                             userSelect: "none",
-                            padding: isMobile ? "8px 16px" : "10px 20px",
+                            padding: isMobile ? "4px 10px" : "6px 14px",
                             border: selectedSize === s ? "2px solid #000" : "1px solid #ddd",
                             borderRadius: "4px",
                             cursor: "pointer",
-                            fontSize: isMobile ? "14px" : "16px",
+                            fontSize: "10px",
                             backgroundColor: selectedSize === s ? "#000" : "transparent",
                             color: selectedSize === s ? "#fff" : "#000",
                             transition: "all 0.2s ease"
@@ -447,7 +446,7 @@ export default function Shop() {
                     </div>
                     {sizeError && (
                       <p style={{ 
-                        fontSize: isMobile ? "13px" : "14px", 
+                        fontSize: "20px", 
                         color: "#c00", 
                         margin: "6px 0 0",
                         textAlign: isMobile ? "center" : "left"
@@ -456,20 +455,21 @@ export default function Shop() {
                   </div>
                 )}
 
+                {/* Add to Wardrobe Button - 13px */}
                 <button
                   className="cart-payout-btn-split"
                   onClick={handleAddToCart}
                   disabled={isOut}
                   style={{ 
-                    marginTop: "24px", 
-                    maxWidth: isMobile ? "100%" : "350px",
-                    width: isMobile ? "78%" : "auto",
-                    padding: isMobile ? "14px 24px" : "16px 32px",
+                    marginTop: "20px", 
+                    maxWidth: isMobile ? "100%" : "300px",
+                    width: isMobile ? "70%" : "auto",
+                    padding: isMobile ? "8px 16px" : "10px 24px",
                     backgroundColor: addedToCart ? "#28a745" : (isOut ? "#ccc" : "#000"),
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
-                    fontSize: isMobile ? "16px" : "18px",
+                    fontSize: "13px",
                     fontWeight: "600",
                     cursor: isOut ? "not-allowed" : "pointer",
                     transition: "all 0.3s ease"
@@ -503,12 +503,12 @@ export default function Shop() {
                   onClick={() => navigate(-1)}
                   style={{
                     cursor: "pointer",
-                    fontSize: isMobile ? "14px" : "16px",
+                    fontSize: "20px",
                     color: "#000"
                   }}
                 >← Back to shopping</span>
                 <span style={{ 
-                  fontSize: isMobile ? "13px" : "15px", 
+                  fontSize: "20px", 
                   color: "#888" 
                 }}>
                   {categoryProducts.length} items in this category
@@ -517,7 +517,6 @@ export default function Shop() {
             </header>
 
             <main className="cart-body-split">
-              {/* Category Products List */}
               <div className="cart-items-list-split">
                 {categoryProducts.length > 0 ? (
                   categoryProducts.map((product) => renderCategoryProduct(product))
@@ -526,7 +525,7 @@ export default function Shop() {
                     padding: "40px 20px", 
                     textAlign: "center", 
                     color: "#888",
-                    fontSize: isMobile ? "14px" : "16px"
+                    fontSize: "20px"
                   }}>
                     No other products in this category
                   </div>
