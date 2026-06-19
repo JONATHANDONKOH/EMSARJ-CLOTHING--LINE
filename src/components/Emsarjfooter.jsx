@@ -6,10 +6,10 @@ const socials = [
     label: "Instagram",
     href: "https://www.instagram.com/emsarj/",
     icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
         <circle cx="12" cy="12" r="4" />
-        <circle cx="17.5" cy="6.5" r="1.5" />
+        <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
       </svg>
     ),
   },
@@ -41,12 +41,12 @@ export default function EmsarjFooter() {
           <h2 className="footer-headline">JOIN THE EMSARJ FAMILY HERE.</h2>
           
           <div className="footer-email-section">
+            <span className="email-label">EMAIL</span>
             <input 
               type="email" 
-              placeholder="EMAIL" 
               className="footer-email-input"
             />
-            <button className="footer-submit-btn">→</button>
+            <button className="footer-submit-btn">✉</button>
           </div>
 
           <div className="footer-social-section">
@@ -85,8 +85,7 @@ export default function EmsarjFooter() {
 
       <style jsx>{`
         .emsarj-footer {
-          background: #f3f3f3;
-
+          background: #f5f0eb;
           padding: 40px 60px 20px;
           font-family: 'Arial', sans-serif;
           border-top: 1px solid #e0d8d0;
@@ -109,43 +108,53 @@ export default function EmsarjFooter() {
         }
 
         .footer-headline {
-          font-size: 24px;
-          font-weight: 700;
+          font-size: 22px;
+          font-weight: 400;
           color: #1a1a1a;
-          margin: 0 0 20px 0;
-          letter-spacing: 1px;
-          font-family: 'Georgia', serif;
+          margin: 0 0 25px 0;
+          letter-spacing: 0.5px;
+          font-family: 'Georgia', 'Times New Roman', serif;
         }
 
         .footer-email-section {
           display: flex;
           align-items: center;
-          border-bottom: 2px solid #1a1a1a;
-          max-width: 350px;
+          gap: 15px;
           margin-bottom: 25px;
+          border-bottom: 1px solid #1a1a1a;
+          padding-bottom: 8px;
+          max-width: 400px;
+        }
+
+        .email-label {
+          font-size: 14px;
+          font-weight: 400;
+          color: #1a1a1a;
+          letter-spacing: 2px;
+          min-width: 60px;
         }
 
         .footer-email-input {
           flex: 1;
-          padding: 10px 0;
+          padding: 8px 0;
           border: none;
           background: transparent;
-          font-size: 14px;
-          letter-spacing: 1px;
+          font-size: 13px;
+          letter-spacing: 0.5px;
           outline: none;
           color: #1a1a1a;
-          text-transform: uppercase;
         }
 
         .footer-email-input::placeholder {
           color: #999;
-          font-weight: 400;
+          font-weight: 300;
+          font-style: italic;
         }
 
         .footer-submit-btn {
           background: none;
           border: none;
-          font-size: 20px;
+          font-size: 18px;
           cursor: pointer;
           color: #1a1a1a;
           padding: 0 0 0 10px;
@@ -153,17 +162,17 @@ export default function EmsarjFooter() {
         }
 
         .footer-submit-btn:hover {
-          transform: translateX(5px);
+          transform: translateX(3px);
         }
 
         .footer-social-section {
-          margin-bottom: 30px;
+          margin-bottom: 25px;
         }
 
         .social-label {
           display: block;
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 400;
           color: #1a1a1a;
           margin-bottom: 12px;
           letter-spacing: 2px;
@@ -181,22 +190,31 @@ export default function EmsarjFooter() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
+          text-decoration: none;
+          opacity: 0.8;
         }
 
         .social-icon-btn:hover {
-          transform: scale(1.1);
+          transform: scale(1.15);
           color: #c0392b;
+          opacity: 1;
+        }
+
+        .social-icon-btn svg {
+          display: block;
+          width: 22px;
+          height: 22px;
         }
 
         .footer-copyright {
-          margin-top: 30px;
+          margin-top: 25px;
         }
 
         .footer-copyright p {
-          font-size: 12px;
+          font-size: 11px;
           color: #666;
-          letter-spacing: 1px;
-          font-weight: 400;
+          letter-spacing: 0.5px;
+          font-weight: 300;
           margin: 0;
         }
 
@@ -212,10 +230,9 @@ export default function EmsarjFooter() {
         }
 
         .footer-character {
-          width: 120px;
+          width: 100px;
           height: auto;
           display: block;
-          filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
         }
 
         /* Responsive Design */
@@ -274,12 +291,22 @@ export default function EmsarjFooter() {
             font-size: 12px;
           }
 
+          .email-label {
+            font-size: 12px;
+            min-width: 50px;
+          }
+
           .footer-character {
             width: 60px;
           }
 
           .social-label {
             font-size: 12px;
+          }
+
+          .social-icon-btn svg {
+            width: 18px;
+            height: 18px;
           }
         }
       `}</style>
