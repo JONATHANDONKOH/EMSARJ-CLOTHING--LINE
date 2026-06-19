@@ -38,12 +38,32 @@ function HeroSection() {
       <div className="emsarj-hero__overlay">
 
         {/* Badge — absolute top-left */}
-        <span className="emsarj-hero__badge">Preorder</span>
+        <span className="emsarj-hero__badge">PREORDER NOW</span>
 
         {/* Left column — heading, tagline, thumbs, button */}
         <div className="emsarj-hero__left">
-          <h1 className="emsarj-hero__heading">Emsarj<br />Signature<br />Collection</h1>
-          <p className="emsarj-hero__tagline">Limited. Elevated. Yours.</p>
+
+          {/* Main heading */}
+          <h1 className="emsarj-hero__heading">
+            New<br />Unreleased
+          </h1>
+
+          {/* Coming soon — lighter weight */}
+          <p
+            className="emsarj-hero__tagline emsarj-hero__tagline--light"
+            style={{ fontFamily: "'Calibri Light', Calibri, Arial, sans-serif" }}
+          >
+            Coming soon...
+          </p>
+
+          {/* Sub-tagline — same bold font as heading */}
+          <p
+            className="emsarj-hero__tagline emsarj-hero__tagline--sub"
+            style={{ fontFamily: "'Calibri Light', Calibri, Arial, sans-serif" }}
+          >
+            Limited. Specially made. Have before it comes out.
+          </p>
+
 
           <div className="emsarj-hero__thumbs">
             {HERO_IMAGES.map((img, i) => (
@@ -58,7 +78,7 @@ function HeroSection() {
             ))}
           </div>
 
-          <button className="emsarj-hero__btn">Details →</button>
+          <button className="emsarj-hero__btn">DETAILS →</button>
         </div>
 
         {/* Dots — pinned bottom-right */}
@@ -77,7 +97,6 @@ function HeroSection() {
     </div>
   );
 }
-
 /* =====================================================================
    HELPER
    ===================================================================== */
@@ -127,15 +146,20 @@ export default function CategoryCard() {
       image_url: imgUrl,
     };
 
+    // ✅ UPDATED: Now passes the full product data to Shop
     function goToProduct() {
-      navigate(`/product/${product.id}`);
+      navigate('/shop', { 
+        state: { 
+          product: product  // Pass the entire product object
+        } 
+      });
     }
 
     return (
       <div
         className="card"
         key={product.id}
-        onClick={goToProduct}
+        onClick={goToProduct}  // ✅ UPDATED: Uses goToProduct to pass data
         style={{ cursor: "pointer" }}
       >
         <div className="card-img-wrap">
@@ -169,7 +193,7 @@ export default function CategoryCard() {
         </div>
 
         <div className="card-info">
-          <span className="card-season-tag">New Trend</span>
+          <span className="card-season-tag">New Released</span>
           <p className="card-name">{product.name}</p>
           <p className="card-price">₵{product.price}</p>
         </div>
@@ -193,12 +217,12 @@ export default function CategoryCard() {
 
   // Updated style with Times New Roman, smaller font, uppercase
   const titleStyle = {
-    fontSize: "18px",
-    fontWeight: 600,
-    fontFamily: "'Times New Roman', Times, serif",
+    fontSize: "15px",
+    fontWeight: 300,
+    fontFamily: "'Calibri Light', Calibri, Arial, sans-serif",
     color: "#1a1a1a",
     margin: 0,
-    letterSpacing: "0.5px",
+    letterSpacing: "0.4px",
     textTransform: "uppercase",
   };
 
@@ -217,10 +241,12 @@ export default function CategoryCard() {
             flexDirection: "column",
             alignItems: "flex-start",
             gap: "0px",
-            marginBottom: "8px", // Small gap between title and first row
+            marginBottom: "8px", 
+            fontFamily: "calibri",
+            // Small gap between title and first row
           }}>
               <h2 style={titleStyle}>
-              <span style={{ textDecoration: "underline" }}>NEW &amp; FEATURED</span>
+              <span style={{ textDecoration: "underline" }}>NEW Released Item</span>
             </h2>
 
             {/* SECOND ROW TITLE - TRENDING NOW (only if there's a second row) */}
