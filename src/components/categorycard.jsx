@@ -201,6 +201,25 @@ function CategoryCard() {
       });
     }
 
+    // Handle add to cart - ONLY adds if not already in cart
+    const handleAddToCart = (e) => {
+      e.stopPropagation(); // Prevent navigation
+      
+      // ✅ CRITICAL: Only add if NOT already in cart
+      if (alreadyAdded) {
+        console.log("Item already in cart, not adding again");
+        return;
+      }
+      
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: imgUrl,
+        sizes: product.sizes,
+      });
+    };
+
     return (
       <div
         className="card"
@@ -222,17 +241,8 @@ function CategoryCard() {
 
           <button
             className={`card-hover-btn${alreadyAdded ? " card-hover-btn--added" : ""}`}
-            onClick={e => {
-              e.stopPropagation();
-              if (alreadyAdded) return;
-              addToCart({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: imgUrl,
-                sizes: product.sizes,
-              });
-            }}
+            onClick={handleAddToCart}
+            disabled={alreadyAdded}
           >
             {alreadyAdded ? "✓ In wardrobe" : "Add to wardrobe"}
           </button>
