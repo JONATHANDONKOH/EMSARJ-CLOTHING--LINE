@@ -116,7 +116,15 @@ export default function CategoryPage() {
                 style={{ 
                   flex: "0 0 calc(25% - 18px)",
                   maxWidth: "calc(25% - 18px)",
-                  minWidth: "calc(25% - 18px)"
+                  minWidth: "calc(25% - 18px)",
+                  cursor: "pointer"  // ✅ ADDED: Makes it clear it's clickable
+                }}
+                onClick={() => {  // ✅ ADDED: Navigate with product data
+                  navigate('/shop', { 
+                    state: { 
+                      product: product  // Pass the entire product object
+                    } 
+                  });
                 }}
               >
                 <div className="card-img-wrap">
@@ -128,7 +136,8 @@ export default function CategoryPage() {
                   />
                   <button
                     className={`card-hover-btn${alreadyAdded ? " card-hover-btn--added" : ""}`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();  // ✅ KEPT: Prevents card click when clicking button
                       if (alreadyAdded) return;
                       addToCart({
                         id:    product.id,

@@ -8,11 +8,30 @@
   background-color: #e0dede;
   width: 100%;
   box-sizing: border-box;
+  transition: height 0.15s ease;
 }
+
+/* Reduce TopNav height */
+.site-header .top-bar,
+.site-header .cat-nav {
+  height: 100; /* overridden below */
+}
+
+/* Top bar row (Row 1) */
+.top-bar {
+  height: 42px;
+}
+
+/* Category nav row (Row 3) */
+.cat-nav {
+  height: 56px;
+}
+
 
 .site-header .cat-nav,
 .site-header .desc-bar,
 .site-header .top-bar { background:#ffffff; }
+
 
 .site-header .cat-flip-item { background: transparent; color: #000000ea; }
 .site-header .nav-item { color: #000; }
@@ -1071,11 +1090,12 @@ ul li:hover { text-decoration: underline; }
     position: relative !important;
     left: auto !important;
     transform: none !important;
-    width: 100% !important;
+    width: auto !important;
     justify-content: center !important;
     display: flex !important;
     pointer-events: auto !important;
-    order: 1 !important;
+    order: 0 !important;
+    flex-shrink: 0;
   }
 
   .nav-search {
@@ -1101,8 +1121,10 @@ ul li:hover { text-decoration: underline; }
   .emsarj-hero__btn   { padding: 12px 24px; font-size: 12px; }
   .emsarj-hero__dots  { bottom: 28px; right: 20px; }
 
-  .top-bar { height: auto; min-height: 48px; padding: 8px 12px; gap: 8px; justify-content: space-between; flex-wrap: nowrap; }
+  .top-bar  { height: 42px; min-height: 42px; padding: 8px 12px; gap: 8px; justify-content: space-between; flex-wrap: nowrap; }
+
   .desc-bar { padding: 0; display: none !important; }
+
   .nav-spacer { display: none !important; }
   .nav-item { font-size: 13px; }
   .discription { font-weight: bolder; font-size: 14px; }
@@ -1203,7 +1225,6 @@ ul li:hover { text-decoration: underline; }
 
   /* Hide profile icon on tablet */
   .profile-menu-wrap { display: none !important; }
-
 
   .cat-nav {
     height: 52px !important;
@@ -1475,4 +1496,38 @@ body { background-color: #f8f8f8; }
 @media (min-width: 1441px) {
   .shop-grid { max-width: 1600px; margin: 0 auto; padding: 20px 60px 60px; }
   .shop-header { max-width: 1600px; margin: 0 auto; padding: 24px 60px 10px; }
+}
+/* Badge update — green pill to match client mockup */
+.emsarj-hero__badge {
+  background: #22c55e;        /* bright green */
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 4px;         /* slight rounding, not a full pill */
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+}
+
+/* Coming soon line — lighter weight */
+.emsarj-hero__tagline--light {
+  font-weight: 300;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 4px 0 6px;
+  font-style: normal;
+}
+
+/* Sub-tagline — same family/weight as heading but smaller */
+.emsarj-hero__tagline--sub {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.3px;
+  margin: 0 0 16px;
+  line-height: 1.5;
 }

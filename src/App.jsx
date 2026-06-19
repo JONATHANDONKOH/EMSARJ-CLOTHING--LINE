@@ -1,5 +1,7 @@
 import "./App.css";
 import { Routes, Route, useLocation } from "react-router-dom";
+import ScrollToTop from "./scrolltotop";
+
 
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/register";
@@ -10,7 +12,7 @@ import Cart from "./pages/cart";
 import Account from "./pages/accounts";
 import Orders from "./pages/ordder";
 import ResetPassword from "./pages/resetpassword";
-import WishlistPage from "./pages/WishlistPage"; // Add this import
+import WishlistPage from "./pages/WishlistPage";
 import Shop from "./pages/shop";
 
 import TopNav from "./components/common/TopNav";
@@ -19,20 +21,23 @@ import AutoPlayAudio from "./components/common/AutoPlayAudio";
 import { CartProvider } from "./cartContext/cartprovider";
 import { WishlistProvider } from "./wishlistContext/wishlistprovider";
 
-function AppContent() { 
+function AppContent() {
   const location = useLocation();
   const hideNav =
     location.pathname === "/signin" ||
     location.pathname === "/signup" ||
     location.pathname === "/dashboard" ||
     location.pathname === "/resetpassword" ||
-    location.pathname === "/cart";
+    location.pathname === "/cart" ||
+    location.pathname === "/shop";
 
 
   return (
     <div className="app-container">
-      {!hideNav && <TopNav />}
+      {/* ScrollToTop is placed here to trigger on route changes */}
+      <ScrollToTop />
 
+      {!hideNav && <TopNav />}
 
       <main className="app-content">
         <Routes>
@@ -45,10 +50,9 @@ function AppContent() {
           <Route path="/account" element={<Account />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
-          <Route path="/wishlist" element={<WishlistPage />} /> {/* Add this route */}
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/shop" element={<Shop />} />
         </Routes>
-
       </main>
 
       {!hideNav && <EmsarjFooter />}
