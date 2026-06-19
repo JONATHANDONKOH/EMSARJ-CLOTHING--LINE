@@ -18,6 +18,15 @@ export default function CategoryPage() {
   const [categoryName, setCategoryName] = useState("");
   const [loading, setLoading]           = useState(true);
   const [notFound, setNotFound]         = useState(false);
+  const [isMobile, setIsMobile]         = useState(window.innerWidth <= 600);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -56,19 +65,18 @@ export default function CategoryPage() {
     return cartItems.some((item) => item.id === productId);
   }
 
-  // Split products into rows of 4 like CategoryCard
-  const rows = [];
-  for (let i = 0; i < products.length; i += 4) {
-    rows.push(products.slice(i, i + 4));
-  }
-
   return (
     <div className="category-page">
-
       {/* ── Header ── */}
-      <div className="category-page-header">
+      <div className="category-page-header" style={{
+        padding: isMobile ? "16px 16px 10px" : "20px 40px 10px",
+        flexWrap: isMobile ? "wrap" : "nowrap",
+        gap: isMobile ? "10px" : "20px"
+      }}>
         <button className="category-back-btn" onClick={() => navigate(-1)}>← Back</button>
-        <h1 className="category-page-title">{categoryName || "Products"}</h1>
+        <h1 className="category-page-title" style={{
+          fontSize: isMobile ? "18px" : "24px"
+        }}>{categoryName || "Products"}</h1>
         <p className="category-page-count">
           {loading ? "" : `${products.length} item${products.length !== 1 ? "s" : ""}`}
         </p>
@@ -91,21 +99,17 @@ export default function CategoryPage() {
         </div>
       )}
 
-      {/* ── Products — using flex with fixed width to prevent expansion ── */}
-      {!loading && !notFound && rows.map((row, rowIndex) => (
-        <div
-          key={rowIndex}
-          style={{ 
-            display: "flex",
-            flexWrap: "nowrap",
-            gap: "24px",
-            padding: rowIndex === 0 ? "20px 40px 40px" : "0px 40px 40px",
-            width: "100%",
-            boxSizing: "border-box",
-            justifyContent: "flex-start"
-          }}
-        >
-          {row.map((product) => {
+      {/* ── Products Grid ── */}
+      {!loading && !notFound && (
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+          gap: isMobile ? "12px" : "24px",
+          padding: isMobile ? "12px" : "20px 40px 40px",
+          width: "100%",
+          boxSizing: "border-box"
+        }}>
+          {products.map((product) => {
             const alreadyAdded = isInCart(product.id);
             const imgUrl = resolveImageUrl(product.image_url);
 
@@ -114,30 +118,43 @@ export default function CategoryPage() {
                 className="card" 
                 key={product.id} 
                 style={{ 
-                  flex: "0 0 calc(25% - 18px)",
-                  maxWidth: "calc(25% - 18px)",
-                  minWidth: "calc(25% - 18px)",
-                  cursor: "pointer"  // ✅ ADDED: Makes it clear it's clickable
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%"
                 }}
-                onClick={() => {  // ✅ ADDED: Navigate with product data
+                onClick={() => {
                   navigate('/shop', { 
                     state: { 
-                      product: product  // Pass the entire product object
+                      product: product
                     } 
                   });
                 }}
               >
-                <div className="card-img-wrap">
+                <div className="card-img-wrap" style={{
+                  position: "relative",
+                  width: "100%",
+                  backgroundColor: "#ffffff",
+                  overflow: "hidden",
+                  borderRadius: isMobile ? "6px" : "10px",
+                  height: isMobile ? "240px" : "340px"
+                }}>
                   <img
                     className="girlscrop"
                     src={imgUrl}
                     alt={product.name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      display: "block"
+                    }}
                     onError={(e) => { e.target.style.opacity = "0.3"; }}
                   />
                   <button
                     className={`card-hover-btn${alreadyAdded ? " card-hover-btn--added" : ""}`}
                     onClick={(e) => {
-                      e.stopPropagation();  // ✅ KEPT: Prevents card click when clicking button
+                      e.stopPropagation();
                       if (alreadyAdded) return;
                       addToCart({
                         id:    product.id,
@@ -147,21 +164,67 @@ export default function CategoryPage() {
                         sizes: product.sizes,
                       });
                     }}
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: isMobile ? "40px" : "44px",
+                      background: "#111",
+                      color: "#fff",
+                      border: "none",
+                      fontSize: isMobile ? "12px" : "13px",
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                      cursor: "pointer",
+                      transform: "translateY(100%)",
+                      transition: "transform 0.25s ease, background 0.2s ease"
+                    }}
                   >
                     {alreadyAdded ? "✓ In wardrobe" : "Add to wardrobe"}
                   </button>
                 </div>
 
-                <div className="card-info">
-                  <span className="card-season-tag">New Trend</span>
-                  <p className="card-name">{product.name}</p>
-                  <p className="card-price">₵{product.price}</p>
+                <div className="card-info" style={{
+                  padding: isMobile ? "10px 4px 12px" : "12px 4px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px"
+                }}>
+                  <span className="card-season-tag" style={{
+                    fontSize: isMobile ? "10px" : "11px",
+                    color: "#666",
+                    fontWeight: 400,
+                    letterSpacing: "0.02em"
+                  }}>New Trend</span>
+                  <p className="card-name" style={{
+                    fontSize: isMobile ? "12px" : "17px",
+                    fontWeight: isMobile ? 400 : 700,
+                    color: "#000",
+                    margin: 0,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontFamily: "Calibri, 'Calibri Bold', Arial, sans-serif"
+                  }}>{product.name}</p>
+                  <p className="card-price" style={{
+                    fontSize: isMobile ? "13px" : "17px",
+                    fontWeight: isMobile ? 500 : 700,
+                    color: "#111",
+                    margin: isMobile ? "5px 0 0" : "6px 0 0",
+                    display: "inline-block",
+                    padding: "1px 0",
+                    width: "fit-content",
+                    background: "#fafafa",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                    fontFamily: "Calibri, 'Calibri Bold', Arial, sans-serif"
+                  }}>₵{product.price}</p>
                 </div>
               </div>
             );
           })}
         </div>
-      ))}
+      )}
     </div>
   );
 }
