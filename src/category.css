@@ -1459,7 +1459,7 @@ body { background-color: #f8f8f8; }
 /* =====================================================================
    FOOTER
    ===================================================================== */
-.emsarj-footer { position: relative; width: 100%; background: #f8f8f8; border-top: 3px solid #111; overflow: hidden; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 60px 48px 0 48px; box-sizing: border-box; font-family: inherit; gap: 0; z-index: 50; }
+.emsarj-footer { position: relative; width: 100%; background: #f8f8f8; border-top: 3px solid #111; overflow: hidden; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 60px 48px 0 48px; box-sizing: border-box; font-family: Calibri, 'Calibri Light', Arial, sans-serif; gap: 0; z-index: 50; }
 .emsarj-footer::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 46px; background: #111; border-radius: 60% 60% 0 0 / 100% 100% 0 0; z-index: 0; }
 .sparkle { position: absolute; color: #cc0000; pointer-events: none; animation: sparkle-pulse 2s ease-in-out infinite; z-index: 1; line-height: 1; }
 .sparkle-1 { top: 20px;  left: 32px;  font-size: 14px; animation-delay: 0s; }
@@ -1574,9 +1574,9 @@ body { background-color: #f8f8f8; }
 
 /* Coming soon line — lighter weight */
 .emsarj-hero__tagline--light {
-  font-weight: 300;
+  font-weight: 200;
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.85);
   margin: 4px 0 6px;
   font-style: normal;
 }

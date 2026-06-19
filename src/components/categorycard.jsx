@@ -41,9 +41,9 @@ function HeroSection({ heroImages }) {
 
   return (
     <div className="emsarj-hero" style={{ 
-      height: isMobile ? "65vh" : "88vh",
-      minHeight: isMobile ? "380px" : "520px",
-      maxHeight: isMobile ? "480px" : "860px"
+      height: isMobile ? "62vh" : "88vh",
+      minHeight: isMobile ? "360px" : "520px",
+      maxHeight: isMobile ? "460px" : "860px"
     }}>
       {heroImages.map((img, i) => (
         <img
@@ -69,7 +69,7 @@ function HeroSection({ heroImages }) {
             fontSize: isMobile ? "clamp(26px, 8vw, 42px)" : "clamp(36px, 6vw, 80px)",
             marginBottom: isMobile ? "4px" : "10px"
           }}>
-            New<br />Unreleased
+            New<br />Released
           </h1>
 
           <p
