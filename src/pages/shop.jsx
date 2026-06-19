@@ -134,7 +134,8 @@ export default function Shop() {
           borderBottom: "1px solid #f0f0f0",
           display: "flex",
           alignItems: "center",
-          gap: "12px"
+          gap: "12px",
+          fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
         }}
         onClick={() => {
           navigate('/shop', { 
@@ -163,15 +164,18 @@ export default function Shop() {
         <div className="cart-item-info-split" style={{ flex: 1, minWidth: 0 }}>
           <p className="cart-item-name-split" style={{ 
             fontSize: "15px", 
-            fontWeight: "600",
-            margin: "0 0 4px 0"
+            fontWeight: "700",
+            margin: "0 0 4px 0",
+            fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
           }}>{product.name}</p>
           <p className="cart-item-price-split" style={{ 
             fontSize: "15px",
-            margin: "0"
+            margin: "0",
+            fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+            fontWeight: "700"
           }}>₵{product.price}</p>
           {isOut && (
-            <span style={{ fontSize: "15px", color: "#c00" }}>Out of stock</span>
+            <span style={{ fontSize: "15px", color: "#c00", fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif", fontWeight: "700" }}>Out of stock</span>
           )}
         </div>
         <button
@@ -191,7 +195,9 @@ export default function Shop() {
           style={{ 
             fontSize: "15px",
             padding: isMobile ? "4px 8px" : "6px 12px",
-            flexShrink: 0
+            flexShrink: 0,
+            fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+            fontWeight: "700"
           }}
         >
           {alreadyIn ? "✓" : isOut ? "Out" : "Add"}
@@ -204,9 +210,9 @@ export default function Shop() {
     return (
       <>
         <TopNav />
-        <div className="shop-page" style={{ paddingTop: "180px", fontFamily: "Calibri, 'Calibri Bold', Arial, sans-serif" }}>
+        <div className="shop-page" style={{ paddingTop: "180px", fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif" }}>
           <div className="shop-header">
-            <h1 className="shop-title" style={{ fontFamily: "Calibri, 'Calibri Bold', Arial, sans-serif" }}>Shop</h1>
+            <h1 className="shop-title" style={{ fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif" }}>Shop</h1>
             <button 
               className="shop-back-btn"
               onClick={() => navigate(-1)}
@@ -215,7 +221,9 @@ export default function Shop() {
                 border: "1px solid #ddd",
                 padding: "8px 16px",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: "pointer",
+                fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                fontWeight: "700"
               }}
             >
               ← Back
@@ -226,6 +234,7 @@ export default function Shop() {
             <button 
               className="cart-shop-btn" 
               onClick={() => navigate("/")}
+              style={{ fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif", fontWeight: "700" }}
             >
               Browse products
             </button>
@@ -258,7 +267,10 @@ export default function Shop() {
   return (
     <>
       <TopNav />
-      <div className="shop-page" style={{ paddingTop: "180px", fontFamily: "Calibri, 'Calibri Bold', Arial, sans-serif" }}>
+      <div className="shop-page" style={{ 
+        paddingTop: "180px", 
+        fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
+      }}>
         <div className="cart-split-layout" style={{ 
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
@@ -304,7 +316,7 @@ export default function Shop() {
                   objectFit: "contain",
                   display: "block",
                   position: "relative",
-                  right: "25px",
+                  right: "15px",
                 }}
               />
               
@@ -316,25 +328,30 @@ export default function Shop() {
                 maxWidth: isMobile ? "100%" : "500px",
                 padding: isMobile ? "0 15px" : "0",
                 position: "relative",
-                right: "25px",
+                right: "15px",
+                fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
               }}>
                 <span className="cart-item-tag-split" style={{ 
                   fontSize: "20px",
                   display: "block",
                   marginBottom: "4px",
-                  color: "#666"
+                  color: "#666",
+                  fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                  fontWeight: "700"
                 }}>New trend</span>
                 
                 <p style={{ 
                   fontSize: "20px", 
                   fontWeight: "700", 
-                  margin: "2px 0" 
+                  margin: "2px 0",
+                  fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
                 }}>Emsarj</p>
                 
                 <p style={{ 
                   fontSize: "20px", 
-                  fontWeight: "600", 
-                  margin: "2px 0" 
+                  fontWeight: "700", 
+                  margin: "2px 0",
+                  fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
                 }}>{product.name}</p>
                 
                 <div style={{ 
@@ -348,7 +365,8 @@ export default function Shop() {
                   <p style={{ 
                     fontSize: "20px", 
                     fontWeight: "700", 
-                    margin: "0" 
+                    margin: "0",
+                    fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
                   }}>
                     ₵{product.price}
                   </p>
@@ -357,7 +375,9 @@ export default function Shop() {
                       fontSize: "20px", 
                       color: "#bbb", 
                       textDecoration: "line-through", 
-                      margin: "0" 
+                      margin: "0",
+                      fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                      fontWeight: "700"
                     }}>
                       ₵{product.original_price}
                     </p>
@@ -368,7 +388,9 @@ export default function Shop() {
                       padding: "4px 12px",
                       backgroundColor: "#c00",
                       color: "#fff",
-                      borderRadius: "4px"
+                      borderRadius: "4px",
+                      fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                      fontWeight: "700"
                     }}>
                       -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
                     </span>
@@ -383,7 +405,9 @@ export default function Shop() {
                     border: "1px solid #c00", 
                     padding: "4px 12px", 
                     borderRadius: "4px", 
-                    marginTop: "8px" 
+                    marginTop: "8px",
+                    fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                    fontWeight: "700"
                   }}>
                     Out of stock
                   </span>
@@ -396,7 +420,9 @@ export default function Shop() {
                     border: "1px solid #b33", 
                     padding: "4px 12px", 
                     borderRadius: "4px", 
-                    marginTop: "8px" 
+                    marginTop: "8px",
+                    fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                    fontWeight: "700"
                   }}>
                     Last {product.stock_quantity} left
                   </span>
@@ -407,9 +433,10 @@ export default function Shop() {
                   <div style={{ marginTop: "16px" }}>
                     <p style={{ 
                       fontSize: "20px", 
-                      fontWeight: "600", 
+                      fontWeight: "700", 
                       margin: "0 0 8px",
-                      textAlign: isMobile ? "center" : "left"
+                      textAlign: isMobile ? "center" : "left",
+                      fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
                     }}>
                       Size {selectedSize && <span style={{ fontWeight: "700" }}>— {selectedSize}</span>}
                     </p>
@@ -433,7 +460,9 @@ export default function Shop() {
                             fontSize: "10px",
                             backgroundColor: selectedSize === s ? "#000" : "transparent",
                             color: selectedSize === s ? "#fff" : "#000",
-                            transition: "all 0.2s ease"
+                            transition: "all 0.2s ease",
+                            fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                            fontWeight: "700"
                           }}
                           onClick={() => {
                             setSelectedSize(s);
@@ -449,7 +478,9 @@ export default function Shop() {
                         fontSize: "20px", 
                         color: "#c00", 
                         margin: "6px 0 0",
-                        textAlign: isMobile ? "center" : "left"
+                        textAlign: isMobile ? "center" : "left",
+                        fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                        fontWeight: "700"
                       }}>⚠ Please select a size</p>
                     )}
                   </div>
@@ -470,9 +501,10 @@ export default function Shop() {
                     border: "none",
                     borderRadius: "4px",
                     fontSize: "13px",
-                    fontWeight: "600",
+                    fontWeight: "700",
                     cursor: isOut ? "not-allowed" : "pointer",
-                    transition: "all 0.3s ease"
+                    transition: "all 0.3s ease",
+                    fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
                   }}
                 >
                   {addedToCart ? "✓ Added!" : (isOut ? "Out of stock" : alreadyIn ? "✓ In wardrobe" : "Add to wardrobe")}
@@ -488,7 +520,8 @@ export default function Shop() {
             maxHeight: isMobile ? "none" : "100vh",
             height: isMobile ? "auto" : "100vh",
             overflowY: isMobile ? "visible" : "auto",
-            width: isMobile ? "100%" : "50%"
+            width: isMobile ? "100%" : "50%",
+            fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif"
           }}>
             <header className="cart-header-split">
               <div className="cart-header-top" style={{
@@ -504,12 +537,16 @@ export default function Shop() {
                   style={{
                     cursor: "pointer",
                     fontSize: "20px",
-                    color: "#000"
+                    color: "#000",
+                    fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                    fontWeight: "700"
                   }}
                 >← Back to shopping</span>
                 <span style={{ 
                   fontSize: "20px", 
-                  color: "#888" 
+                  color: "#888",
+                  fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                  fontWeight: "700"
                 }}>
                   {categoryProducts.length} items in this category
                 </span>
@@ -525,7 +562,9 @@ export default function Shop() {
                     padding: "40px 20px", 
                     textAlign: "center", 
                     color: "#888",
-                    fontSize: "20px"
+                    fontSize: "20px",
+                    fontFamily: "'Calibri Bold', 'Calibri', Arial, sans-serif",
+                    fontWeight: "700"
                   }}>
                     No other products in this category
                   </div>
