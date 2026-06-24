@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import footImage from "../assets/emsy.PNG";
 import { insertEmail } from "../context/emailfunction";
 
@@ -56,6 +56,15 @@ export default function EmsarjFooter() {
   const [email, setEmail] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const buttonIcon = useMemo(() => {
     if (isSending) return "...";
@@ -84,7 +93,11 @@ export default function EmsarjFooter() {
         <div className="footer-box">
           <h2 className="footer-headline">JOIN THE EMSARJ FAMILY HERE.</h2>
 
-          <div className="footer-email-section">
+          {/* ✅ MODIFIED: Email section with relative positioning on small screens - now 20px */}
+          <div className="footer-email-section" style={{
+            position: 'relative',
+            top: isMobile ? '20px' : '0' // Changed from 10px to 20px
+          }}>
             <span className="email-label">EMAIL</span>
             <input
               type="email"
@@ -107,7 +120,11 @@ export default function EmsarjFooter() {
             </button>
           </div>
 
-          <div className="footer-social-section">
+          {/* ✅ MODIFIED: Social section with relative positioning on small screens - now 20px */}
+          <div className="footer-social-section" style={{
+            position: 'relative',
+            top: isMobile ? '20px' : '0' // Changed from 10px to 20px
+          }}>
             <span className="social-label">SOCIAL PAGES</span>
             <div className="footer-socials">
               {socials.map((s) => (
@@ -118,7 +135,11 @@ export default function EmsarjFooter() {
             </div>
           </div>
 
-          <div className="footer-copyright">
+          {/* Copyright with relative positioning */}
+          <div className="footer-copyright" style={{
+            position: 'relative',
+            top: isMobile ? '90px' : '0'
+          }}>
             <p>© {new Date().getFullYear()} EMSARJ. ALL RIGHTS RESERVED.</p>
           </div>
         </div>
