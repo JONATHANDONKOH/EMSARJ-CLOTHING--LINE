@@ -23,10 +23,11 @@ export default function TopNav() {
   const profileMenuRef = useRef(null);
 
 
-  const handleLogoClick = () => {
-    if (location.pathname === "/cart" || location.pathname === "/cart/") {
-      navigate("/");
-    }
+  const handleLogoClick = (e) => {
+    // Always go back to the main page from any route.
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    navigate("/");
   };
 
   const marqueeRef  = useRef(null);

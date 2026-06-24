@@ -14,14 +14,119 @@
 /* Reduce TopNav height */
 .site-header .top-bar,
 .site-header .cat-nav {
-  height: 100; /* overridden below */
+  /* baseline; overridden by per-row rules below */
+  height: auto;
 }
+
+/* Make header overall shorter on all screens */
+.site-header .top-bar,
 
 /* Top bar row (Row 1) */
 .top-bar {
   height: 42px;
 }
+/* =====================
+   SITE HEADER — Mobile adjustments
+   ===================== */
 
+/* Remove height constraint on small screens */
+@media (max-width: 600px) {
+  .site-header .top-bar,
+  .top-bar {
+    height: auto !important;
+    min-height: 42px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+
+  .site-header .cat-nav {
+    height: auto !important;
+    min-height: 56px;
+  }
+}
+
+/* =====================
+   SITE HEADER — Base styles (unchanged)
+   ===================== */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background-color: #e0dede;
+  width: 100%;
+  box-sizing: border-box;
+  transition: height 0.15s ease;
+}
+
+.site-header .cat-nav {
+  height: auto;
+}
+
+.site-header .cat-nav,
+.site-header .desc-bar,
+.site-header .top-bar {
+  background: #ffffff;
+}
+
+.site-header .cat-flip-item {
+  background: transparent;
+  color: #000000ea;
+}
+
+.site-header .nav-item {
+  color: #000;
+}
+
+.site-header .nav-item:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.site-header .mobile-search-drawer {
+  background: #fff;
+}
+
+.site-header .discription {
+  color: #000;
+}
+
+.site-header .nav-logo {
+  color: inherit;
+}
+
+/* Top bar row (Row 1) */
+.top-bar {
+  height: 42px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.top-bar-spacer {
+  flex: 1;
+}
+
+/* Row 2 - now empty but kept for spacing */
+.desc-bar {
+  padding: 0;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Row 3 - Desktop: Logo and search on same row */
+.cat-nav {
+  height: 56px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+  background: #ffffff;
+}
 /* Category nav row (Row 3) */
 .cat-nav {
   height: 56px;
@@ -109,6 +214,9 @@
   width: 100%;
 }
 
+/* =====================
+   SEARCH DROPDOWN — Fixed positioning
+   ===================== */
 .sb-dropdown {
   position: fixed;
   top: 150px;
@@ -1189,9 +1297,20 @@ ul li:hover { text-decoration: underline; }
   .category-front { top: 121px !important; margin-top: 121px !important; padding: 10px 16px 8px; }
   .auth-modal  { padding: 40px 24px 32px; border-radius: 12px; max-width: 100%; }
   .auth-title  { font-size: 22px; }
-  .sb-dropdown { top: 108px; padding: 16px 16px 20px; }
+  
+  /* ===== SEARCH DROPDOWN - MOBILE FIX ===== */
+  .sb-dropdown {
+    top: 180px !important;  /* Pushed down below search bar */
+    padding: 16px 16px 20px;
+    max-height: 60vh;       /* Limit height */
+    overflow-y: auto;       /* Allow scrolling */
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+  
   .sb-grid-item { flex: 0 0 120px; }
   .sb-grid-img-wrap { width: 120px; height: 150px; }
+  
   .category-page { padding-top: 160px; }
   .category-front { top: 160px !important; margin-top: 160px !important; }
   .category-page-header { padding: 16px 16px 10px; flex-wrap: wrap; gap: 10px; }
@@ -1232,8 +1351,9 @@ ul li:hover { text-decoration: underline; }
     flex-direction: row !important;
     align-items: center !important;
   }
-  .nav-logo { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; display: flex !important; align-items: center !important; pointer-events: none !important; order: 0 !important; width: auto !important; }
+  .nav-logo { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; display: flex !important; align-items: center !important; pointer-events: auto !important; order: 0 !important; width: auto !important; z-index: 250; }
   .nav-search { display: flex !important; margin-left: auto !important; width: auto !important; max-width: 300px !important; order: 0 !important; }
+
 
   /* Hero tablet */
   .emsarj-hero { height: 70vh; min-height: 400px; }
@@ -1295,9 +1415,16 @@ ul li:hover { text-decoration: underline; }
   .pm-summary-col { padding-left: 0; border-left: none; border-top: 1px solid #f0f0f0; padding-top: 20px; }
   .pm-row2 { grid-template-columns: 1fr; }
   .section-divider { padding: 28px 24px 10px; }
-  .sb-dropdown { top: 138px; padding: 18px 24px 22px; border-radius: 0 !important; }
+  
+  /* ===== SEARCH DROPDOWN - TABLET FIX ===== */
+  .sb-dropdown { 
+    top: 138px !important; 
+    padding: 18px 24px 22px; 
+    border-radius: 0 !important; 
+  }
   .sb-grid-item { flex: 0 0 140px; }
   .sb-grid-img-wrap { width: 140px; height: 175px; border-radius: 8px !important; }
+  
   .category-page { padding-top: 178px; }
   .category-front { top: 178px !important; margin-top: 178px !important; }
   .category-page-header { padding: 16px 24px 10px; }
@@ -1337,7 +1464,8 @@ ul li:hover { text-decoration: underline; }
   .mobile-search-container { display: none !important; }
 
   .cat-nav { height: 64px !important; padding: 0 40px !important; flex-direction: row !important; align-items: center !important; }
-  .nav-logo { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; display: flex !important; align-items: center !important; pointer-events: none !important; }
+  .nav-logo { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; display: flex !important; align-items: center !important; pointer-events: auto !important; z-index: 250; }
+
   .nav-search { display: flex !important; margin-left: auto !important; max-width: 500px !important; }
   .cartsearch { width: 300px; }
   .top-bar  { height: 50px; padding: 0 40px; gap: 16px; }
@@ -1401,13 +1529,18 @@ body { background-color: #f8f8f8; }
    FOOTER
    ===================================================================== */
 .emsarj-footer { position: relative; width: 100%; background: #f8f8f8; border-top: 3px solid #111; overflow: hidden; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 60px 48px 0 48px; box-sizing: border-box; font-family: inherit; gap: 0; z-index: 50; }
-.emsarj-footer::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 46px; background: #111; border-radius: 60% 60% 0 0 / 100% 100% 0 0; z-index: 0; }
+/* Removed the black arc at the footer bottom */
+.emsarj-footer::before { content: none; }
 .sparkle { position: absolute; color: #cc0000; pointer-events: none; animation: sparkle-pulse 2s ease-in-out infinite; z-index: 1; line-height: 1; }
 .sparkle-1 { top: 20px;  left: 32px;  font-size: 14px; animation-delay: 0s; }
 .sparkle-2 { top: 55px;  left: 64px;  font-size: 26px; animation-delay: 0.4s; }
 .sparkle-3 { top: 26px;  left: 108px; font-size: 18px; animation-delay: 0.8s; }
 .sparkle-4 { top: 80px;  left: 28px;  font-size: 12px; animation-delay: 1.2s; }
 @keyframes sparkle-pulse { 0%, 100% { opacity: 0.5; transform: scale(1) rotate(0deg); } 50% { opacity: 1; transform: scale(1.3) rotate(20deg); } }
+.footer-copyright { margin-top: auto; }
+.footer-copyright p { margin: 0; }
+
+/* legacy footer layout (kept) */
 .footer-content { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; padding-left: 56px; padding-bottom: 60px; position: relative; z-index: 1; }
 .footer-headline { font-size: clamp(20px,2.6vw,36px); font-weight: 900; color: #111; margin: 0; letter-spacing: -0.5px; line-height: 1.1; text-transform: uppercase; }
 .footer-sub { font-size: clamp(12px,1.3vw,16px); color: #cc0000; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 0.03em; }
@@ -1532,7 +1665,7 @@ body { background-color: #f8f8f8; }
   line-height: 1.5;
 }
 /* ─── FOOTER ─────────────────────────────────────────────── */
-..emsarj-footer {
+.emsarj-footer-alt { /* fixed typo: was ..emsarj-footer */
   background: #f5f0eb;
   border-top: 1px solid #e0d8d0;
   width: 100%;
