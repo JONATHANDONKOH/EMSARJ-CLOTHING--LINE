@@ -4,22 +4,28 @@ import { useCart } from "../cartContext/cartprovider";
 import supabase from "../supabasefol/supabaseClient";
 import TopNav from "../components/common/TopNav";
 
-
 const DELIVERY_FEE = 50;
+const PAYSTACK_PUBLIC_KEY  = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+const EDGE_FUNCTION_URL    = "https://bdynpkxcziibqwgwlugt.supabase.co/functions/v1/verifyAndMarkPaid";
 
-async function insertOrder({ first_name, last_name, phone, total_amount }) {
-  const { data: { user } } = await supabase.auth.getUser();
+// ── Supabase helpers ────────────────────────────────────────────────────────
+
+async function insertOrder({ first_name, last_name, phone_number, email, subtotal, total }) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("You must be signed in to place an order.");
 
   const { data, error } = await supabase
     .from("orders")
     .insert({
-      user_id:           user?.id ?? null,
+      user_id:      session.user.id,
       first_name,
       last_name,
-      phone,
-      total_amount,
-      status:            "pending",
-      payment_reference: null,
+      email,
+      phone_number,
+      subtotal,
+      delivery_fee: DELIVERY_FEE,
+      total,
+      status:       "pending",
     })
     .select()
     .single();
@@ -29,18 +35,80 @@ async function insertOrder({ first_name, last_name, phone, total_amount }) {
 }
 
 async function insertOrderItems(orderItems) {
-  const { data, error } = await supabase
-    .from("orderItems")
-    .insert(orderItems)
-    .select();
-
+  const { error } = await supabase.from("orderItems").insert(orderItems);
   if (error) throw new Error(`Order items insert failed: ${error.message}`);
-  return data;
 }
+
+// ── Verify payment via Edge Function — secret key never touches browser ──
+async function verifyAndMarkPaid(orderId, reference) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Unauthorized.");
+
+  const res = await fetch(EDGE_FUNCTION_URL, {
+    method:  "POST",
+    headers: {
+      "Content-Type":  "application/json",
+      "Authorization": `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ orderId, reference }),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok || !result.success) {
+    throw new Error(result.error || "Payment verification failed.");
+  }
+
+  return result;
+}
+
+// ── Paystack popup ──────────────────────────────────────────────────────────
+
+function loadPaystackScript() {
+  return new Promise((resolve) => {
+    if (document.getElementById("paystack-script")) { resolve(); return; }
+    const script = document.createElement("script");
+    script.id    = "paystack-script";
+    script.src   = "https://js.paystack.co/v1/inline.js";
+    script.onload = resolve;
+    document.body.appendChild(script);
+  });
+}
+
+function payWithPaystack({ email, amountGhc, orderId }) {
+  return new Promise((resolve, reject) => {
+    if (!window.PaystackPop) {
+      reject(new Error("Paystack script not loaded yet. Please try again."));
+      return;
+    }
+
+    const handler = window.PaystackPop.setup({
+      key:      PAYSTACK_PUBLIC_KEY,
+      email,
+      amount:   Math.round(amountGhc * 100),
+      currency: "GHS",
+      ref:      `order_${orderId}_${Date.now()}`,
+
+      // ── Callback calls Edge Function, not Supabase directly ──
+      callback: function (response) {
+        verifyAndMarkPaid(orderId, response.reference)
+          .then(() => resolve(response.reference))
+          .catch((err) => reject(err));
+      },
+
+      onClose: function () {
+        reject(new Error("Payment window closed."));
+      },
+    });
+
+    handler.openIframe();
+  });
+}
+
+// ── Utilities ───────────────────────────────────────────────────────────────
 
 function parseSizes(raw) {
   if (!raw) return [];
-
   if (Array.isArray(raw)) return raw;
   if (typeof raw === "string") {
     try {
@@ -53,11 +121,20 @@ function parseSizes(raw) {
   return [];
 }
 
+// ── PaymentModal ─────────────────────────────────────────────────────────────
+
 function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onClose, onSuccess }) {
-  const [form, setForm]     = useState({ firstName: "", lastName: "", phone: "" });
-  const [errors, setErrors] = useState({});
+  const [form, setForm]       = useState({ firstName: "", lastName: "", phone: "", email: "" });
+  const [errors, setErrors]   = useState({});
   const [loading, setLoading] = useState(false);
-  const [done, setDone]     = useState(false);
+  const [done, setDone]       = useState(false);
+  const [orderId, setOrderId] = useState(null);
+
+  useEffect(() => {
+    loadPaystackScript().then(() => {
+      console.log("Paystack ready");
+    });
+  }, []);
 
   function handleChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -69,6 +146,8 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
     if (!form.firstName.trim()) e.firstName = "Required";
     if (!form.lastName.trim())  e.lastName  = "Required";
     if (!form.phone.trim())     e.phone     = "Required";
+    if (!form.email.trim())     e.email     = "Required";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Enter a valid email";
     return e;
   }
 
@@ -76,19 +155,31 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
+    // ── Layer 2: safety net session check ──
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setErrors({ submit: "Session expired. Please sign in again." });
+      return;
+    }
+
     setLoading(true);
     try {
+      // 1. Insert order
       const order = await insertOrder({
         first_name:   form.firstName.trim(),
         last_name:    form.lastName.trim(),
-        phone:        form.phone.trim(),
-        total_amount: total,
+        email:        form.email.trim(),
+        phone_number: form.phone.trim(),
+        subtotal,
+        total,
       });
 
+      setOrderId(order.id);
+
+      // 2. Insert order items
       const rows = [];
       cartItems.forEach((item) => {
         const activeSizes = selectedSizes[item.id] || [];
-
         if (activeSizes.length > 0) {
           activeSizes.forEach((size) => {
             const qty = sizeQtys[item.id]?.[size] ?? 1;
@@ -96,7 +187,8 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
               order_id:     order.id,
               product_name: item.name,
               size,
-              quantity:     qty,
+              qty,
+              price:        item.price * qty,
             });
           });
         } else {
@@ -104,20 +196,30 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
             order_id:     order.id,
             product_name: item.name,
             size:         null,
-            quantity:     1,
+            qty:          1,
+            price:        item.price,
           });
         }
       });
-
       await insertOrderItems(rows);
 
-      console.log("✅ Order saved. ID:", order.id);
+      // 3. Open Paystack → on success calls Edge Function → marks order paid
+      await payWithPaystack({
+        email:     form.email.trim(),
+        amountGhc: total,
+        orderId:   order.id,
+      });
+
+      // 4. Success — pass orderId up to Cart for Thank You page
       setDone(true);
-      setTimeout(() => { onSuccess(); }, 2200);
+      setTimeout(() => { onSuccess(order.id); }, 2200);
 
     } catch (err) {
       console.error(err);
-      setErrors({ submit: err.message || "Something went wrong." });
+      const msg = err.message === "Payment window closed."
+        ? "Payment was not completed. You can try again."
+        : err.message || "Something went wrong.";
+      setErrors({ submit: msg });
     } finally {
       setLoading(false);
     }
@@ -142,7 +244,7 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
           <div className="pm-success">
             <div className="pm-success-icon">✓</div>
             <p className="pm-success-title">Order placed!</p>
-            <p className="pm-success-sub">Your order has been saved. We'll be in touch shortly.</p>
+            <p className="pm-success-sub">Payment confirmed. We'll be in touch shortly.</p>
           </div>
         ) : (
           <div className="pm-body">
@@ -173,6 +275,19 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
                   />
                   {errors.lastName && <span className="pm-err">{errors.lastName}</span>}
                 </div>
+              </div>
+
+              <div className="pm-field">
+                <label className="pm-label">Email</label>
+                <input
+                  className={`pm-input${errors.email ? " pm-input--err" : ""}`}
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="kwame@example.com"
+                />
+                {errors.email && <span className="pm-err">{errors.email}</span>}
               </div>
 
               <div className="pm-field">
@@ -248,14 +363,14 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
   );
 }
 
+// ── Cart ─────────────────────────────────────────────────────────────────────
+
 export default function Cart() {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, clearCart } = useCart();
 
   useEffect(() => {
-    if (cartItems.length === 0) {
-      navigate("/");
-    }
+    if (cartItems.length === 0) navigate("/");
   }, [cartItems, navigate]);
 
   const [selectedSizes, setSelectedSizes]       = useState({});
@@ -263,6 +378,8 @@ export default function Cart() {
   const [focusedSize, setFocusedSize]           = useState({});
   const [sizeError, setSizeError]               = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [authError, setAuthError]               = useState("");
+  const [payoutLoading, setPayoutLoading]       = useState(false);
 
   function getItemTotalQty(itemId) {
     const qtys  = sizeQtys[itemId] || {};
@@ -307,28 +424,42 @@ export default function Cart() {
     });
   }
 
-  function handlePayout() {
+  async function handlePayout() {
+    setAuthError("");
+
+    // 1. Check sizes
     const errors = {};
     cartItems.forEach((item) => {
       if ((selectedSizes[item.id] || []).length === 0) errors[item.id] = true;
     });
     if (Object.keys(errors).length > 0) { setSizeError(errors); return; }
+
+    // 2. Check live session
+    setPayoutLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    setPayoutLoading(false);
+
+    if (!session) {
+      setAuthError("You must be signed in to place an order.");
+      return;
+    }
+
+    // 3. Open modal
     setShowPaymentModal(true);
   }
 
-  function handlePaymentSuccess() {
+  // ── Receives orderId from PaymentModal after success ──
+  function handlePaymentSuccess(orderId) {
     setShowPaymentModal(false);
     clearCart();
-    navigate("/");
+    navigate("/order-success", { state: { orderId } });
   }
 
-  // Get the first cart item's image for the left side
   const mainImage = cartItems.length > 0 ? cartItems[0].image : null;
 
   return (
     <div className="cart-page">
       <TopNav />
-
 
       {showPaymentModal && (
         <PaymentModal
@@ -343,18 +474,16 @@ export default function Cart() {
       )}
 
       <div className="cart-split-layout">
-        {/* Left side - Product Image */}
         <div className="cart-image-side">
-          {mainImage && (
-            <img src={mainImage} alt="Product" className="cart-main-image" />
-          )}
+          {mainImage && <img src={mainImage} alt="Product" className="cart-main-image" />}
         </div>
 
-        {/* Right side - Cart Content */}
         <div className="cart-content-side">
           <header className="cart-header-split">
             <div className="cart-header-top">
-              <span className="cart-continue-link-split" onClick={() => navigate("/")}>Continue shopping →</span>
+              <span className="cart-continue-link-split" onClick={() => navigate("/")}>
+                Continue shopping →
+              </span>
             </div>
           </header>
 
@@ -383,12 +512,6 @@ export default function Cart() {
                           <span className="cart-item-tag-split">New trend</span>
                           <p className="cart-item-brand-split">Emsarj</p>
                           <p className="cart-item-name-split">{item.name}</p>
-
-                          {/* Removed stock text: "Last 1 left" (per request) */}
-                          {/* {activeSizes.length === 0 && (
-                            <span className="cart-item-stock-split">Last 1 left</span>
-                          )} */}
-
 
                           <div className="cart-size-section-split">
                             <p className="cart-size-heading-split">
@@ -441,7 +564,6 @@ export default function Cart() {
                   )}
                 </div>
 
-                {/* Payment Summary */}
                 <aside className="cart-right-split">
                   <h3 className="cart-payment-title-split">Payment</h3>
 
@@ -484,12 +606,50 @@ export default function Cart() {
                     </div>
                   )}
 
+                  {/* ── Auth error message ── */}
+                  {authError && (
+                    <div style={{
+                      margin: "12px 0",
+                      padding: "12px 14px",
+                      background: "#fff0f0",
+                      border: "1px solid #fca5a5",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      color: "#b91c1c",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                    }}>
+                      <span>⚠ {authError}</span>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          onClick={() => navigate("/signin", { state: { from: "/cart" } })}
+                          style={{
+                            flex: 1, padding: "8px",
+                            background: "#111", color: "#fff",
+                            border: "none", borderRadius: "6px",
+                            fontSize: "13px", fontWeight: 600, cursor: "pointer",
+                          }}
+                        >Sign In</button>
+                        <button
+                          onClick={() => navigate("/signup", { state: { from: "/cart" } })}
+                          style={{
+                            flex: 1, padding: "8px",
+                            background: "transparent", color: "#111",
+                            border: "1px solid #111", borderRadius: "6px",
+                            fontSize: "13px", fontWeight: 600, cursor: "pointer",
+                          }}
+                        >Register</button>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     className="cart-payout-btn-split"
                     onClick={handlePayout}
-                    disabled={cartItems.length === 0}
+                    disabled={cartItems.length === 0 || payoutLoading}
                   >
-                    Pay out
+                    {payoutLoading ? "Checking…" : "Pay out"}
                   </button>
 
                   {Object.values(sizeError).some(Boolean) && (

@@ -98,7 +98,7 @@ export default function EmsarjFooter() {
             position: 'relative',
             top: isMobile ? '20px' : '0' // Changed from 10px to 20px
           }}>
-            <span className="email-label">EMAIL</span>
+            <span className="email-label">Message</span>
             <input
               type="email"
               className="footer-email-input"

@@ -1,14 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import supabase from "../supabasefol/supabaseClient"; // ← import your client
+import supabase from "../supabasefol/supabaseClient";
 
 const AuthContext = createContext();
 
-// AuthProvider shares auth state and functions across the app
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);
 
-  // 🔥 Load full user profile (auth + role) into `user`
+  // ── Load full user profile (auth + role) into `user` ──
   const loadUser = async (authUser) => {
     if (!authUser) {
       setUser(null);
@@ -31,17 +30,19 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    // Get current session on load
+    // ── Get current session on load using getSession ──
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       loadUser(data.session?.user ?? null);
     });
 
-    // Listen for auth state changes
+    // ── Listen for auth state changes ──
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        loadUser(session?.user ?? null);
+      async (_event, newSession) => {
+        // ── Always use getSession for the fresh token ──
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        loadUser(data.session?.user ?? null);
       }
     );
 
@@ -50,37 +51,29 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // SIGN UP FUNCTION
+  // ── SIGN UP ──
   const signUp = async ({ name, email, number, location, password }) => {
-    // 1. Create auth user
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
 
     const authUser = data.user;
 
-    // 2. Insert into Users table
     if (authUser) {
       const { error: usersError } = await supabase
         .from("users")
-        .insert([
-          {
-            id: authUser.id,
-            name,
-            email,
-            number,
-            location,
-            role: "user", // 🔥 default role
-          },
-        ]);
+        .insert([{
+          id:       authUser.id,
+          name,
+          email,
+          number,
+          location,
+          role:     "user",
+        }]);
 
       if (usersError) throw usersError;
     }
 
-    // 3. Refresh session/user state
+    // ── Use getSession after signup ──
     const { data: latest } = await supabase.auth.getSession();
     setSession(latest.session);
     await loadUser(latest.session?.user ?? null);
@@ -88,7 +81,7 @@ export function AuthProvider({ children }) {
     return authUser;
   };
 
-  // SIGN IN FUNCTION
+  // ── SIGN IN ──
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -98,16 +91,16 @@ export function AuthProvider({ children }) {
     if (error) {
       console.error("Supabase SignIn Error:", {
         message: error.message,
-        status: error.status,
-        code: error.code,
+        status:  error.status,
+        code:    error.code,
       });
 
       const errorMessages = {
         "Invalid login credentials": "Incorrect email or password. Please try again.",
-        "Email not confirmed": "Please verify your email before signing in.",
-        "Too many requests": "Too many attempts. Please wait a few minutes and try again.",
-        "User not found": "No account found with this email.",
-        "Network request failed": "Network error. Please check your connection.",
+        "Email not confirmed":       "Please verify your email before signing in.",
+        "Too many requests":         "Too many attempts. Please wait a few minutes and try again.",
+        "User not found":            "No account found with this email.",
+        "Network request failed":    "Network error. Please check your connection.",
       };
 
       const friendlyMessage = Object.entries(errorMessages).find(([key]) =>
@@ -115,35 +108,35 @@ export function AuthProvider({ children }) {
       );
 
       throw new Error(
-        friendlyMessage ? friendlyMessage[1] : error.message || "Something went wrong. Please try again."
+        friendlyMessage
+          ? friendlyMessage[1]
+          : error.message || "Something went wrong. Please try again."
       );
     }
 
-    // Update session/user state
-    setSession(data.session);
-    await loadUser(data.user);
+    // ── Use getSession after sign in for fresh token ──
+    const { data: sessionData } = await supabase.auth.getSession();
+    setSession(sessionData.session);
+    await loadUser(sessionData.session?.user ?? null);
 
-    // 🔥 Fetch role directly so SignIn page can redirect immediately
+    // ── Fetch role so SignIn page can redirect immediately ──
     const { data: profile } = await supabase
       .from("users")
       .select("role")
-      .eq("id", data.user.id)
+      .eq("id", sessionData.session?.user?.id)
       .single();
 
     return { ...data, role: profile?.role ?? "user" };
   };
 
-  // SIGN OUT FUNCTION
+  // ── SIGN OUT ──
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-
     if (error) throw error;
-
     setSession(null);
     setUser(null);
   };
 
-  // Exposed to all consumers via useAuth()
   const value = {
     signUp,
     signIn,
@@ -165,13 +158,8 @@ export function AuthProvider({ children }) {
   );
 }
 
-// Custom Hook
 export function useAuth() {
   const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
   return context;
 }

@@ -8,7 +8,7 @@ import { IconGrid, IconPackage, IconShoppingBag, IconUsers, IconCreditCard, Icon
 const NAV = [
   { id: "categories", label: "Categories", Icon: IconGrid },
   { id: "products", label: "Products", Icon: IconPackage },
-  { id: "orderItems", label: "Order Items", Icon: IconShoppingBag },
+  { id: "orderItems", label: "Orders", Icon: IconShoppingBag },
   { id: "users", label: "Users", Icon: IconUsers },
   { id: "payments", label: "Payments", Icon: IconCreditCard },
   { id: "emails", label: "Emails", Icon: IconMail }, // ✅ ADDED EMAILS

@@ -5,137 +5,125 @@ import { IconEye, IconEyeOff } from "../components/common/Icons";
 import emmyLogo from "../assets/emmy.png";
 
 export default function SignIn() {
-  const { signIn, supabase } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [message, setMessage] = useState("");
+
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+
+    setIsLoading(true);
+    setIsError(false);
+    setMessage("");
 
     try {
-      const data = await signIn(formData.email, formData.password);
-
-      const { data: roleData, error: roleError } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", data.user.id)
-        .single();
-
-      if (roleError && roleError.code !== "PGRST116") throw roleError;
-
-      navigate(roleData?.role === "admin" ? "/dashboard" : "/");
+      const result = await signIn(formData.email, formData.password);
+      if (result) {
+        navigate(result.role === "admin" ? "/dashboard" : "/");
+      }
     } catch (err) {
-      setError(err.message);
+      setIsError(true);
+      setMessage(err?.message || "Something went wrong. Please try again.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
+
+
   };
 
+
   return (
-    <>
-      <div style={styles.page}>
-        <div style={styles.card}>
-          {/* Logo */}
-          <div style={styles.logoWrap}>
-            <img src={emmyLogo} alt="EMSarj" style={styles.logo} />
+    <div style={styles.page}>
+      <div style={styles.card}>
+        {/* Logo */}
+        <div style={styles.logoWrap}>
+          <img src={emmyLogo} alt="EMSarj" style={styles.logo} />
+        </div>
+
+        <p style={styles.subtitle}>Sign in to your account</p>
+
+        {/* Auth-level error from useAuthStatus */}
+        {isError && <div style={styles.errorBox}>{message}</div>}
+
+        <form onSubmit={handleSubmit} style={styles.form}>
+          {/* Email */}
+          <div style={styles.field}>
+            <label htmlFor="email" style={styles.label}>Email</label>
+            <input
+              type="email"
+              id="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              style={styles.input}
+              onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
+              onBlur={(e) => Object.assign(e.target.style, styles.input)}
+            />
           </div>
 
-          <p style={styles.subtitle}>Sign in to your account</p>
-
-          {error && <div style={styles.errorBox}>{error}</div>}
-
-          <form onSubmit={handleSubmit} style={styles.form}>
-            {/* Email */}
-            <div style={styles.field}>
-              <label htmlFor="email" style={styles.label}>
-                Email
-              </label>
+          {/* Password */}
+          <div style={styles.field}>
+            <div style={styles.labelRow}>
+              <label htmlFor="password" style={styles.label}>Password</label>
+              <Link to="/resetpassword" style={styles.resetLink}>Forgot password?</Link>
+            </div>
+            <div style={styles.passwordWrap}>
               <input
-                type="email"
-                id="email"
-                value={formData.email}
+                type={showPassword ? "text" : "password"}
+                id="password"
+                value={formData.password}
                 onChange={handleChange}
                 required
-                autoComplete="email"
-                placeholder="you@example.com"
-                style={styles.input}
-                onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
-                onBlur={(e) => Object.assign(e.target.style, styles.input)}
+                autoComplete="current-password"
+                placeholder="••••••••"
+                style={{ ...styles.input, paddingRight: "42px" }}
+                onFocus={(e) =>
+                  Object.assign(e.target.style, { ...styles.inputFocus, paddingRight: "42px" })
+                }
+                onBlur={(e) =>
+                  Object.assign(e.target.style, { ...styles.input, paddingRight: "42px" })
+                }
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={styles.eyeBtn}
+              >
+                {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+              </button>
             </div>
+          </div>
 
-            {/* Password */}
-            <div style={styles.field}>
-              <div style={styles.labelRow}>
-                <label htmlFor="password" style={styles.label}>
-                  Password
-                </label>
-                <Link to="/resetpassword" style={styles.resetLink}>
-                  Forgot password?
-                </Link>
-              </div>
-              <div style={styles.passwordWrap}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  style={{ ...styles.input, paddingRight: "42px" }}
-                  onFocus={(e) =>
-                    Object.assign(e.target.style, {
-                      ...styles.inputFocus,
-                      paddingRight: "42px",
-                    })
-                  }
-                  onBlur={(e) =>
-                    Object.assign(e.target.style, {
-                      ...styles.input,
-                      paddingRight: "42px",
-                    })
-                  }
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={styles.eyeBtn}
-                >
-                  {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-                </button>
-              </div>
-            </div>
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={isLoading ? { ...styles.submitBtn, opacity: 0.6 } : styles.submitBtn}
+          >
+            {isLoading ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={loading ? { ...styles.submitBtn, opacity: 0.6 } : styles.submitBtn}
-            >
-              {loading ? "Signing in…" : "Sign In"}
-            </button>
-          </form>
-
-          <p style={styles.footer}>
-            Don't have an account?{" "}
-            <Link to="/signup" style={styles.link}>
-              Register
-            </Link>
-          </p>
-        </div>
+        <p style={styles.footer}>
+          Don't have an account?{" "}
+          <Link to="/signup" style={styles.link}>Register</Link>
+        </p>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -146,10 +134,9 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f5f5f5",
-    padding: "0 16px 0",
+    padding: "0 16px",
     fontFamily: "'Georgia', serif",
   },
-
   card: {
     backgroundColor: "#ffffff",
     border: "1px solid #e0e0e0",
@@ -159,16 +146,8 @@ const styles = {
     maxWidth: "380px",
     boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
   },
-  logoWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "8px",
-  },
-  logo: {
-    height: "48px",
-    width: "auto",
-    objectFit: "contain",
-  },
+  logoWrap: { display: "flex", justifyContent: "center", marginBottom: "8px" },
+  logo: { height: "48px", width: "auto", objectFit: "contain" },
   subtitle: {
     textAlign: "center",
     fontSize: "13px",
@@ -185,16 +164,8 @@ const styles = {
     color: "#b91c1c",
     marginBottom: "16px",
   },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "5px",
-  },
+  form: { display: "flex", flexDirection: "column", gap: "16px" },
+  field: { display: "flex", flexDirection: "column", gap: "5px" },
   labelRow: {
     display: "flex",
     alignItems: "center",
@@ -230,9 +201,7 @@ const styles = {
     color: "#111",
     boxSizing: "border-box",
   },
-  passwordWrap: {
-    position: "relative",
-  },
+  passwordWrap: { position: "relative" },
   eyeBtn: {
     position: "absolute",
     right: "10px",
@@ -260,12 +229,7 @@ const styles = {
     letterSpacing: "0.04em",
     transition: "background-color 0.15s",
   },
-  footer: {
-    textAlign: "center",
-    marginTop: "16px",
-    fontSize: "13px",
-    color: "#888",
-  },
+  footer: { textAlign: "center", marginTop: "16px", fontSize: "13px", color: "#888" },
   resetLink: {
     fontSize: "12px",
     color: "#888",
