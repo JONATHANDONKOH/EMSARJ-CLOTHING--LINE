@@ -4,7 +4,7 @@ import { useCart } from "../cartContext/cartprovider";
 import supabase from "../supabasefol/supabaseClient";
 import TopNav from "../components/common/TopNav";
 
-const DELIVERY_FEE = 50;
+const DELIVERY_FEE = 45;
 const PAYSTACK_PUBLIC_KEY  = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 const EDGE_FUNCTION_URL    = "https://bdynpkxcziibqwgwlugt.supabase.co/functions/v1/verifyAndMarkPaid";
 

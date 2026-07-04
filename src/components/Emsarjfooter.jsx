@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import footImage from "../assets/emsy.PNG";
+import footImage from "../assets/toyyyeee.PNG";
 import { insertEmail } from "../context/emailfunction";
 
 const socials = [
