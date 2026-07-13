@@ -3,6 +3,13 @@ import { SIZES } from "../../constants";
 import { InputField } from "../common/InputField";
 import { IconImage, IconCheck } from "../common/Icons";
 import supabase from "../../supabasefol/supabaseClient";
+import { useAuth } from "../../context/authContext";
+// adjust path if your auth context lives elsewhere
+
+// Your Express/Cloudinary upload server.
+// Put VITE_UPLOAD_API_URL=http://localhost:5000 in your frontend .env for local dev,
+// and swap it to your deployed backend URL in production.
+const UPLOAD_API_URL = import.meta.env.VITE_UPLOAD_API_URL || "http://localhost:5000";
 
 export function ProductForm({
   initial     = {},
@@ -22,6 +29,7 @@ export function ProductForm({
   const [errors, setErrors]             = useState({});
   const [loading, setLoading]           = useState(false);
   const fileRef                         = useRef();
+  const { session }                     = useAuth();
 
   useEffect(() => {
     async function fetchCategories() {
@@ -59,30 +67,56 @@ export function ProductForm({
     return errs;
   }
 
-  async function uploadImage(file, catId) {
-    const ext      = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const filePath = `${catId}/${fileName}`;
+  // ── Cloudinary upload via Express backend (JWT-protected) ─────
+  async function uploadImage(file) {
+    // No session at all → user isn't signed in, or auth context hasn't loaded yet
+    if (!session) {
+      throw new Error("You must be signed in to upload images.");
+    }
 
-    const { error: uploadError } = await supabase.storage
-      .from("product-images")
-      .upload(filePath, file, { cacheControl: "3600", upsert: false });
+    // Session exists but no access_token (shouldn't normally happen, but guard anyway)
+    if (!session.access_token) {
+      throw new Error("Your session is missing an access token. Please sign in again.");
+    }
 
-    if (uploadError) throw uploadError;
+    const formData = new FormData();
+    formData.append("image", file); // must match multer field name: upload.single("image")
 
-    const { data: urlData } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(filePath);
+    let res;
+    try {
+      res = await fetch(`${UPLOAD_API_URL}/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: formData,
+      });
+    } catch (networkErr) {
+      throw new Error("Could not reach the upload server. Check your connection and try again.");
+    }
 
-    return urlData.publicUrl;
+    // Expired/invalid token → backend rejects with 401
+    if (res.status === 401) {
+      throw new Error("Your session has expired. Please sign in again and retry the upload.");
+    }
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      throw new Error(`Image upload failed: ${errText || res.statusText}`);
+    }
+
+    const data = await res.json();
+    if (!data.url) throw new Error("Upload succeeded but no URL was returned");
+
+    return data.url; // Cloudinary secure_url
   }
 
-  async function deleteOldImage(imageUrl) {
-    const marker = "/product-images/";
-    const idx    = (imageUrl || "").indexOf(marker);
-    if (idx === -1) return;
-    const storagePath = imageUrl.slice(idx + marker.length);
-    await supabase.storage.from("product-images").remove([storagePath]);
+  // Old Supabase-storage cleanup no longer applies since images now live on
+  // Cloudinary. Left as a safe no-op so existing calls don't break; wire this
+  // up to a DELETE /upload/:public_id route on your server if you want to
+  // actually delete old Cloudinary images later.
+  async function deleteOldImage(_imageUrl) {
+    return;
   }
 
   async function handleSubmit(e) {
@@ -95,8 +129,8 @@ export function ProductForm({
       // ── Step 1: upload image if new one was picked ─────────────
       let image_url = initial.image_url || null;
       if (imageFile) {
-        if (initial.image_url) deleteOldImage(initial.image_url);
-        image_url = await uploadImage(imageFile, categoryId);
+        if (initial.image_url) await deleteOldImage(initial.image_url);
+        image_url = await uploadImage(imageFile);
       }
 
       const payload = {
