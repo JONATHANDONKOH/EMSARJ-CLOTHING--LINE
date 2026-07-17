@@ -1,4 +1,10 @@
 {
+  "name": "emsarj-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.2",
     "cloudinary": "^2.10.0",
