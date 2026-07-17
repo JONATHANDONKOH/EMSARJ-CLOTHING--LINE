@@ -9,7 +9,7 @@ import { useAuth } from "../../context/authContext";
 // Your Express/Cloudinary upload server.
 // Put VITE_UPLOAD_API_URL=http://localhost:5000 in your frontend .env for local dev,
 // and swap it to your deployed backend URL in production.
-const UPLOAD_API_URL = import.meta.env.VITE_UPLOAD_API_URL || "http://localhost:5000";
+const UPLOAD_API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export function ProductForm({
   initial     = {},
