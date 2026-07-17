@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-import { authMiddleware } from "../Middleware/AuthMiddleware.js";
+import { authMiddleware } from "../Middleware/Authmiddleware.js";
 
 dotenv.config();
 
