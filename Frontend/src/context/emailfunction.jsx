@@ -1,28 +1,32 @@
+// src/context/emailfunction.js
 import supabase from "../supabasefol/supabaseClient";
 
+/**
+ * Insert a message from the currently signed-in user into the `emails` table.
+ * Matches your RLS policy "Users send messages", which requires:
+ *   auth.uid() = user_id AND sender_role = 'user'
+ */
 export async function insertEmail(message) {
-  // Get the currently logged-in user
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const trimmed = (message || "").trim();
+  if (!trimmed) return null;
 
-  if (userError || !user) {
-    console.error("No user logged in");
-    return { error: "User must be logged in" };
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error("You must be signed in to send a message.");
   }
 
-  // Insert into emails table
   const { data, error } = await supabase
     .from("emails")
     .insert([
       {
-        user_id: user.id,   // foreign key to users table
-        message: message    // optional message
-      }
-    ]);
+        user_id: session.user.id,
+        sender_role: "user",
+        message: trimmed,
+      },
+    ])
+    .select()
+    .single();
 
-  if (error) {
-    console.error("Insert failed:", error);
-    return { error };
-  }
-
-  return { data };
+  if (error) throw error;
+  return data;
 }

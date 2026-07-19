@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import footImage from "../assets/toyyyeee.PNG";
 import { insertEmail } from "../context/emailfunction";
 
@@ -57,6 +57,8 @@ export default function EmsarjFooter() {
   const [isTyping, setIsTyping] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [sendError, setSendError] = useState("");
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -65,6 +67,15 @@ export default function EmsarjFooter() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Auto-grow the textarea as text wraps to new lines, so it behaves
+  // like the old single-line input until the text actually needs more room.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [email]);
 
   const buttonIcon = useMemo(() => {
     if (isSending) return "...";
@@ -75,11 +86,17 @@ export default function EmsarjFooter() {
     if (isSending) return;
     const trimmed = email.trim();
     if (!trimmed) return;
+    setSendError("");
     try {
       setIsSending(true);
-      await insertEmail(trimmed, "");
+      await insertEmail(trimmed);
       setEmail("");
       setIsTyping(false);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+    } catch (err) {
+      setSendError(err.message || "Something went wrong sending your message.");
     } finally {
       setIsSending(false);
     }
@@ -99,14 +116,31 @@ export default function EmsarjFooter() {
             top: isMobile ? '20px' : '0' // Changed from 10px to 20px
           }}>
             <span className="email-label">Message</span>
-            <input
-              type="email"
+            <textarea
+              ref={textareaRef}
               className="footer-email-input"
               value={email}
               onChange={(e) => { setEmail(e.target.value); setIsTyping(true); }}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onSubmitEmail(); } }}
+              onKeyDown={(e) => {
+                // Enter sends the message, Shift+Enter adds a line break
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  onSubmitEmail();
+                }
+              }}
               placeholder="send your message here"
               disabled={isSending}
+              rows={1}
+              style={{
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                resize: "none",
+                overflow: "hidden",
+                fontFamily: "inherit",
+                fontSize: "inherit",
+                lineHeight: "inherit",
+              }}
             />
             <button
               className="footer-submit-btn"
@@ -119,6 +153,18 @@ export default function EmsarjFooter() {
               {buttonIcon}
             </button>
           </div>
+
+          {sendError && (
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontSize: "12px",
+                color: "#ef4444",
+              }}
+            >
+              {sendError}
+            </p>
+          )}
 
           {/* ✅ MODIFIED: Social section with relative positioning on small screens - now 20px */}
           <div className="footer-social-section" style={{

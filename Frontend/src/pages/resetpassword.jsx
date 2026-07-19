@@ -1,21 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import emmyLogo from "../assets/emmy.png";
 
 export default function ResetPassword() {
   const { supabase } = useAuth();
-  const [newPassword, setNewPassword] = useState("");
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleReset = async (e) => {
+  // "request"  -> user enters email, we send the reset link (resetPasswordForEmail)
+  // "update"   -> user arrived here FROM the email link, we let them set a new password
+  const [mode, setMode] = useState("request");
+
+  const [email, setEmail]             = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [error, setError]             = useState("");
+  const [message, setMessage]         = useState("");
+  const [loading, setLoading]         = useState(false);
+
+  // Supabase fires a PASSWORD_RECOVERY auth event when the user lands here
+  // via the link from the reset email (it also sets a temporary session).
+  // We listen for that to flip into "update" mode automatically.
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setMode("update");
+      }
+    });
+
+    return () => {
+      listener?.subscription?.unsubscribe();
+    };
+  }, [supabase]);
+
+  // ── Step 1: request the reset email ─────────────────────────────
+  const handleRequestReset = async (e) => {
     e.preventDefault();
     setError("");
+    setMessage("");
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.updateUser({
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        // Must be a URL that's allow-listed under
+        // Supabase Dashboard → Authentication → URL Configuration → Redirect URLs.
+        // This should point back to this same ResetPassword page.
+        redirectTo: "https://emsarj.net/reset-password",
+      });
+
+      if (error) throw error;
+
+      setMessage("Check your email for a password reset link.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Step 2: set the new password (after clicking the email link) ─
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
@@ -36,38 +84,79 @@ export default function ResetPassword() {
           <img src={emmyLogo} alt="EMSarj" style={styles.logo} />
         </div>
 
-        <p style={styles.subtitle}>Reset your password</p>
+        <p style={styles.subtitle}>
+          {mode === "request" ? "Reset your password" : "Set a new password"}
+        </p>
 
         {error && <div style={styles.errorBox}>{error}</div>}
-        {message && <div style={{ ...styles.errorBox, backgroundColor: "#f0fff0", borderColor: "#34d399", color: "#065f46" }}>{message}</div>}
-
-        <form onSubmit={handleReset} style={styles.form}>
-          {/* New Password */}
-          <div style={styles.field}>
-            <label htmlFor="newPassword" style={styles.label}>
-              New Password
-            </label>
-            <input
-              type="password"
-              id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              style={styles.input}
-              onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
-              onBlur={(e) => Object.assign(e.target.style, styles.input)}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={loading ? { ...styles.submitBtn, opacity: 0.6 } : styles.submitBtn}
+        {message && (
+          <div
+            style={{
+              ...styles.errorBox,
+              backgroundColor: "#f0fff0",
+              borderColor: "#34d399",
+              color: "#065f46",
+            }}
           >
-            {loading ? "Updating…" : "Update Password"}
-          </button>
-        </form>
+            {message}
+          </div>
+        )}
+
+        {mode === "request" ? (
+          <form onSubmit={handleRequestReset} style={styles.form}>
+            <div style={styles.field}>
+              <label htmlFor="email" style={styles.label}>
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@example.com"
+                style={styles.input}
+                onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
+                onBlur={(e) => Object.assign(e.target.style, styles.input)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={loading ? { ...styles.submitBtn, opacity: 0.6 } : styles.submitBtn}
+            >
+              {loading ? "Sending…" : "Send Reset Link"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleUpdatePassword} style={styles.form}>
+            <div style={styles.field}>
+              <label htmlFor="newPassword" style={styles.label}>
+                New Password
+              </label>
+              <input
+                type="password"
+                id="newPassword"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                style={styles.input}
+                onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
+                onBlur={(e) => Object.assign(e.target.style, styles.input)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={loading ? { ...styles.submitBtn, opacity: 0.6 } : styles.submitBtn}
+            >
+              {loading ? "Updating…" : "Update Password"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

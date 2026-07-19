@@ -1,4 +1,4 @@
-export const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34", "36"];
+export const SIZES = ["XS", "S", "M", "L", "XL", "XXL","XXXL", "28", "30", "32", "34", "36"];
 export const MAX_PRODUCTS = 20;
 
 export const initialCategories = [

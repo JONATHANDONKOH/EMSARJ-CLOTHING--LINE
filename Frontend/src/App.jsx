@@ -14,6 +14,7 @@ import Orders from "./pages/ordder";
 import ResetPassword from "./pages/resetpassword";
 import WishlistPage from "./pages/WishlistPage";
 import Shop from "./pages/shop";
+import { UserMessages } from "./pages/UserMessages";
 
 import TopNav from "./components/common/TopNav";
 import EmsarjFooter from "./components/Emsarjfooter";
@@ -52,6 +53,7 @@ function AppContent() {
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/messages" element={<UserMessages />} />
         </Routes>
       </main>
 

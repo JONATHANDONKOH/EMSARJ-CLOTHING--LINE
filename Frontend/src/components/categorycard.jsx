@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../supabasefol/supabaseClient";
 import { useCart } from "../cartContext/cartprovider";
@@ -249,19 +249,48 @@ function CategoryCard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      setLoading(true);
+  // ── Fetch function moved outside useEffect so it's reusable ──
+  // (unchanged Supabase query / logic, just no longer trapped inside the effect)
+  const fetchProducts = useCallback(async () => {
+    console.log("🔄 fetchProducts: starting fetch...");
+    setLoading(true);
+    try {
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .order("created_at", { ascending: false });
+
+      console.log("🔄 fetchProducts: response received", { data, error });
+
       if (error) console.error("❌ Fetch error:", error.message);
       setProducts(data || []);
+      console.log("✅ fetchProducts: products set, count =", (data || []).length);
+    } catch (err) {
+      console.error("❌ fetchProducts threw an exception:", err);
+    } finally {
       setLoading(false);
+      console.log("✅ fetchProducts: loading set to false");
     }
-    fetchProducts();
   }, []);
+
+  // Initial fetch on mount — same as before
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Re-fetch whenever the tab/page becomes visible again.
+  // This covers the case where the browser restores the page from
+  // cache/back-forward cache (e.g. reopening the tab or hitting back)
+  // and the products list would otherwise stay stale/empty.
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        fetchProducts();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [fetchProducts]);
 
   function isInCart(id) {
     return cartItems.some((item) => item.id === id);
