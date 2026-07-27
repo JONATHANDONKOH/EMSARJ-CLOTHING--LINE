@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const pool = require("../Config/db");
 
 const PUBLIC_FIELDS =
   "id, name, price, sizes, image_url, category_id, show_on_hero, featured, trending, created_at";
