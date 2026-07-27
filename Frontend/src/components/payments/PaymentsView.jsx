@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import supabase from "../../supabasefol/supabaseClient"; // your initialized Supabase client
+import { useAuth } from "../../context/authContext";
 import { IconCreditCard } from "../common/Icons";
 import { Modal } from "../common/Modal";
+
+// Base URL for the Express backend. Adjust the env var name if yours differs.
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 // Mapping for status colors and method icons
 const statusColors = {
@@ -18,21 +21,23 @@ const methodIcons = {
 };
 
 export function PaymentsView({ userRole }) {
+  const { session } = useAuth();
   const [payments, setPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  // Fetch payments from Supabase
+  // Fetch payments from the Express backend
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      let { data, error } = await supabase
-        .from("payments")
-        .select("*")
-        .order("date", { ascending: false });
+      const res = await fetch(`${API_URL}/api/payments`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error(`Failed to fetch payments (${res.status})`);
+
+      const data = await res.json();
       setPayments(data || []);
     } catch (err) {
       console.error("Error fetching payments:", err.message);
@@ -42,8 +47,9 @@ export function PaymentsView({ userRole }) {
   };
 
   useEffect(() => {
+    if (session === undefined) return; // still resolving auth state
     fetchPayments();
-  }, []);
+  }, [session]);
 
   // Delete a payment (admins only)
   const handleDelete = async (paymentId) => {
@@ -52,8 +58,13 @@ export function PaymentsView({ userRole }) {
     if (!confirmDelete) return;
 
     try {
-      const { error } = await supabase.from("payments").delete().eq("id", paymentId);
-      if (error) throw error;
+      const res = await fetch(`${API_URL}/api/payments/${paymentId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+
+      if (!res.ok) throw new Error(`Failed to delete payment (${res.status})`);
+
       setPayments(payments.filter(p => p.id !== paymentId));
     } catch (err) {
       console.error("Error deleting payment:", err.message);

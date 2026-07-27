@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import supabase from "../supabasefol/supabaseClient";
 import { useCart } from "../cartContext/cartprovider";
 
-function resolveImageUrl(imageUrl) {
-  if (!imageUrl) return null;
-  if (imageUrl.startsWith("http")) return imageUrl;
-  return supabase.storage.from("product-images").getPublicUrl(imageUrl).data.publicUrl;
-}
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export default function CategoryPage() {
   const { id } = useParams();
@@ -36,29 +31,46 @@ export default function CategoryPage() {
   }, [id]);
 
   async function fetchCategoryName(categoryId) {
-    const { data } = await supabase
-      .from("categories")
-      .select("name")
-      .eq("id", categoryId)
-      .single();
-    if (data) setCategoryName(data.name);
+    try {
+      const res = await fetch(`${API_URL}/categories/${categoryId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data?.name) setCategoryName(data.name);
+    } catch (err) {
+      console.error("Category fetch error:", err.message);
+    }
   }
 
   async function fetchByCategory(categoryId) {
     setLoading(true);
     setNotFound(false);
 
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("category_id", categoryId)
-      .order("created_at", { ascending: false });
+    try {
+      const res = await fetch(`${API_URL}/products/category/${categoryId}`);
+      const data = await res.json().catch(() => []);
 
-    setLoading(false);
+      setLoading(false);
 
-    if (error) { console.error("Category fetch error:", error.message); return; }
-    if (!data || data.length === 0) { setNotFound(true); setProducts([]); return; }
-    setProducts(data);
+      if (!res.ok) {
+        console.error("Category fetch error:", data?.message || res.statusText);
+        setNotFound(true);
+        setProducts([]);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        setNotFound(true);
+        setProducts([]);
+        return;
+      }
+
+      setProducts(data);
+    } catch (err) {
+      setLoading(false);
+      console.error("Category fetch error:", err.message);
+      setNotFound(true);
+      setProducts([]);
+    }
   }
 
   function isInCart(productId) {
@@ -111,7 +123,7 @@ export default function CategoryPage() {
         }}>
           {products.map((product) => {
             const alreadyAdded = isInCart(product.id);
-            const imgUrl = resolveImageUrl(product.image_url);
+            const imgUrl = product.image_url || null;
 
             return (
               <div 

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
-import supabase from "../supabasefol/supabaseClient";
 import TopNav from "../components/common/TopNav";
 
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+
 export default function Account() {
-  const { user } = useAuth();
+  const { user, session, refresh } = useAuth();
   const navigate  = useNavigate();
 
   const [form, setForm] = useState({
@@ -21,33 +22,34 @@ export default function Account() {
   const [error, setError]     = useState("");
 
   useEffect(() => {
-    if (!user) { navigate("/signin"); return; }
+    if (session === undefined) return; // auth still resolving
+    if (!session || !user) { navigate("/signin"); return; }
     fetchProfile();
-  }, [user, navigate]);
+  }, [session, user, navigate]);
 
   async function fetchProfile() {
     setLoading(true);
 
-    // ── Use getSession not user.id ──
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { navigate("/signin"); return; }
+    try {
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
 
-    const { data, error } = await supabase
-      .from("users")
-      .select("name, email, number, location")
-      .eq("id", session.user.id)
-      .single();
+      const data = await res.json().catch(() => ({}));
 
-    if (error) {
-      console.error("Failed to fetch profile:", error.message);
-      setError("Could not load your profile.");
-    } else if (data) {
+      if (!res.ok) {
+        throw new Error(data.message || "Could not load your profile.");
+      }
+
       setForm({
         name:     data.name     || "",
         email:    data.email    || "",
         number:   data.number   || "",
         location: data.location || "",
       });
+    } catch (err) {
+      console.error("Failed to fetch profile:", err.message);
+      setError("Could not load your profile.");
     }
 
     setLoading(false);
@@ -65,28 +67,39 @@ export default function Account() {
     setMessage("");
     setError("");
 
-    // ── Use getSession for update too ──
-    const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       setError("Session expired. Please sign in again.");
       setSaving(false);
       return;
     }
 
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({
-        name:     form.name,
-        number:   form.number,
-        location: form.location,
-      })
-      .eq("id", session.user.id);
+    try {
+      const res = await fetch(`${API_URL}/auth/me`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          name:     form.name,
+          number:   form.number,
+          location: form.location,
+        }),
+      });
 
-    if (updateError) {
-      console.error("Failed to update profile:", updateError.message);
-      setError("Failed to update your profile. Please try again.");
-    } else {
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update your profile. Please try again.");
+      }
+
       setMessage("Profile updated successfully.");
+      // Keep authContext's `user` (used elsewhere, e.g. TopNav) in sync
+      // with what was just saved.
+      await refresh();
+    } catch (err) {
+      console.error("Failed to update profile:", err.message);
+      setError(err.message || "Failed to update your profile. Please try again.");
     }
 
     setSaving(false);

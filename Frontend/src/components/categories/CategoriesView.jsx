@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { IconPlus, IconGrid, IconTrash } from "../common/Icons";
 import { Modal } from "../common/Modal";
-import supabase from "../../supabasefol/supabaseClient";
+import { useAuth } from "../../context/authContext";
 
 // ─── CategoriesView ───────────────────────────────────────────
 // ONE JOB: Add and delete categories.
 // These categories appear in the Product form dropdown on the Products page.
 // No product management happens here.
 // ─────────────────────────────────────────────────────────────
+
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export function CategoriesView() {
   const [categories, setCategories] = useState([]);
@@ -17,30 +19,33 @@ export function CategoriesView() {
   const [error, setError] = useState("");
   const [adding, setAdding] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // holds { id, name }
+  const { session } = useAuth();
 
   const ACCENT_COLORS = [
     "#3b82f6", "#8b5cf6", "#06b6d4", "#10b981",
     "#f59e0b", "#ef4444", "#ec4899", "#6366f1",
   ];
 
-  // ─── FETCH categories from Supabase ───────────────────────
+  // ─── FETCH categories from Express/Neon ───────────────────
   useEffect(() => {
     fetchCategories();
   }, []);
 
   async function fetchCategories() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name, created_at")
-      .order("created_at", { ascending: true });
-
-    if (error) console.error("Fetch error:", error);
-    else setCategories(data || []);
-    setLoading(false);
+    try {
+     const res = await fetch(`${API_URL}/categories`);
+      if (!res.ok) throw new Error(`Failed to fetch categories (status ${res.status})`);
+      const data = await res.json();
+      setCategories(data || []);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // ─── INSERT new category into Supabase ────────────────────
+  // ─── CREATE new category via Express/Neon ─────────────────
   async function addCategory() {
     const trimmed = newName.trim();
     if (!trimmed) { setError("Category name is required"); return; }
@@ -51,36 +56,50 @@ export function CategoriesView() {
     if (exists) { setError("This category already exists"); return; }
 
     setAdding(true);
-    const { data, error: insertError } = await supabase
-      .from("categories")
-      .insert([{ name: trimmed }])
-      .select("id, name, created_at")
-      .single();
+    try {
+      const res = await fetch(`${API_URL}/categories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ name: trimmed }),
+      });
 
-    if (insertError) {
-      console.error("Insert error:", insertError);
-      setError("Failed to add category. Try again.");
-    } else {
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.message || "Failed to add category");
+      }
+
+      const data = await res.json();
       setCategories(prev => [...prev, data]);
       setNewName("");
       setError("");
       setShowAdd(false);
+    } catch (err) {
+      console.error("Insert error:", err);
+      setError("Failed to add category. Try again.");
+    } finally {
+      setAdding(false);
     }
-    setAdding(false);
   }
 
-  // ─── DELETE category from Supabase ───────────────────────
+  // ─── DELETE category via Express/Neon ─────────────────────
   async function deleteCategory(id) {
-    const { error: delError } = await supabase
-      .from("categories")
-      .delete()
-      .eq("id", id);
+    try {
+      const res = await fetch(`${API_URL}/categories/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
 
-    if (delError) {
-      console.error("Delete error:", delError);
-    } else {
+      if (!res.ok) throw new Error(`Failed to delete category (status ${res.status})`);
+
       setCategories(prev => prev.filter(c => c.id !== id));
       setDeleteConfirm(null);
+    } catch (err) {
+      console.error("Delete error:", err);
     }
   }
 

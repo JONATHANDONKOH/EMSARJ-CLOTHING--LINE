@@ -2,14 +2,17 @@ import { useState, useRef, useEffect } from "react";
 import { SIZES } from "../../constants";
 import { InputField } from "../common/InputField";
 import { IconImage, IconCheck } from "../common/Icons";
-import supabase from "../../supabasefol/supabaseClient";
 import { useAuth } from "../../context/authContext";
 // adjust path if your auth context lives elsewhere
 
-// Your Express/Cloudinary upload server.
-// Put VITE_UPLOAD_API_URL=http://localhost:5000 in your frontend .env for local dev,
+// Your Express/Cloudinary/Neon backend.
+// Put VITE_API_URL=http://localhost:5000 in your frontend .env for local dev,
 // and swap it to your deployed backend URL in production.
-const UPLOAD_API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+
+
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+
+
 
 export function ProductForm({
   initial     = {},
@@ -26,6 +29,9 @@ export function ProductForm({
     initial.category_id ? String(initial.category_id) : ""
   );
   const [categories, setCategories]     = useState([]);
+  const [showOnHero, setShowOnHero]     = useState(Boolean(initial.show_on_hero));
+  const [featured, setFeatured]         = useState(Boolean(initial.featured));
+  const [trending, setTrending]         = useState(Boolean(initial.trending));
   const [errors, setErrors]             = useState({});
   const [loading, setLoading]           = useState(false);
   const fileRef                         = useRef();
@@ -33,12 +39,14 @@ export function ProductForm({
 
   useEffect(() => {
     async function fetchCategories() {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id, name")
-        .order("name", { ascending: true });
-      if (error) console.error("fetchCategories:", error);
-      else setCategories(data || []);
+      try {
+        const res = await fetch(`${API_URL}/categories`);
+        if (!res.ok) throw new Error(`Failed to fetch categories (status ${res.status})`);
+        const data = await res.json();
+        setCategories(data || []);
+      } catch (err) {
+        console.error("fetchCategories:", err);
+      }
     }
     fetchCategories();
   }, []);
@@ -69,12 +77,9 @@ export function ProductForm({
 
   // ── Cloudinary upload via Express backend (JWT-protected) ─────
   async function uploadImage(file) {
-    // No session at all → user isn't signed in, or auth context hasn't loaded yet
     if (!session) {
       throw new Error("You must be signed in to upload images.");
     }
-
-    // Session exists but no access_token (shouldn't normally happen, but guard anyway)
     if (!session.access_token) {
       throw new Error("Your session is missing an access token. Please sign in again.");
     }
@@ -84,7 +89,7 @@ export function ProductForm({
 
     let res;
     try {
-      res = await fetch(`${UPLOAD_API_URL}/upload`, {
+      res = await fetch(`${API_URL}/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -95,7 +100,6 @@ export function ProductForm({
       throw new Error("Could not reach the upload server. Check your connection and try again.");
     }
 
-    // Expired/invalid token → backend rejects with 401
     if (res.status === 401) {
       throw new Error("Your session has expired. Please sign in again and retry the upload.");
     }
@@ -111,14 +115,6 @@ export function ProductForm({
     return data.url; // Cloudinary secure_url
   }
 
-  // Old Supabase-storage cleanup no longer applies since images now live on
-  // Cloudinary. Left as a safe no-op so existing calls don't break; wire this
-  // up to a DELETE /upload/:public_id route on your server if you want to
-  // actually delete old Cloudinary images later.
-  async function deleteOldImage(_imageUrl) {
-    return;
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     const errs = validate();
@@ -129,8 +125,9 @@ export function ProductForm({
       // ── Step 1: upload image if new one was picked ─────────────
       let image_url = initial.image_url || null;
       if (imageFile) {
-        if (initial.image_url) await deleteOldImage(initial.image_url);
         image_url = await uploadImage(imageFile);
+        // Deleting the old Cloudinary image on replace is handled server-side
+        // by the /delete route, wired up from ProductsView on actual removal.
       }
 
       const payload = {
@@ -138,47 +135,44 @@ export function ProductForm({
         price:       parseFloat(price),
         sizes,
         image_url,
-        category_id: categoryId,  // ✅ UUID string passed as-is
+        category_id: categoryId,
+        show_on_hero: showOnHero,
+        featured,
+        trending,
       };
 
-      // ── Step 2: insert or update ────────────────────────────────
-      let savedId = initial.id || null;
+      console.log("ProductForm payload being sent:", payload); // TEMP — remove after debugging
 
-      if (initial.id) {
-        const { error: updateError } = await supabase
-          .from("products")
-          .update(payload)
-          .eq("id", initial.id);
+      // ── Step 2: create or update via Express/Neon ───────────────
+      const isEdit = Boolean(initial.id);
+      const url = isEdit
+        ? `${API_URL}/products/${initial.id}`
+        : `${API_URL}/products`;
 
-        if (updateError) throw updateError;
-      } else {
-        const { data: inserted, error: insertError } = await supabase
-          .from("products")
-          .insert([payload])
-          .select("id")
-          .single();
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-        if (insertError) throw insertError;
-        savedId = inserted.id;
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.message || `Failed to save product (status ${res.status})`);
       }
 
-      // ── Step 3: fetch full product WITH category join ───────────
-      const { data: fullProduct, error: fetchError } = await supabase
-        .from("products")
-        .select(`
-          id,
-          name,
-          price,
-          sizes,
-          image_url,
-          category_id,
-          created_at,
-          categories ( id, name )
-        `)
-        .eq("id", savedId)
-        .single();
+      const savedProduct = await res.json();
 
-      if (fetchError) throw fetchError;
+      // The backend returns flat fields, no `categories` join — attach the
+      // display name locally from the categories we already fetched, so
+      // ProductCard's `product.categories.name` keeps working unchanged.
+      const matchedCategory = categories.find(c => String(c.id) === String(categoryId));
+      const fullProduct = {
+        ...savedProduct,
+        categories: matchedCategory ? { id: matchedCategory.id, name: matchedCategory.name } : null,
+      };
 
       onSubmit(fullProduct);
 
@@ -323,6 +317,39 @@ export function ProductForm({
         {errors.sizes && (
           <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#ef4444" }}>{errors.sizes}</p>
         )}
+      </div>
+
+      {/* PLACEMENT — hero / featured / trending */}
+      <div style={{ marginBottom: "1rem" }}>
+        <label style={{
+          display: "block", fontSize: "13px",
+          fontWeight: 500, color: "#94a3b8", marginBottom: "6px",
+        }}>
+          Landing Page Placement
+        </label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {[
+            { key: "hero",     label: "Show on Hero", checked: showOnHero, set: setShowOnHero },
+            { key: "featured", label: "Featured",      checked: featured,   set: setFeatured   },
+            { key: "trending", label: "Trending",      checked: trending,   set: setTrending   },
+          ].map(({ key, label, checked, set }) => (
+            <label
+              key={key}
+              style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                fontSize: "13px", color: "#e2e8f0", cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={e => set(e.target.checked)}
+                style={{ width: "14px", height: "14px", cursor: "pointer", accentColor: "#3b82f6" }}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* SUBMIT */}

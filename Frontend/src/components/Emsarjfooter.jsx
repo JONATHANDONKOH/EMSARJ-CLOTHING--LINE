@@ -1,6 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import footImage from "../assets/toyyyeee.PNG";
-import { insertEmail } from "../context/emailfunction";
 
 const socials = [
   {
@@ -55,21 +54,15 @@ function IconSend({ size = 20 }) {
 export default function EmsarjFooter() {
   const [email, setEmail] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
-  const [sendError, setSendError] = useState("");
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 600);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const handleResize = () => setIsMobile(window.innerWidth <= 600);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto-grow the textarea as text wraps to new lines, so it behaves
-  // like the old single-line input until the text actually needs more room.
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -77,59 +70,26 @@ export default function EmsarjFooter() {
     el.style.height = `${el.scrollHeight}px`;
   }, [email]);
 
-  const buttonIcon = useMemo(() => {
-    if (isSending) return "...";
-    return isTyping ? <IconSend /> : <IconMail />;
-  }, [isSending, isTyping]);
-
-  const onSubmitEmail = async () => {
-    if (isSending) return;
-    const trimmed = email.trim();
-    if (!trimmed) return;
-    setSendError("");
-    try {
-      setIsSending(true);
-      await insertEmail(trimmed);
-      setEmail("");
-      setIsTyping(false);
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
-    } catch (err) {
-      setSendError(err.message || "Something went wrong sending your message.");
-    } finally {
-      setIsSending(false);
-    }
-  };
+  const buttonIcon = useMemo(() => (isTyping ? <IconSend /> : <IconMail />), [isTyping]);
 
   return (
     <footer className="emsarj-footer">
       <div className="footer-inner">
-
-        {/* LEFT: bordered content box */}
         <div className="footer-box">
           <h2 className="footer-headline">JOIN THE EMSARJ FAMILY HERE.</h2>
 
-          {/* ✅ MODIFIED: Email section with relative positioning on small screens - now 20px */}
-          <div className="footer-email-section" style={{
-            position: 'relative',
-            top: isMobile ? '20px' : '0' // Changed from 10px to 20px
-          }}>
+          {/* Email section */}
+          <div className="footer-email-section" style={{ position: "relative", top: isMobile ? "20px" : "0" }}>
             <span className="email-label">Message</span>
             <textarea
               ref={textareaRef}
               className="footer-email-input"
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setIsTyping(true); }}
-              onKeyDown={(e) => {
-                // Enter sends the message, Shift+Enter adds a line break
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  onSubmitEmail();
-                }
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setIsTyping(true);
               }}
               placeholder="send your message here"
-              disabled={isSending}
               rows={1}
               style={{
                 whiteSpace: "pre-wrap",
@@ -142,35 +102,13 @@ export default function EmsarjFooter() {
                 lineHeight: "inherit",
               }}
             />
-            <button
-              className="footer-submit-btn"
-              type="button"
-              onClick={onSubmitEmail}
-              disabled={isSending}
-              aria-label="Send email"
-              style={isSending ? { cursor: "not-allowed", opacity: 0.7 } : undefined}
-            >
+            <button className="footer-submit-btn" type="button" aria-label="Send email">
               {buttonIcon}
             </button>
           </div>
 
-          {sendError && (
-            <p
-              style={{
-                margin: "6px 0 0",
-                fontSize: "12px",
-                color: "#ef4444",
-              }}
-            >
-              {sendError}
-            </p>
-          )}
-
-          {/* ✅ MODIFIED: Social section with relative positioning on small screens - now 20px */}
-          <div className="footer-social-section" style={{
-            position: 'relative',
-            top: isMobile ? '20px' : '0' // Changed from 10px to 20px
-          }}>
+          {/* Social section */}
+          <div className="footer-social-section" style={{ position: "relative", top: isMobile ? "20px" : "0" }}>
             <span className="social-label">SOCIAL PAGES</span>
             <div className="footer-socials">
               {socials.map((s) => (
@@ -181,20 +119,15 @@ export default function EmsarjFooter() {
             </div>
           </div>
 
-          {/* Copyright with relative positioning */}
-          <div className="footer-copyright" style={{
-            position: 'relative',
-            top: isMobile ? '90px' : '0'
-          }}>
+          {/* Copyright */}
+          <div className="footer-copyright" style={{ position: "relative", top: isMobile ? "90px" : "0" }}>
             <p>© {new Date().getFullYear()} EMSARJ. ALL RIGHTS RESERVED.</p>
           </div>
         </div>
 
-        {/* RIGHT: character image, pushed far right */}
         <div className="footer-character-col">
           <img src={footImage} alt="Emsarj character" className="footer-character" />
         </div>
-
       </div>
     </footer>
   );

@@ -1,15 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+const jwt = require("jsonwebtoken");
 
-// Server-side Supabase client, used ONLY to verify incoming JWTs.
-// SUPABASE_URL and SUPABASE_ANON_KEY go in the backend .env (never the frontend).
-// The anon key is fine here — supabase.auth.getUser(token) just validates the
-// token against Supabase's auth server, it doesn't need elevated privileges.
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
-export async function authMiddleware(req, res, next) {
+function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -22,14 +13,22 @@ export async function authMiddleware(req, res, next) {
     return res.status(401).json({ error: "No token provided" });
   }
 
-  const { data, error } = await supabase.auth.getUser(token);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  if (error || !data?.user) {
-    return res.status(401).json({ error: "Invalid or expired token" });
+    // decoded = { id, role, iat, exp } — matches the payload signToken()
+    // puts in every JWT at signup/signin. role rides along in the token
+    // itself, so roleMiddleware("admin") can check req.user.role directly
+    // without a DB round trip on every request.
+    req.user = { id: decoded.id, role: decoded.role };
+
+    next();
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Session expired. Please sign in again." });
+    }
+    return res.status(401).json({ error: "Invalid token" });
   }
-
-  // Attach the authenticated Supabase user to the request
-  req.user = data.user;
-
-  next();
 }
+
+module.exports = authMiddleware;

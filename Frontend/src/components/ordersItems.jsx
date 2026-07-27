@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import supabase from "../supabasefol/supabaseClient";
+import { useAuth } from "../context/authContext";
+
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export default function OrdersView() {
+  const { session } = useAuth();
   const [orders, setOrders]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const [expanded, setExpanded]     = useState(null); // order id
@@ -10,19 +13,27 @@ export default function OrdersView() {
 
   /* ── fetch all orders ── */
   useEffect(() => {
+    if (session === undefined) return; // still resolving auth state
+
     async function fetchOrders() {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("orders")
-        .select("id, created_at, customer_name, customer_phone, total, status")
-        .order("created_at", { ascending: false });
+      try {
+        const res = await fetch(`${API_URL}/api/orders`, {
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
 
-      if (error) console.error("fetchOrders:", error);
-      else setOrders(data || []);
-      setLoading(false);
+        if (!res.ok) throw new Error(`Failed to fetch orders (${res.status})`);
+
+        const data = await res.json();
+        setOrders(data || []);
+      } catch (err) {
+        console.error("fetchOrders:", err.message);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchOrders();
-  }, []);
+  }, [session]);
 
   /* ── toggle expand: fetch items for that order ── */
   async function toggleOrder(orderId) {
@@ -33,21 +44,23 @@ export default function OrdersView() {
     if (itemsMap[orderId]) return; // already fetched
 
     setItemsLoading(true);
-    const { data, error } = await supabase
-      .from("orderItems")
-      .select(`
-        id,
-        quantity,
-        size,
-        price,
-        product_id,
-        products ( id, name, image_url )
-      `)
-      .eq("order_id", orderId);
+    try {
+      // Assumes GET /api/orders/:id returns the order with its line items
+      // nested as `items` — adjust the key below (e.g. `orderItems`) if
+      // your OrdersController shapes the response differently.
+      const res = await fetch(`${API_URL}/api/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
 
-    if (error) console.error("fetchOrderItems:", error);
-    else setItemsMap(prev => ({ ...prev, [orderId]: data || [] }));
-    setItemsLoading(false);
+      if (!res.ok) throw new Error(`Failed to fetch order items (${res.status})`);
+
+      const data = await res.json();
+      setItemsMap(prev => ({ ...prev, [orderId]: data.items || [] }));
+    } catch (err) {
+      console.error("fetchOrderItems:", err.message);
+    } finally {
+      setItemsLoading(false);
+    }
   }
 
   /* ── status badge colour ── */

@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import supabase from "../supabasefol/supabaseClient";
 import { useCart } from "../cartContext/cartprovider";
 import WishlistHeartButton from "../ui/WishlistHeartButton";
 import TopNav from "../components/common/TopNav";
 
 const DEFAULT_QTY = 1;
 
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+
+
 function resolveImageUrl(imageUrl) {
   if (!imageUrl) return null;
-  if (imageUrl.startsWith("http")) return imageUrl;
-  return supabase.storage
-    .from("product-images")
-    .getPublicUrl(imageUrl).data.publicUrl;
+  // Cloudinary already returns a full https URL at upload time.
+  return imageUrl;
 }
 
 function parseSizes(raw) {
@@ -77,19 +77,20 @@ export default function Shop() {
     }
   }, [passedProduct]);
 
+  // Related products only — the backend does the category filtering now
+  // (GET /products/category/:categoryId), we just exclude the product
+  // already showing as the main item.
   async function fetchCategoryProducts(categoryId, currentProductId) {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("category_id", categoryId)
-        .neq("id", currentProductId)
-        .order("created_at", { ascending: false });
-      if (error) { console.error("❌ Error fetching category products:", error.message); setCategoryProducts([]); }
-      else setCategoryProducts(data || []);
+      const res = await fetch(`${API_URL}/products/category/${categoryId}`);
+      if (!res.ok) throw new Error(`Failed to fetch related products (status ${res.status})`);
+      const data = await res.json();
+
+      const filtered = (data || []).filter((p) => p.id !== currentProductId);
+      setCategoryProducts(filtered);
     } catch (err) {
-      console.error("❌ Error:", err);
+      console.error("❌ Error fetching category products:", err);
       setCategoryProducts([]);
     } finally {
       setLoading(false);

@@ -1,10 +1,9 @@
 import { CategoriesView } from "./categories/CategoriesView";
 import { ProductsView } from "./products/ProductsView";
 import { ProductsView as AllProductsView } from "./products/ProductsView";
-import OrdersView from "./orderitems";
+import OrdersView from "./ordersItems";
 import { UsersView } from "./users/UsersView";
 import { PaymentsView } from "./payments/PaymentsView";
-import { EmailView } from "./emailsView"; // ✅ fixed path
 
 export function MainContent({ 
   activePage, 
@@ -56,8 +55,7 @@ export function MainContent({
       case "payments":
         return <PaymentsView />;
 
-      case "emails":               // ✅ new case
-        return <EmailView />;
+      
 
       default:
         return null;

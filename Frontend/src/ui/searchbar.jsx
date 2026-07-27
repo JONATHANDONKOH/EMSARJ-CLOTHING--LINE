@@ -1,14 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import supabase from "../supabasefol/supabaseClient";
 
-function resolveImageUrl(imageUrl) {
-  if (!imageUrl) return null;
-  if (imageUrl.startsWith("http")) return imageUrl;
-  return supabase.storage
-    .from("product-images")
-    .getPublicUrl(imageUrl).data.publicUrl;
-}
+
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+
 
 export default function SearchBar({
   placeholder = "search your style...",
@@ -61,34 +56,38 @@ export default function SearchBar({
 
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .ilike("name", `%${q}%`)
-        .limit(10);
+      try {
+        const res = await fetch(`${API_URL}/products/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json().catch(() => []);
 
-      setLoading(false);
+        setLoading(false);
 
-      if (error || !data || data.length === 0) {
+        if (!res.ok || !data || data.length === 0) {
+          setProducts([]);
+          setNoResults(true);
+          return;
+        }
+
+        const ranked = [...data].sort((a, b) => {
+          const score = (item) => {
+            const name = item.name?.toLowerCase() ?? "";
+            const lq   = q.toLowerCase();
+            if (name === lq)         return 5;
+            if (name.startsWith(lq)) return 3;
+            if (name.includes(lq))   return 1;
+            return 0;
+          };
+          return score(b) - score(a);
+        });
+
+        setProducts(ranked);
+        setNoResults(false);
+      } catch (err) {
+        console.error("Search error:", err.message);
+        setLoading(false);
         setProducts([]);
         setNoResults(true);
-        return;
       }
-
-      const ranked = [...data].sort((a, b) => {
-        const score = (item) => {
-          const name = item.name?.toLowerCase() ?? "";
-          const lq   = q.toLowerCase();
-          if (name === lq)         return 5;
-          if (name.startsWith(lq)) return 3;
-          if (name.includes(lq))   return 1;
-          return 0;
-        };
-        return score(b) - score(a);
-      });
-
-      setProducts(ranked);
-      setNoResults(false);
     }, 300);
   }, []);
 
@@ -111,9 +110,8 @@ export default function SearchBar({
     onSelect?.(item);
 
     // Category page already exists; show the product list for this item's category
-    const nextCategoryId = item.category_id ?? item?.categories?.id;
-    if (nextCategoryId) {
-      navigate(`/category/${nextCategoryId}`);
+    if (item.category_id) {
+      navigate(`/category/${item.category_id}`);
     } else {
       // Fallback to home so we don't end up on an empty route
       navigate(`/`);
@@ -170,7 +168,7 @@ export default function SearchBar({
                   >
                     <div className="sb-grid-img-wrap">
                       <img
-                        src={resolveImageUrl(item.image_url)}
+                        src={item.image_url}
                         alt={item.name}
                         className="sb-grid-img"
                         onError={(e) => { e.target.style.display = "none"; }}

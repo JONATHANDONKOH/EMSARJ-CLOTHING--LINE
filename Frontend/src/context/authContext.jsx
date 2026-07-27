@@ -1,138 +1,114 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import supabase from "../supabasefol/supabaseClient";
+
+
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+
+
+const TOKEN_KEY = "emsarj_token";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(undefined); // undefined = still resolving, null = signed out
   const [user, setUser]       = useState(null);
 
-  // ── Load full user profile (auth + role) into `user` ──
-  const loadUser = async (authUser) => {
-    if (!authUser) {
+  // ── Fetch the current user from the backend using a stored token ──
+  const loadUser = async (token) => {
+    if (!token) {
+      setSession(null);
       setUser(null);
       return;
     }
 
-    const { data, error } = await supabase
-      .from("users")
-      .select("name, email, number, location, role")
-      .eq("id", authUser.id)
-      .single();
+    try {
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (error) {
-      console.error("User profile fetch error:", error.message);
-      setUser({ ...authUser, role: "user" });
-      return;
+      if (!res.ok) {
+        // Token missing/expired/invalid — drop it
+        localStorage.removeItem(TOKEN_KEY);
+        setSession(null);
+        setUser(null);
+        return;
+      }
+
+      const userData = await res.json();
+      setSession({ access_token: token });
+      setUser(userData);
+    } catch (err) {
+      console.error("Failed to load user:", err.message);
+      setSession(null);
+      setUser(null);
     }
-
-    setUser({ ...authUser, ...data });
   };
 
   useEffect(() => {
-    // ── Get current session on load using getSession ──
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      loadUser(data.session?.user ?? null);
-    });
-
-    // ── Listen for auth state changes ──
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
-        // ── Always use getSession for the fresh token ──
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        loadUser(data.session?.user ?? null);
-      }
-    );
-
-    return () => {
-      listener?.subscription?.unsubscribe?.();
-    };
+    const token = localStorage.getItem(TOKEN_KEY);
+    loadUser(token);
   }, []);
 
   // ── SIGN UP ──
   const signUp = async ({ name, email, number, location, password }) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
+    const res = await fetch(`${API_URL}/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, number, location, password }),
+    });
 
-    const authUser = data.user;
+    const data = await res.json().catch(() => ({}));
 
-    if (authUser) {
-      const { error: usersError } = await supabase
-        .from("users")
-        .insert([{
-          id:       authUser.id,
-          name,
-          email,
-          number,
-          location,
-          role:     "user",
-        }]);
-
-      if (usersError) throw usersError;
+    if (!res.ok) {
+      throw new Error(data.message || "Registration failed. Please try again.");
     }
 
-    // ── Use getSession after signup ──
-    const { data: latest } = await supabase.auth.getSession();
-    setSession(latest.session);
-    await loadUser(latest.session?.user ?? null);
+    const { token, ...authUser } = data;
+    localStorage.setItem(TOKEN_KEY, token);
+    setSession({ access_token: token });
+    setUser(authUser);
 
     return authUser;
   };
 
   // ── SIGN IN ──
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await fetch(`${API_URL}/auth/signin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
 
-    if (error) {
-      console.error("Supabase SignIn Error:", {
-        message: error.message,
-        status:  error.status,
-        code:    error.code,
-      });
+    const data = await res.json().catch(() => ({}));
 
-      const errorMessages = {
-        "Invalid login credentials": "Incorrect email or password. Please try again.",
-        "Email not confirmed":       "Please verify your email before signing in.",
-        "Too many requests":         "Too many attempts. Please wait a few minutes and try again.",
-        "User not found":            "No account found with this email.",
-        "Network request failed":    "Network error. Please check your connection.",
-      };
-
-      const friendlyMessage = Object.entries(errorMessages).find(([key]) =>
-        error.message?.includes(key)
-      );
-
-      throw new Error(
-        friendlyMessage
-          ? friendlyMessage[1]
-          : error.message || "Something went wrong. Please try again."
-      );
+    if (!res.ok) {
+      throw new Error(data.message || "Something went wrong. Please try again.");
     }
 
-    // ── Use getSession after sign in for fresh token ──
-    const { data: sessionData } = await supabase.auth.getSession();
-    setSession(sessionData.session);
-    await loadUser(sessionData.session?.user ?? null);
+    const { token, ...authUser } = data;
+    localStorage.setItem(TOKEN_KEY, token);
+    setSession({ access_token: token });
+    setUser(authUser);
 
-    // ── Fetch role so SignIn page can redirect immediately ──
-    const { data: profile } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", sessionData.session?.user?.id)
-      .single();
-
-    return { ...data, role: profile?.role ?? "user" };
+    return authUser;
   };
 
   // ── SIGN OUT ──
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    const token = localStorage.getItem(TOKEN_KEY);
+    try {
+      if (token) {
+        await fetch(`${API_URL}/auth/signout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch (err) {
+      // Stateless JWT — nothing server-side actually depends on this
+      // succeeding. Clear local state regardless.
+      console.error("Signout request failed:", err.message);
+    }
+
+    localStorage.removeItem(TOKEN_KEY);
     setSession(null);
     setUser(null);
   };
@@ -143,11 +119,9 @@ export function AuthProvider({ children }) {
     signOut,
     user,
     session,
-    supabase,
     refresh: async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      await loadUser(data.session?.user ?? null);
+      const token = localStorage.getItem(TOKEN_KEY);
+      await loadUser(token);
     },
   };
 

@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../../cartContext/cartprovider";
-import supabase from "../../supabasefol/supabaseClient";
 import emmy from "../../assets/emmy.png";
 import ghanaFlag from "../../assets/ghana flag.jpg";
 import SearchBar from "../../ui/searchbar";
 import { useAuth } from "../../context/authContext";
 import { useWishlist } from "../../wishlistContext/wishlistprovider";
+
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export default function TopNav() {
   const navigate = useNavigate();
@@ -37,12 +38,16 @@ export default function TopNav() {
   const scrollStart = useRef(0);
 
   async function fetchCategories() {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name")
-      .order("name", { ascending: true });
-    if (error) { console.error("Failed to fetch categories:", error.message); return; }
-    setCategories(data || []);
+    try {
+      const res = await fetch(`${API_URL}/categories`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch categories (status ${res.status})`);
+      }
+      const data = await res.json();
+      setCategories(data || []);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err.message);
+    }
   }
 
   useEffect(() => {

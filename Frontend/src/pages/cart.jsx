@@ -1,108 +1,54 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../cartContext/cartprovider";
-import supabase from "../supabasefol/supabaseClient";
+import { useAuth } from "../context/authContext";
 import TopNav from "../components/common/TopNav";
 
 const DELIVERY_FEE = 45;
-const PAYSTACK_PUBLIC_KEY  = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-const EDGE_FUNCTION_URL    = "https://bdynpkxcziibqwgwlugt.supabase.co/functions/v1/verifyAndMarkPaid";
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
-// ── Supabase helpers ────────────────────────────────────────────────────────
+// ── Express/Neon helpers ─────────────────────────────────────────────────
 
-async function insertOrder({ first_name, last_name, phone_number, email, subtotal, total }) {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error("You must be signed in to place an order.");
+// Creates the order AND its items in one call — the backend runs both
+// inserts in a single transaction (see OrdersController.createOrder).
+async function createOrder({ first_name, last_name, phone_number, email, subtotal, items, token }) {
+  if (!token) throw new Error("You must be signed in to place an order.");
 
-  const { data, error } = await supabase
-    .from("orders")
-    .insert({
-      user_id:      session.user.id,
-      first_name,
-      last_name,
-      email,
-      phone_number,
-      subtotal,
-      delivery_fee: DELIVERY_FEE,
-      total,
-      status:       "pending",
-    })
-    .select()
-    .single();
-
-  if (error) throw new Error(`Order insert failed: ${error.message}`);
-  return data;
-}
-
-async function insertOrderItems(orderItems) {
-  const { error } = await supabase.from("orderItems").insert(orderItems);
-  if (error) throw new Error(`Order items insert failed: ${error.message}`);
-}
-
-// ── Verify payment via Edge Function — secret key never touches browser ──
-async function verifyAndMarkPaid(orderId, reference) {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error("Unauthorized.");
-
-  const res = await fetch(EDGE_FUNCTION_URL, {
-    method:  "POST",
+  const res = await fetch(`${API_URL}/orders`, {
+    method: "POST",
     headers: {
-      "Content-Type":  "application/json",
-      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ orderId, reference }),
+    body: JSON.stringify({ first_name, last_name, email, phone_number, subtotal, items }),
   });
 
-  const result = await res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Order insert failed");
+  return data; // { id, ..., total, items }
+}
 
-  if (!res.ok || !result.success) {
-    throw new Error(result.error || "Payment verification failed.");
+// ── Ask the backend to open a Paystack transaction. The backend recomputes
+// the amount from the order it just created — the frontend never sends or
+// trusts a total here, and the secret key never touches the browser.
+// Returns { authorization_url, reference }.
+async function initializePayment(orderId, token) {
+  if (!token) throw new Error("Unauthorized.");
+
+  const res = await fetch(`${API_URL}/payments/initialize`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ orderId }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.authorization_url) {
+    throw new Error(data.error || "Could not start payment.");
   }
-
-  return result;
-}
-
-// ── Paystack popup ──────────────────────────────────────────────────────────
-
-function loadPaystackScript() {
-  return new Promise((resolve) => {
-    if (document.getElementById("paystack-script")) { resolve(); return; }
-    const script = document.createElement("script");
-    script.id    = "paystack-script";
-    script.src   = "https://js.paystack.co/v1/inline.js";
-    script.onload = resolve;
-    document.body.appendChild(script);
-  });
-}
-
-function payWithPaystack({ email, amountGhc, orderId }) {
-  return new Promise((resolve, reject) => {
-    if (!window.PaystackPop) {
-      reject(new Error("Paystack script not loaded yet. Please try again."));
-      return;
-    }
-
-    const handler = window.PaystackPop.setup({
-      key:      PAYSTACK_PUBLIC_KEY,
-      email,
-      amount:   Math.round(amountGhc * 100),
-      currency: "GHS",
-      ref:      `order_${orderId}_${Date.now()}`,
-
-      // ── Callback calls Edge Function, not Supabase directly ──
-      callback: function (response) {
-        verifyAndMarkPaid(orderId, response.reference)
-          .then(() => resolve(response.reference))
-          .catch((err) => reject(err));
-      },
-
-      onClose: function () {
-        reject(new Error("Payment window closed."));
-      },
-    });
-
-    handler.openIframe();
-  });
+  return data; // { authorization_url, reference }
 }
 
 // ── Utilities ───────────────────────────────────────────────────────────────
@@ -123,18 +69,12 @@ function parseSizes(raw) {
 
 // ── PaymentModal ─────────────────────────────────────────────────────────────
 
-function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onClose, onSuccess }) {
+function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onClose }) {
+  const { session } = useAuth();
   const [form, setForm]       = useState({ firstName: "", lastName: "", phone: "", email: "" });
   const [errors, setErrors]   = useState({});
   const [loading, setLoading] = useState(false);
-  const [done, setDone]       = useState(false);
-  const [orderId, setOrderId] = useState(null);
-
-  useEffect(() => {
-    loadPaystackScript().then(() => {
-      console.log("Paystack ready");
-    });
-  }, []);
+  const [redirecting, setRedirecting] = useState(false);
 
   function handleChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -156,7 +96,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     // ── Layer 2: safety net session check ──
-    const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       setErrors({ submit: "Session expired. Please sign in again." });
       return;
@@ -164,27 +103,15 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
 
     setLoading(true);
     try {
-      // 1. Insert order
-      const order = await insertOrder({
-        first_name:   form.firstName.trim(),
-        last_name:    form.lastName.trim(),
-        email:        form.email.trim(),
-        phone_number: form.phone.trim(),
-        subtotal,
-        total,
-      });
-
-      setOrderId(order.id);
-
-      // 2. Insert order items
-      const rows = [];
+      // Build order items (product_id required for the products(id) FK)
+      const items = [];
       cartItems.forEach((item) => {
         const activeSizes = selectedSizes[item.id] || [];
         if (activeSizes.length > 0) {
           activeSizes.forEach((size) => {
             const qty = sizeQtys[item.id]?.[size] ?? 1;
-            rows.push({
-              order_id:     order.id,
+            items.push({
+              product_id:   item.id,
               product_name: item.name,
               size,
               qty,
@@ -192,8 +119,8 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
             });
           });
         } else {
-          rows.push({
-            order_id:     order.id,
+          items.push({
+            product_id:   item.id,
             product_name: item.name,
             size:         null,
             qty:          1,
@@ -201,25 +128,33 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
           });
         }
       });
-      await insertOrderItems(rows);
 
-      // 3. Open Paystack → on success calls Edge Function → marks order paid
-      await payWithPaystack({
-        email:     form.email.trim(),
-        amountGhc: total,
-        orderId:   order.id,
+      // 1. Create order + items (pending) — server computes the real total
+      const order = await createOrder({
+        first_name:   form.firstName.trim(),
+        last_name:    form.lastName.trim(),
+        email:        form.email.trim(),
+        phone_number: form.phone.trim(),
+        subtotal,
+        items,
+        token: session.access_token,
       });
 
-      // 4. Success — pass orderId up to Cart for Thank You page
-      setDone(true);
-      setTimeout(() => { onSuccess(order.id); }, 2200);
+      // 2. Ask backend to open a Paystack transaction for that order.
+      //    The backend fetches the order server-side and calculates the
+      //    amount itself — nothing payment-related is sent from here.
+      //    The backend's callback_url already embeds this order's id
+      //    (?orderId=...), so /payment-success can pick it back up —
+      //    nothing needs to be stashed client-side for that handoff.
+      const { authorization_url } = await initializePayment(order.id, session.access_token);
+
+      // 3. Hand off to Paystack's hosted checkout page.
+      setRedirecting(true);
+      window.location.href = authorization_url;
 
     } catch (err) {
       console.error(err);
-      const msg = err.message === "Payment window closed."
-        ? "Payment was not completed. You can try again."
-        : err.message || "Something went wrong.";
-      setErrors({ submit: msg });
+      setErrors({ submit: err.message || "Something went wrong." });
     } finally {
       setLoading(false);
     }
@@ -240,11 +175,11 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
           <button className="pm-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
-        {done ? (
+        {redirecting ? (
           <div className="pm-success">
-            <div className="pm-success-icon">✓</div>
-            <p className="pm-success-title">Order placed!</p>
-            <p className="pm-success-sub">Payment confirmed. We'll be in touch shortly.</p>
+            <div className="pm-spinner" />
+            <p className="pm-success-title">Taking you to Paystack…</p>
+            <p className="pm-success-sub">Hang tight, don't close this tab.</p>
           </div>
         ) : (
           <div className="pm-body">
@@ -347,7 +282,7 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
           </div>
         )}
 
-        {!done && (
+        {!redirecting && (
           <div className="pm-footer">
             <button
               className={`pm-pay-btn${loading ? " pm-pay-btn--loading" : ""}`}
@@ -368,8 +303,9 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
 export default function Cart() {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, clearCart } = useCart();
+  const { session } = useAuth();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (cartItems.length === 0) navigate("/");
   }, [cartItems, navigate]);
 
@@ -436,7 +372,6 @@ export default function Cart() {
 
     // 2. Check live session
     setPayoutLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
     setPayoutLoading(false);
 
     if (!session) {
@@ -446,13 +381,6 @@ export default function Cart() {
 
     // 3. Open modal
     setShowPaymentModal(true);
-  }
-
-  // ── Receives orderId from PaymentModal after success ──
-  function handlePaymentSuccess(orderId) {
-    setShowPaymentModal(false);
-    clearCart();
-    navigate("/order-success", { state: { orderId } });
   }
 
   const mainImage = cartItems.length > 0 ? cartItems[0].image : null;
@@ -469,7 +397,6 @@ export default function Cart() {
           subtotal={subtotal}
           total={total}
           onClose={() => setShowPaymentModal(false)}
-          onSuccess={handlePaymentSuccess}
         />
       )}
 

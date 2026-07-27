@@ -5,22 +5,19 @@ import ScrollToTop from "./scrolltotop";
 
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/register";
-import CategoryFront from "./pages/CategoryFront";
+import Categorycard from "./pages/Categorycard";
 import CategoryPage from "./pages/categoryPage";
 import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/cart";
 import Account from "./pages/accounts";
-import Orders from "./pages/ordder";
-import ResetPassword from "./pages/resetpassword";
+import Orders from "./pages/customerorders";
 import WishlistPage from "./pages/WishlistPage";
 import Shop from "./pages/shop";
-import { UserMessages } from "./pages/UserMessages";
-
 import TopNav from "./components/common/TopNav";
-import EmsarjFooter from "./components/Emsarjfooter";
 import AutoPlayAudio from "./components/common/AutoPlayAudio";
 import { CartProvider } from "./cartContext/cartprovider";
 import { WishlistProvider } from "./wishlistContext/wishlistprovider";
+import EmsarjFooter from "./components/Emsarjfooter";
 
 function AppContent() {
   const location = useLocation();
@@ -42,7 +39,7 @@ function AppContent() {
 
       <main className="app-content">
         <Routes>
-          <Route path="/" element={<CategoryFront />} />
+          <Route path="/" element={<Categorycard />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -50,14 +47,13 @@ function AppContent() {
           <Route path="/category/:id" element={<CategoryPage />} />
           <Route path="/account" element={<Account />} />
           <Route path="/orders" element={<Orders />} />
-          <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/messages" element={<UserMessages />} />
+        
         </Routes>
       </main>
 
-      {!hideNav && <EmsarjFooter />}
+   {!hideNav && <EmsarjFooter />}
     </div>
   );
 }

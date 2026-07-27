@@ -3,7 +3,12 @@ import { IconPlus, IconPackage } from "../common/Icons";
 import { Modal } from "../common/Modal";
 import { ProductCard } from "./ProductCard";
 import { ProductForm } from "./ProductForm";
-import supabase from "../../supabasefol/supabaseClient";
+import { useAuth } from "../../context/authContext";
+
+
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+
+
 
 export function ProductsView() {
 
@@ -13,6 +18,7 @@ export function ProductsView() {
   const [editProduct, setEditProduct]     = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting]           = useState(false);
+  const { session }                       = useAuth();
 
   useEffect(() => {
     fetchProducts();
@@ -20,23 +26,34 @@ export function ProductsView() {
 
   async function fetchProducts() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("products")
-      .select(`
-        id,
-        name,
-        price,
-        sizes,
-        image_url,
-        category_id,
-        created_at,
-        categories ( id, name )
-      `)
-      .order("created_at", { ascending: false });
+    try {
+      // Products and categories come from separate routes now — the Express
+      // model doesn't join them, so we stitch category display info on here
+      // to keep ProductCard's `product.categories.name` working unchanged.
+      const [productsRes, categoriesRes] = await Promise.all([
+        fetch(`${API_URL}/products`),
+        fetch(`${API_URL}/categories`),
+      ]);
 
-    if (error) console.error("fetchProducts error:", error);
-    else setProducts(data || []);
-    setLoading(false);
+      if (!productsRes.ok) throw new Error(`Failed to fetch products (status ${productsRes.status})`);
+      const productsData = await productsRes.json();
+      const categoriesData = categoriesRes.ok ? await categoriesRes.json() : [];
+
+      const categoryMap = Object.fromEntries(
+        categoriesData.map(c => [String(c.id), c])
+      );
+
+      const withCategories = (productsData || []).map(p => ({
+        ...p,
+        categories: categoryMap[String(p.category_id)] || null,
+      }));
+
+      setProducts(withCategories);
+    } catch (err) {
+      console.error("fetchProducts error:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleAdded(newProduct) {
@@ -54,28 +71,37 @@ export function ProductsView() {
   async function handleDelete(id) {
     const product = products.find(p => p.id === id);
     setDeleting(true);
-
-    if (product?.image_url) {
-      const marker = "/product-images/";
-      const idx    = product.image_url.indexOf(marker);
-      if (idx !== -1) {
-        const storagePath = product.image_url.slice(idx + marker.length);
-        await supabase.storage.from("product-images").remove([storagePath]);
+    try {
+      // Clean up the Cloudinary image first (your Express /delete route +
+      // extractPublicId helper). Adjust the body shape if your route expects
+      // a public_id instead of the full image_url.
+      if (product?.image_url) {
+        await fetch(`${API_URL}/delete`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ image_url: product.image_url }),
+        });
       }
-    }
 
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", id);
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
 
-    if (!error) {
+      if (!res.ok) throw new Error(`Failed to delete product (status ${res.status})`);
+
       setProducts(prev => prev.filter(p => p.id !== id));
       setDeleteConfirm(null);
-    } else {
-      console.error("deleteProduct error:", error);
+    } catch (err) {
+      console.error("deleteProduct error:", err);
+    } finally {
+      setDeleting(false);
     }
-    setDeleting(false);
   }
 
   return (

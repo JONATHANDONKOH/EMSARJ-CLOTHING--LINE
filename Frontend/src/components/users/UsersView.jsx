@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { IconUsers } from "../common/Icons";
 import { Modal } from "../common/Modal";
-import supabase from "../../supabasefol/supabaseClient";
+import { useAuth } from "../../context/authContext";
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 export function UsersView() {
+  const { session } = useAuth();
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
@@ -11,18 +14,20 @@ export function UsersView() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (session === undefined) return; // still resolving auth state
     fetchUsers();
-  }, []);
+  }, [session]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .order("name", { ascending: true });
+      const res = await fetch(`${API_URL}/api/users`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error(`Failed to fetch users (${res.status})`);
+
+      const data = await res.json();
       setUsers(data || []);
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -34,12 +39,13 @@ export function UsersView() {
 
   const deleteUser = async (userId) => {
     try {
-      const { error } = await supabase
-        .from("users")
-        .delete()
-        .eq("id", userId);
+      const res = await fetch(`${API_URL}/api/users/${userId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error(`Failed to delete user (${res.status})`);
+
       setUsers(users.filter((user) => user.id !== userId));
       setSelectedUser(null);
     } catch (err) {

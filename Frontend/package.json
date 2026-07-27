@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.98.0",
     "axios": "^1.17.0",
     "multer": "^2.2.0",
     "react": "^19.2.0",

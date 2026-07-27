@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
-import supabase from "../supabasefol/supabaseClient";
+
 import TopNav from "../components/common/TopNav";
 
 const STATUS_COLORS = {
