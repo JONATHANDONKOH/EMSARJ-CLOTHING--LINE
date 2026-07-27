@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../Controllers/AuthController");
-const authMiddleware = require("../Middleware/AuthMiddleware");
+const authMiddleware = require("../Middleware/Authmiddleware");
 
 // Public routes — names matched to what AuthController.js actually exports
 router.post("/signup", authController.signup);

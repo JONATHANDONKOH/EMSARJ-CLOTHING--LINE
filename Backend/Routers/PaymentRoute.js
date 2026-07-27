@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const paymentController = require("../Controllers/paymentController");
-const authMiddleware = require("../Middleware/AuthMiddleware");
+const authMiddleware = require("../Middleware/Authmiddleware");
 const roleMiddleware = require("../Middleware/RoleMiddleware");
 
 // ── Webhook — no authMiddleware (Paystack calls this directly, not a user),
