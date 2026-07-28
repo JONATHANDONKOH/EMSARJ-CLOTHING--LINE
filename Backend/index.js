@@ -22,8 +22,10 @@ const PORT = process.env.PORT || 5000;
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
   "https://emsarj.net",
+  "https://www.emsarj.net",   // ← add this
   "https://emsarj-clothing-line.vercel.app"
 ];
+
 
 app.use(cors({
   origin: ALLOWED_ORIGINS,
