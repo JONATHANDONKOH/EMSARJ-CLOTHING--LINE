@@ -5,10 +5,11 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 200;
-  background-color: #e0dede;
+  background-color: #949090;
   width: 100%;
   box-sizing: border-box;
   transition: height 0.15s ease;
+  
 }
 
 /* Reduce TopNav height */
@@ -24,6 +25,7 @@
 /* Top bar row (Row 1) */
 .top-bar {
   height: 42px;
+  
 }
 /* =====================
    SITE HEADER — Mobile adjustments
@@ -54,20 +56,22 @@
   left: 0;
   right: 0;
   z-index: 200;
-  background-color: #e0dede;
+  background-color: #070606;
   width: 100%;
   box-sizing: border-box;
   transition: height 0.15s ease;
+  
 }
 
 .site-header .cat-nav {
   height: auto;
+  
 }
 
 .site-header .cat-nav,
 .site-header .desc-bar,
 .site-header .top-bar {
-  background: #ffffff;
+  background: #e9e7e9;
 }
 
 .site-header .cat-flip-item {
@@ -104,6 +108,7 @@
   align-items: center;
   gap: 16px;
   box-sizing: border-box;
+  
 }
 
 .top-bar-spacer {
@@ -130,15 +135,16 @@
 /* Category nav row (Row 3) */
 .cat-nav {
   height: 56px;
+
 }
 
 
 .site-header .cat-nav,
 .site-header .desc-bar,
-.site-header .top-bar { background:#ffffff; }
+.site-header .top-bar { background:#faf7f7; }
 
 
-.site-header .cat-flip-item { background: transparent; color: #000000ea; }
+.site-header .cat-flip-item { background: transparent; color: #ffffff; }
 .site-header .nav-item { color: #000; }
 .site-header .nav-item:hover { color: #000; text-decoration: underline; }
 .site-header .mobile-search-drawer { background: #fff; }
@@ -257,18 +263,18 @@
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40%           { opacity: 1;   transform: scale(1); }
 }
-.sb-no-results { font-size: 14px; color: #888; padding: 12px 0; }
+.sb-no-results { font-size: 14px; color: #918c8c; padding: 12px 0; }
 
 .nav-item {
   font-size: 14px;
   font-weight: 500;
-  color: #555;
+  color: #8d8a8a;
   cursor: pointer;
   transition: color 0.2s ease;
   white-space: nowrap;
   user-select: none;
 }
-.nav-item:hover { color: #000; text-decoration: underline; }
+.nav-item:hover { color: #fff8f8; text-decoration: underline; }
 
 /* Country flag */
 .country-flag-btn {
@@ -550,7 +556,7 @@ ul li:hover { text-decoration: underline; }
    PRODUCT CARDS GRID
    ===================== */
 .product-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; padding: 20px 40px; max-width: 1400px; margin: 40px auto 0; }
-.product-card { background-color: #ffffff; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; transition: border-color 0.2s ease; cursor: pointer; }
+.product-card { background-color: #ee9e9e; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; transition: border-color 0.2s ease; cursor: pointer; }
 .product-card:hover { border-color: #999; }
 .product-card-image-wrapper { position: relative; width: 100%; height: 300px; overflow: hidden; background-color: #ffffff; }
 .product-card-image { width: 100%; height: 100%; object-fit: contain; }
@@ -574,6 +580,7 @@ ul li:hover { text-decoration: underline; }
   overflow: hidden;
   background: #1a1818;
   border-radius: 10px 10px 10px 10px;
+  margin-top: 0;
 }
 
 .emsarj-hero__img {
@@ -1186,12 +1193,28 @@ ul li:hover { text-decoration: underline; }
   .desktop-only { display: none !important; }
   .desktop-auth { display: none !important; }
 
+  .site-header {
+    background-color: #faf7f7 !important;
+  }
+
+  .site-header .top-bar,
+  .site-header .cat-nav,
+  .site-header .desc-bar {
+    background-color: #faf7f7 !important;
+  }
+
   .cat-nav {
     flex-direction: column !important;
     height: auto !important;
     padding: 2px 12px !important;
     gap: 8px !important;
-    background: #ffffff !important;
+    background-color: #faf7f7 !important;
+  }
+
+  /* Marquee row only — keep it near-black to match desktop, independent of the light header above it */
+  .site-header .cat-nav-scroll,
+  .cat-nav-scroll {
+    background-color: #070606 !important;
   }
 
   .nav-logo {
@@ -1379,10 +1402,8 @@ ul li:hover { text-decoration: underline; }
     box-sizing: border-box !important;
   }
   .card { display: flex !important; flex-direction: column !important; width: 100% !important; min-width: 0 !important; background: transparent !important; overflow: hidden !important; border-radius: 6px !important; transition: transform 0.3s ease, box-shadow 0.3s ease !important; }
-  .card:hover { transform: translateY(-5px) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; }
   .card .card-img-wrap { position: relative !important; width: 100% !important; background-color: #ffffff !important; overflow: hidden !important; border-radius: 10px 10px 0 0 !important; }
   .card .girlscrop { width: 100% !important; height: 280px !important; object-fit: contain !important; display: block !important; animation: hang 4s ease-in-out infinite !important; transform-origin: top center !important; transition: transform 0.4s ease !important; }
-  .card:hover .girlscrop { animation-play-state: running !important; transform: none !important; }
   .card .card-hover-btn { position: absolute !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; height: 44px !important; transform: translateY(100%) !important; background: #111 !important; color: #fff !important; border: none !important; font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.04em !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 2 !important; transition: transform 0.25s ease, background 0.2s ease !important; }
   .card:hover .card-hover-btn { transform: translateY(0) !important; }
   .card-hover-btn:hover { background: #333 !important; }

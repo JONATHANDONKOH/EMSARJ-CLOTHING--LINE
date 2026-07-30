@@ -13,6 +13,7 @@ import Account from "./pages/accounts";
 import Orders from "./pages/customerorders";
 import WishlistPage from "./pages/WishlistPage";
 import Shop from "./pages/shop";
+import PreorderPage from "./pages/PreorderPage"; // Import the Preorder page
 import TopNav from "./components/common/TopNav";
 import AutoPlayAudio from "./components/common/AutoPlayAudio";
 import { CartProvider } from "./cartContext/cartprovider";
@@ -27,8 +28,8 @@ function AppContent() {
     location.pathname === "/dashboard" ||
     location.pathname === "/resetpassword" ||
     location.pathname === "/cart" ||
-    location.pathname === "/shop";
-
+    location.pathname === "/shop" ||
+    location.pathname === "/preorder"; // Add preorder to hide nav if needed
 
   return (
     <div className="app-container">
@@ -49,11 +50,11 @@ function AppContent() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/shop" element={<Shop />} />
-        
+          <Route path="/preorder" element={<PreorderPage />} /> {/* Add preorder route */}
         </Routes>
       </main>
 
-   {!hideNav && <EmsarjFooter />}
+      {!hideNav && <EmsarjFooter />}
     </div>
   );
 }

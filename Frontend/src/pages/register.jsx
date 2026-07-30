@@ -87,8 +87,8 @@ export default function Signup() {
       setIsError(false);
       setMessage("");
 
-      await signUp(formData);
-      navigate("/");
+      const authUser = await signUp(formData);
+      navigate(authUser?.role === "admin" ? "/dashboard" : "/");
     } catch (err) {
       setIsError(true);
       setMessage(err?.message || "Registration failed. Please try again.");
@@ -129,6 +129,8 @@ export default function Signup() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
+        <Link to="/" style={styles.homeLink}>← Home</Link>
+
         <div style={styles.logoWrap}>
           <img src={emmyLogo} alt="EMSarj" style={styles.logo} />
         </div>
@@ -335,6 +337,16 @@ const styles = {
     width: "100%",
     maxWidth: "380px",
     boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
+    position: "relative",
+  },
+  homeLink: {
+    display: "inline-block",
+    fontSize: "12px",
+    color: "#888",
+    fontWeight: "600",
+    textDecoration: "none",
+    marginBottom: "12px",
+    letterSpacing: "0.02em",
   },
   logoWrap: { display: "flex", justifyContent: "center", marginBottom: "8px" },
   logo: { height: "48px", width: "auto", objectFit: "contain" },

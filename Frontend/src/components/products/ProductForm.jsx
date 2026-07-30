@@ -13,7 +13,6 @@ import { useAuth } from "../../context/authContext";
 const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 
-
 export function ProductForm({
   initial     = {},
   onSubmit,
@@ -319,7 +318,7 @@ export function ProductForm({
         )}
       </div>
 
-      {/* PLACEMENT — hero / featured / trending */}
+      {/* PLACEMENT — Preorder / New Product / Products */}
       <div style={{ marginBottom: "1rem" }}>
         <label style={{
           display: "block", fontSize: "13px",
@@ -329,9 +328,9 @@ export function ProductForm({
         </label>
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {[
-            { key: "hero",     label: "Show on Hero", checked: showOnHero, set: setShowOnHero },
-            { key: "featured", label: "Featured",      checked: featured,   set: setFeatured   },
-            { key: "trending", label: "Trending",      checked: trending,   set: setTrending   },
+            { key: "hero",     label: "Preorder",    checked: showOnHero, set: setShowOnHero },
+            { key: "featured", label: "New Product",  checked: featured,   set: setFeatured   },
+            { key: "trending", label: "Products",     checked: trending,   set: setTrending   },
           ].map(({ key, label, checked, set }) => (
             <label
               key={key}

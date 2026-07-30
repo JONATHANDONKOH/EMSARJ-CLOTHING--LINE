@@ -1,17 +1,14 @@
+// PreorderPage.jsx
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../cartContext/cartprovider";
 import WishlistHeartButton from "../ui/WishlistHeartButton";
 import TopNav from "../components/common/TopNav";
 
-const DEFAULT_QTY = 1;
-
 const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
-
 
 function resolveImageUrl(imageUrl) {
   if (!imageUrl) return null;
-  // Cloudinary already returns a full https URL at upload time.
   return imageUrl;
 }
 
@@ -29,34 +26,29 @@ function parseSizes(raw) {
   return [];
 }
 
-export default function Shop() {
+export default function PreorderPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { addToCart, cartItems } = useCart();
-
-  const passedProduct = location?.state?.product ?? null;
-
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [categoryProducts, setCategoryProducts] = useState([]);
+  
+  const [heroProducts, setHeroProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizeError, setSizeError] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [addedToCart, setAddedToCart] = useState(false);
 
-  const quantity = DEFAULT_QTY;
-
-  /* ── font tokens — desktop larger, mobile compact ── */
+  // Font tokens
   const F = {
     family: "'Calibri', Arial, sans-serif",
-    tag:    { fontSize: isMobile ? "10px" : "12px", fontWeight: 400, color: "#888", letterSpacing: "0.5px", textTransform: "uppercase" },
-    name:   { fontSize: isMobile ? "11px" : "18px", fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: "0.3px" },
-    price:  { fontSize: isMobile ? "11px" : "18px", fontWeight: 700, color: "#111" },
+    tag: { fontSize: isMobile ? "10px" : "12px", fontWeight: 400, color: "#888", letterSpacing: "0.5px", textTransform: "uppercase" },
+    name: { fontSize: isMobile ? "11px" : "18px", fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: "0.3px" },
+    price: { fontSize: isMobile ? "11px" : "18px", fontWeight: 700, color: "#111" },
     strike: { fontSize: isMobile ? "11px" : "16px", fontWeight: 700, color: "#bbb", textDecoration: "line-through", textDecorationThickness: "2px" },
-    label:  { fontSize: isMobile ? "10px" : "12px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.5px" },
-    btn:    { fontSize: isMobile ? "11px" : "14px", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase" },
-    back:   { fontSize: isMobile ? "11px" : "13px", fontWeight: 400, color: "#555", letterSpacing: "0.3px" },
-    count:  { fontSize: isMobile ? "10px" : "12px", fontWeight: 400, color: "#aaa", letterSpacing: "0.3px" },
+    label: { fontSize: isMobile ? "10px" : "12px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.5px" },
+    btn: { fontSize: isMobile ? "11px" : "14px", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase" },
+    back: { fontSize: isMobile ? "11px" : "13px", fontWeight: 400, color: "#555", letterSpacing: "0.3px" },
+    count: { fontSize: isMobile ? "10px" : "12px", fontWeight: 400, color: "#aaa", letterSpacing: "0.3px" },
   };
 
   useEffect(() => {
@@ -66,32 +58,26 @@ export default function Shop() {
   }, []);
 
   useEffect(() => {
-    if (passedProduct) {
-      setSelectedProduct(passedProduct);
-      const sizes = parseSizes(passedProduct.sizes);
-      if (sizes.length > 0) setSelectedSize(sizes[0]);
-      fetchCategoryProducts(passedProduct.category_id, passedProduct.id);
-    } else {
-      setLoading(false);
-      setSelectedProduct(null);
-    }
-  }, [passedProduct]);
+    fetchHeroProducts();
+  }, []);
 
-  // Related products only — the backend does the category filtering now
-  // (GET /products/category/:categoryId), we just exclude the product
-  // already showing as the main item.
-  async function fetchCategoryProducts(categoryId, currentProductId) {
+  async function fetchHeroProducts() {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/products/category/${categoryId}`);
-      if (!res.ok) throw new Error(`Failed to fetch related products (status ${res.status})`);
+      const res = await fetch(`${API_URL}/products/hero`);
+      if (!res.ok) throw new Error(`Failed to fetch hero products (status ${res.status})`);
       const data = await res.json();
-
-      const filtered = (data || []).filter((p) => p.id !== currentProductId);
-      setCategoryProducts(filtered);
+      setHeroProducts(data || []);
+      
+      // Set first product as selected by default
+      if (data && data.length > 0) {
+        setSelectedProduct(data[0]);
+        const sizes = parseSizes(data[0].sizes);
+        if (sizes.length > 0) setSelectedSize(sizes[0]);
+      }
     } catch (err) {
-      console.error("❌ Error fetching category products:", err);
-      setCategoryProducts([]);
+      console.error("❌ Error fetching hero products:", err);
+      setHeroProducts([]);
     } finally {
       setLoading(false);
     }
@@ -112,24 +98,31 @@ export default function Shop() {
       image: resolveImageUrl(selectedProduct.image_url),
       sizes: selectedProduct.sizes,
       selectedSize,
-      quantity: DEFAULT_QTY,
+      quantity: 1,
     });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   }
 
-  function renderCategoryProduct(product) {
+  function renderHeroProduct(product) {
     const imgUrl = resolveImageUrl(product.image_url);
     const alreadyIn = isInCart(product.id);
     const isOut = product.stock_quantity === 0;
     const currentPrice = Number(product.price) || 0;
     const originalPrice = currentPrice + 50;
 
+    const isSelected = selectedProduct?.id === product.id;
+
     return (
       <div
         className="cart-item-card-split"
         key={product.id}
-        onClick={() => navigate("/shop", { state: { product } })}
+        onClick={() => {
+          setSelectedProduct(product);
+          const sizes = parseSizes(product.sizes);
+          if (sizes.length > 0) setSelectedSize(sizes[0]);
+          setSizeError(false);
+        }}
         style={{
           cursor: "pointer",
           padding: "12px",
@@ -138,25 +131,51 @@ export default function Shop() {
           alignItems: "center",
           gap: "12px",
           fontFamily: F.family,
+          backgroundColor: isSelected ? "#f8f8f8" : "transparent",
+          transition: "background-color 0.2s ease",
         }}
       >
-        <div className="cart-item-img-wrap-split" style={{ width: isMobile ? "60px" : "70px", height: isMobile ? "75px" : "85px", flexShrink: 0, overflow: "hidden", background: "#f5f5f5" }}>
+        <div className="cart-item-img-wrap-split" style={{ 
+          width: isMobile ? "60px" : "70px", 
+          height: isMobile ? "75px" : "85px", 
+          flexShrink: 0, 
+          overflow: "hidden", 
+          background: "#f5f5f5",
+          border: isSelected ? "2px solid #000" : "none",
+          borderRadius: "4px",
+        }}>
           <img className="cart-item-img-split" src={imgUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         </div>
 
         <div className="cart-item-info-split" style={{ flex: 1, minWidth: 0, fontFamily: F.family }}>
-          <span style={{ ...F.tag, fontFamily: F.family, display: "block", marginBottom: "3px" }}>New Released</span>
+          <span style={{ ...F.tag, fontFamily: F.family, display: "block", marginBottom: "3px" }}>Preorder</span>
           <p className="cart-item-name-split" style={{ ...F.name, fontFamily: F.family, margin: "0 0 5px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</p>
           <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
             <span style={{ ...F.price, fontFamily: F.family }}>₵{currentPrice.toFixed(2)}</span>
             <span style={{ ...F.strike, fontFamily: F.family }}>₵{originalPrice.toFixed(2)}</span>
           </div>
           {isOut && <span style={{ ...F.label, fontFamily: F.family, color: "#c00", marginTop: "4px", display: "block" }}>Out of stock</span>}
+          {!isOut && product.stock_quantity <= 5 && (
+            <span style={{ ...F.label, fontFamily: F.family, color: "#b33", marginTop: "4px", display: "block", fontSize: "9px" }}>Last {product.stock_quantity} left</span>
+          )}
         </div>
 
         <button
           className="cart-remove-btn-split"
-          onClick={(e) => { e.stopPropagation(); if (alreadyIn || isOut) return; addToCart({ id: product.id, name: product.name, price: product.price, image: imgUrl, sizes: product.sizes }); }}
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            if (alreadyIn || isOut) return; 
+            setSelectedProduct(product);
+            const sizes = parseSizes(product.sizes);
+            if (sizes.length > 0) setSelectedSize(sizes[0]);
+            addToCart({ 
+              id: product.id, 
+              name: product.name, 
+              price: product.price, 
+              image: imgUrl, 
+              sizes: product.sizes 
+            });
+          }}
           disabled={isOut}
           style={{
             ...F.btn, fontFamily: F.family,
@@ -173,26 +192,7 @@ export default function Shop() {
     );
   }
 
-  /* ── Empty state ── */
-  if (!selectedProduct && !loading) {
-    return (
-      <>
-        <TopNav />
-        <div className="shop-page" style={{ paddingTop: "180px", fontFamily: F.family, fontWeight: 300 }}>
-          <div className="shop-header">
-            <h1 className="shop-title" style={{ ...F.name, fontFamily: F.family, fontSize: isMobile ? "13px" : "15px", margin: 0 }}>Shop</h1>
-            <button className="shop-back-btn" onClick={() => navigate(-1)} style={{ ...F.btn, fontFamily: F.family, background: "none", border: "1px solid #ddd", padding: "8px 16px", borderRadius: "4px", cursor: "pointer", color: "#111" }}>← Back</button>
-          </div>
-          <div className="shop-empty">
-            <p style={{ ...F.name, fontFamily: F.family }}>No product selected.</p>
-            <button className="cart-shop-btn" onClick={() => navigate("/")} style={{ ...F.btn, fontFamily: F.family, marginTop: "16px", padding: "10px 24px", background: "#000", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Browse products</button>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  /* ── Loading ── */
+  // Loading state
   if (loading) {
     return (
       <>
@@ -204,8 +204,27 @@ export default function Shop() {
     );
   }
 
-  /* ── Main ── */
-  const product = selectedProduct;
+  // Empty state
+  if (!heroProducts || heroProducts.length === 0) {
+    return (
+      <>
+        <TopNav />
+        <div className="shop-page" style={{ paddingTop: "180px", fontFamily: F.family, fontWeight: 300 }}>
+          <div className="shop-header" style={{ padding: "0 20px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+            <h1 className="shop-title" style={{ ...F.name, fontFamily: F.family, fontSize: isMobile ? "13px" : "15px", margin: 0 }}>Preorder</h1>
+            <button className="shop-back-btn" onClick={() => navigate(-1)} style={{ ...F.btn, fontFamily: F.family, background: "none", border: "1px solid #ddd", padding: "8px 16px", borderRadius: "4px", cursor: "pointer", color: "#111" }}>← Back</button>
+          </div>
+          <div className="shop-empty" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "40vh" }}>
+            <p style={{ ...F.name, fontFamily: F.family }}>No preorder products available.</p>
+            <button className="cart-shop-btn" onClick={() => navigate("/")} style={{ ...F.btn, fontFamily: F.family, marginTop: "16px", padding: "10px 24px", background: "#000", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Browse products</button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Main render
+  const product = selectedProduct || heroProducts[0];
   const imgUrl = resolveImageUrl(product.image_url);
   const alreadyIn = isInCart(product.id);
   const isDiscount = product.original_price && product.original_price > product.price;
@@ -219,7 +238,7 @@ export default function Shop() {
       <TopNav />
       <div className="shop-page" style={{ paddingTop: "180px", fontFamily: F.family }}>
 
-        {/* ── Mobile-only: back to shopping, shown before the image ── */}
+        {/* Mobile back button */}
         {isMobile && (
           <div style={{ padding: "0 16px 12px" }}>
             <span
@@ -237,7 +256,7 @@ export default function Shop() {
           minHeight: "calc(100vh - 180px)",
         }}>
 
-          {/* ── LEFT: Selected product ── */}
+          {/* LEFT: Selected product */}
           <div className="cart-image-side" style={{
             flex: isMobile ? "0 0 auto" : "0 0 50%",
             width: isMobile ? "100%" : "50%",
@@ -279,7 +298,7 @@ export default function Shop() {
                 }}
               />
 
-              {/* Product details under image */}
+              {/* Product details */}
               <div style={{
                 width: "100%",
                 marginTop: isMobile ? "20px" : "32px",
@@ -290,16 +309,11 @@ export default function Shop() {
                 right: "15px",
                 fontFamily: F.family,
               }}>
-                {/* Tag */}
-                <span className="cart-item-tag-split" style={{ ...F.tag, fontFamily: F.family, display: "block", marginBottom: "6px" }}>New trend</span>
+                <span className="cart-item-tag-split" style={{ ...F.tag, fontFamily: F.family, display: "block", marginBottom: "6px" }}>Preorder</span>
 
-                {/* Brand */}
                 <p style={{ ...F.name, fontFamily: F.family, margin: "0 0 2px" }}>Emsarj</p>
-
-                {/* Product name */}
                 <p style={{ ...F.name, fontFamily: F.family, margin: "0 0 8px" }}>{product.name}</p>
 
-                {/* Price row */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: isMobile ? "center" : "flex-start", gap: isMobile ? "10px" : "14px", marginTop: isMobile ? "6px" : "8px", flexWrap: "wrap" }}>
                   <span style={{ ...F.price, fontFamily: F.family }}>₵{currentPrice.toFixed(2)}</span>
                   {isDiscount && <span style={{ ...F.strike, fontFamily: F.family }}>₵{originalPrice.toFixed(2)}</span>}
@@ -310,7 +324,6 @@ export default function Shop() {
                   )}
                 </div>
 
-                {/* Stock badges */}
                 {isOut && (
                   <span style={{ ...F.label, fontFamily: F.family, display: "inline-block", color: "#c00", border: "1px solid #c00", padding: isMobile ? "2px 8px" : "4px 12px", borderRadius: "4px", marginTop: isMobile ? "6px" : "8px" }}>Out of stock</span>
                 )}
@@ -318,7 +331,6 @@ export default function Shop() {
                   <span style={{ ...F.label, fontFamily: F.family, display: "inline-block", color: "#b33", border: "1px solid #b33", padding: isMobile ? "2px 8px" : "4px 12px", borderRadius: "4px", marginTop: isMobile ? "6px" : "8px" }}>Last {product.stock_quantity} left</span>
                 )}
 
-                {/* Size selector */}
                 {sizes.length > 0 && (
                   <div style={{ marginTop: isMobile ? "10px" : "16px" }}>
                     <p style={{ ...F.label, fontFamily: F.family, margin: "0 0 6px", textAlign: isMobile ? "center" : "left" }}>
@@ -328,7 +340,6 @@ export default function Shop() {
                       {sizes.map((s) => (
                         <span
                           key={s}
-                          className={`cart-size-chip-split${selectedSize === s ? " cart-size-chip--active-split" : ""}`}
                           onClick={() => { setSelectedSize(s); setSizeError(false); }}
                           style={{
                             ...F.btn, fontFamily: F.family,
@@ -351,7 +362,6 @@ export default function Shop() {
                   </div>
                 )}
 
-                {/* Add to Wardrobe Button */}
                 <button
                   className="cart-payout-btn-split"
                   onClick={handleAddToCart}
@@ -376,7 +386,7 @@ export default function Shop() {
             </div>
           </div>
 
-          {/* ── RIGHT: Category products ── */}
+          {/* RIGHT: All hero products list */}
           <div className="cart-content-side" style={{
             flex: isMobile ? "1" : "1",
             padding: isMobile ? "16px" : "24px",
@@ -396,20 +406,14 @@ export default function Shop() {
                   >← Back to shopping</span>
                 )}
                 <span style={{ ...F.count, fontFamily: F.family }}>
-                  {categoryProducts.length} items in this category
+                  {heroProducts.length} preorder items
                 </span>
               </div>
             </header>
 
             <main className="cart-body-split">
               <div className="cart-items-list-split">
-                {categoryProducts.length > 0 ? (
-                  categoryProducts.map((product) => renderCategoryProduct(product))
-                ) : (
-                  <div style={{ padding: "40px 20px", textAlign: "center" }}>
-                    <span style={{ ...F.label, fontFamily: F.family }}>No other products in this category</span>
-                  </div>
-                )}
+                {heroProducts.map((product) => renderHeroProduct(product))}
               </div>
             </main>
           </div>

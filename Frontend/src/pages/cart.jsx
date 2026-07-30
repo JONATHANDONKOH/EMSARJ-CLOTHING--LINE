@@ -408,7 +408,11 @@ export default function Cart() {
         <div className="cart-content-side">
           <header className="cart-header-split">
             <div className="cart-header-top">
-              <span className="cart-continue-link-split" onClick={() => navigate("/")}>
+              <span
+                className="cart-continue-link-split"
+                onClick={() => navigate("/")}
+                style={{ color: "#c00", cursor: "pointer" }}
+              >
                 Continue shopping →
               </span>
             </div>
@@ -478,7 +482,7 @@ export default function Cart() {
 
                         <div className="cart-item-meta-split">
                           <p className="cart-item-price-split">Ghc {item.price * getItemTotalQty(item.id)}</p>
-                          <button className="cart-remove-btn-split" onClick={() => removeFromCart(item.id, item.selectedSize)}>
+                          <button className="cart-remove-btn-split" onClick={() => removeFromCart(item.id, item.selectedSize)} style={{ color: "#c00" }}>
                             Remove
                           </button>
                         </div>

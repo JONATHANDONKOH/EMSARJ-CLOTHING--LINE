@@ -1,5 +1,8 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import footImage from "../assets/toyyyeee.PNG";
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 const socials = [
   {
@@ -51,10 +54,23 @@ function IconSend({ size = 20 }) {
   );
 }
 
+function IconCheck({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  );
+}
+
 export default function EmsarjFooter() {
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+  const [statusMessage, setStatusMessage] = useState("");
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -70,7 +86,56 @@ export default function EmsarjFooter() {
     el.style.height = `${el.scrollHeight}px`;
   }, [email]);
 
-  const buttonIcon = useMemo(() => (isTyping ? <IconSend /> : <IconMail />), [isTyping]);
+  async function handleSend() {
+    if (!email.trim() || status === "sending") return;
+
+    if (!session?.access_token) {
+      navigate("/signin");
+      return;
+    }
+
+    setStatus("sending");
+    setStatusMessage("");
+
+    try {
+      const res = await fetch(`${API_URL}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ body: email.trim() }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to send message. Please try again.");
+      }
+
+      setEmail("");
+      setIsTyping(false);
+      setStatus("sent");
+      setTimeout(() => setStatus("idle"), 2500);
+    } catch (err) {
+      console.error("❌ Error sending message:", err);
+      setStatus("error");
+      setStatusMessage(err.message || "Failed to send message. Please try again.");
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }
+
+  const buttonIcon = useMemo(() => {
+    if (status === "sending") return <IconSend />;
+    if (status === "sent") return <IconCheck />;
+    return isTyping ? <IconSend /> : <IconMail />;
+  }, [isTyping, status]);
 
   return (
     <footer className="emsarj-footer">
@@ -88,9 +153,12 @@ export default function EmsarjFooter() {
               onChange={(e) => {
                 setEmail(e.target.value);
                 setIsTyping(true);
+                if (status === "error") setStatus("idle");
               }}
+              onKeyDown={handleKeyDown}
               placeholder="send your message here"
               rows={1}
+              disabled={status === "sending"}
               style={{
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
@@ -102,10 +170,23 @@ export default function EmsarjFooter() {
                 lineHeight: "inherit",
               }}
             />
-            <button className="footer-submit-btn" type="button" aria-label="Send email">
+            <button
+              className="footer-submit-btn"
+              type="button"
+              aria-label="Send message"
+              onClick={handleSend}
+              disabled={status === "sending" || !email.trim()}
+            >
               {buttonIcon}
             </button>
           </div>
+
+          {status === "error" && (
+            <p style={{ color: "#c00", fontSize: "12px", marginTop: "6px" }}>{statusMessage}</p>
+          )}
+          {status === "sent" && (
+            <p style={{ color: "#16a34a", fontSize: "12px", marginTop: "6px" }}>Message sent!</p>
+          )}
 
           {/* Social section */}
           <div className="footer-social-section" style={{ position: "relative", top: isMobile ? "20px" : "0" }}>

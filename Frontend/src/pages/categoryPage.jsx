@@ -85,7 +85,7 @@ export default function CategoryPage() {
         flexWrap: isMobile ? "wrap" : "nowrap",
         gap: isMobile ? "10px" : "20px"
       }}>
-        <button className="category-back-btn" onClick={() => navigate(-1)}>← Back</button>
+        <button className="category-back-btn" onClick={() => navigate(-1)} style={{ color: "#c00" }}>← Back</button>
         <h1 className="category-page-title" style={{
           fontSize: isMobile ? "18px" : "24px"
         }}>{categoryName || "Products"}</h1>

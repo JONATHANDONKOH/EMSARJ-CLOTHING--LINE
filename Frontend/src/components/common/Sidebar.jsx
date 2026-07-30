@@ -11,7 +11,7 @@ const NAV = [
   { id: "orderItems", label: "Orders", Icon: IconShoppingBag },
   { id: "users", label: "Users", Icon: IconUsers },
   { id: "payments", label: "Payments", Icon: IconCreditCard },
-  { id: "emails", label: "Emails", Icon: IconMail }, // ✅ ADDED EMAILS
+  { id: "UsersMessages", label: "messages", Icon: IconMail }, // ✅ ADDED EMAILS
 ];
 
 export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {

@@ -37,7 +37,7 @@ exports.initializePayment = async (req, res) => {
       amount: Math.round(order.total * 100), // pesewas
       currency: "GHS",
       reference,
-      callback_url: `${process.env.FRONTEND_URL}/payment-success?orderId=${order.id}`,
+      callback_url: `https://emsarj.net/payment-success?orderId=${order.id}`,
     };
 
     const response = await axios.post(
