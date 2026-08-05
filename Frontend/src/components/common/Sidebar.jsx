@@ -2,8 +2,7 @@ import emmyLogo from "../../assets/emmy.png";
 
 // Ensure sidebar logo import works with bundlers
 
-import { IconGrid, IconPackage, IconShoppingBag, IconUsers, IconCreditCard, IconMail } from "./Icons";
-
+import { IconGrid, IconPackage, IconShoppingBag, IconUsers, IconCreditCard, IconMail, IconBell } from "./Icons";
 
 const NAV = [
   { id: "categories", label: "Categories", Icon: IconGrid },
@@ -11,7 +10,8 @@ const NAV = [
   { id: "orderItems", label: "Orders", Icon: IconShoppingBag },
   { id: "users", label: "Users", Icon: IconUsers },
   { id: "payments", label: "Payments", Icon: IconCreditCard },
-  { id: "UsersMessages", label: "messages", Icon: IconMail }, // ✅ ADDED EMAILS
+  { id: "notifications", label: "Notifications", Icon: IconBell },
+  { id: "UsersMessages", label: "messages", Icon: IconMail },
 ];
 
 export function Sidebar({ active, onChange, sidebarOpen, setSidebarOpen }) {

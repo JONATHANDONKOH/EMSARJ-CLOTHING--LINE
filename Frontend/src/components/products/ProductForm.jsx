@@ -10,7 +10,7 @@ import { useAuth } from "../../context/authContext";
 // and swap it to your deployed backend URL in production.
 
 
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 
 export function ProductForm({
@@ -74,13 +74,10 @@ export function ProductForm({
     return errs;
   }
 
-  // ── Cloudinary upload via Express backend (JWT-protected) ─────
+  // ── Cloudinary upload via Express backend (cookie-authenticated) ─────
   async function uploadImage(file) {
     if (!session) {
       throw new Error("You must be signed in to upload images.");
-    }
-    if (!session.access_token) {
-      throw new Error("Your session is missing an access token. Please sign in again.");
     }
 
     const formData = new FormData();
@@ -90,9 +87,7 @@ export function ProductForm({
     try {
       res = await fetch(`${API_URL}/upload`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        credentials: "include",
         body: formData,
       });
     } catch (networkErr) {
@@ -152,8 +147,8 @@ export function ProductForm({
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 

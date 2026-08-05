@@ -10,7 +10,7 @@ import CategoryPage from "./pages/categoryPage";
 import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/cart";
 import Account from "./pages/accounts";
-import Orders from "./pages/customerorders";
+import Orders from "./pages/orders";
 import WishlistPage from "./pages/WishlistPage";
 import Shop from "./pages/shop";
 import PreorderPage from "./pages/PreorderPage"; // Import the Preorder page

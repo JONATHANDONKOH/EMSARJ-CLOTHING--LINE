@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function OrdersView() {
   const { session } = useAuth();
@@ -19,7 +19,7 @@ export default function OrdersView() {
       setLoading(true);
       try {
         const res = await fetch(`${API_URL}/api/orders`, {
-          headers: { Authorization: `Bearer ${session?.access_token}` },
+          credentials: "include",
         });
 
         if (!res.ok) throw new Error(`Failed to fetch orders (${res.status})`);
@@ -49,7 +49,7 @@ export default function OrdersView() {
       // nested as `items` — adjust the key below (e.g. `orderItems`) if
       // your OrdersController shapes the response differently.
       const res = await fetch(`${API_URL}/api/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`Failed to fetch order items (${res.status})`);

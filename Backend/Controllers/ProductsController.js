@@ -1,14 +1,33 @@
 const Product = require("../Models/ProductsModule");
+const redis = require("../utils/cache");
 
 // Utility to normalize booleans
 function toBoolean(val) {
   return val === true || val === "true";
 }
 
+const CACHE_TTL = { EX: 1800 }; // 30 minutes
+
+async function invalidateProductCaches() {
+  await redis.del(
+    "homepage:hero",
+    "homepage:featured",
+    "homepage:trending",
+    "products:all"
+  );
+}
+
 // GET /products
 exports.getAllProducts = async (req, res) => {
   try {
+    const cacheKey = "products:all";
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.status(200).json(JSON.parse(cached));
+    }
+
     const products = await Product.findAll();
+    await redis.set(cacheKey, JSON.stringify(products), CACHE_TTL);
     res.status(200).json(products);
   } catch (err) {
     console.error("Get products error:", err);
@@ -19,7 +38,14 @@ exports.getAllProducts = async (req, res) => {
 // GET /products/hero
 exports.getHeroProducts = async (req, res) => {
   try {
+    const cacheKey = "homepage:hero";
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.status(200).json(JSON.parse(cached));
+    }
+
     const products = await Product.findHero();
+    await redis.set(cacheKey, JSON.stringify(products), CACHE_TTL);
     res.status(200).json(products);
   } catch (err) {
     console.error("Get hero products error:", err);
@@ -30,7 +56,14 @@ exports.getHeroProducts = async (req, res) => {
 // GET /products/featured
 exports.getFeaturedProducts = async (req, res) => {
   try {
+    const cacheKey = "homepage:featured";
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.status(200).json(JSON.parse(cached));
+    }
+
     const products = await Product.findFeatured();
+    await redis.set(cacheKey, JSON.stringify(products), CACHE_TTL);
     res.status(200).json(products);
   } catch (err) {
     console.error("Get featured products error:", err);
@@ -41,7 +74,14 @@ exports.getFeaturedProducts = async (req, res) => {
 // GET /products/trending
 exports.getTrendingProducts = async (req, res) => {
   try {
+    const cacheKey = "homepage:trending";
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.status(200).json(JSON.parse(cached));
+    }
+
     const products = await Product.findTrending();
+    await redis.set(cacheKey, JSON.stringify(products), CACHE_TTL);
     res.status(200).json(products);
   } catch (err) {
     console.error("Get trending products error:", err);
@@ -104,6 +144,8 @@ exports.createProduct = async (req, res) => {
       trending: toBoolean(trending),
     });
 
+    await invalidateProductCaches();
+
     res.status(201).json(product);
   } catch (err) {
     console.error("Create product error:", err);
@@ -128,6 +170,9 @@ exports.updateProduct = async (req, res) => {
     });
 
     if (!product) return res.status(404).json({ message: "Product not found" });
+
+    await invalidateProductCaches();
+
     res.status(200).json(product);
   } catch (err) {
     console.error("Update product error:", err);
@@ -142,6 +187,9 @@ exports.deleteProduct = async (req, res) => {
     if (!existing) return res.status(404).json({ message: "Product not found" });
 
     await Product.delete(req.params.id);
+
+    await invalidateProductCaches();
+
     res.status(200).json({ message: "Product deleted" });
   } catch (err) {
     console.error("Delete product error:", err);

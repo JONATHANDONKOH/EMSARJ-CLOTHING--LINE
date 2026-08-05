@@ -5,6 +5,7 @@ import OrdersView from "./ordersItems";
 import { UsersView } from "./users/UsersView";
 import { PaymentsView } from "./payments/PaymentsView";
 import { MessagesView } from "./MessageView";
+import { NotificationsView } from "./notifications/NotificationView";
 
 export function MainContent({ 
   activePage, 
@@ -58,6 +59,9 @@ export function MainContent({
 
       case "messages":
         return <MessagesView />;
+
+      case "notifications":
+        return <NotificationsView />;
 
       default:
         return null;

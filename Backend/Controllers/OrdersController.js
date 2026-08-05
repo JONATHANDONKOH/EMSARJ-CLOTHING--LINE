@@ -91,6 +91,32 @@ exports.getOrdersByUser = async (req, res) => {
   }
 };
 
+// GET /orders/user/:userId/receipt  (self or admin) - NEW ROUTE
+// Returns orders with their items included for receipt display
+exports.getOrdersWithItemsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (userId !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized to view these orders" });
+    }
+
+    const orders = await Order.getOrdersByUser(userId);
+    
+    // Fetch items for each order
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const items = await OrderItem.getItemsByOrderId(order.id);
+        return { ...order, items };
+      })
+    );
+    
+    res.status(200).json(ordersWithItems);
+  } catch (err) {
+    console.error("Get orders with items error:", err);
+    res.status(500).json({ message: "Failed to fetch orders with items." });
+  }
+};
+
 // GET /orders  (admin only)
 exports.getAllOrders = async (req, res) => {
   try {

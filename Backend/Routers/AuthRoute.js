@@ -16,10 +16,13 @@ const signinLimiter = rateLimit({
 // Public routes
 router.post("/signup", authController.signup);
 router.post("/signin", signinLimiter, authController.signin); // limiter applied here
-router.post("/signout", authController.signout);
 
 // Protected routes
 router.get("/me", authMiddleware, authController.getMe);
 router.put("/me", authMiddleware, authController.updateMe);
+
+// Signout runs behind authMiddleware — the controller needs req.user.id to
+// know which Redis session key (`session:${id}`) to delete.
+router.post("/signout", authMiddleware, authController.signout);
 
 module.exports = router;

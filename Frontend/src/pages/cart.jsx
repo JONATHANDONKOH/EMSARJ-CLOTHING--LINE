@@ -11,15 +11,13 @@ const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-
 
 // Creates the order AND its items in one call — the backend runs both
 // inserts in a single transaction (see OrdersController.createOrder).
-async function createOrder({ first_name, last_name, phone_number, email, subtotal, items, token }) {
-  if (!token) throw new Error("You must be signed in to place an order.");
-
+async function createOrder({ first_name, last_name, phone_number, email, subtotal, items }) {
   const res = await fetch(`${API_URL}/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify({ first_name, last_name, email, phone_number, subtotal, items }),
   });
 
@@ -32,15 +30,13 @@ async function createOrder({ first_name, last_name, phone_number, email, subtota
 // the amount from the order it just created — the frontend never sends or
 // trusts a total here, and the secret key never touches the browser.
 // Returns { authorization_url, reference }.
-async function initializePayment(orderId, token) {
-  if (!token) throw new Error("Unauthorized.");
-
+async function initializePayment(orderId) {
   const res = await fetch(`${API_URL}/payments/initialize`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify({ orderId }),
   });
 
@@ -137,7 +133,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
         phone_number: form.phone.trim(),
         subtotal,
         items,
-        token: session.access_token,
       });
 
       // 2. Ask backend to open a Paystack transaction for that order.
@@ -146,7 +141,7 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
       //    The backend's callback_url already embeds this order's id
       //    (?orderId=...), so /payment-success can pick it back up —
       //    nothing needs to be stashed client-side for that handoff.
-      const { authorization_url } = await initializePayment(order.id, session.access_token);
+      const { authorization_url } = await initializePayment(order.id);
 
       // 3. Hand off to Paystack's hosted checkout page.
       setRedirecting(true);

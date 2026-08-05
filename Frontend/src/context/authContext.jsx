@@ -4,37 +4,28 @@ import { createContext, useContext, useState, useEffect } from "react";
 const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 
-const TOKEN_KEY = "emsarj_token";
-
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(undefined); // undefined = still resolving, null = signed out
   const [user, setUser]       = useState(null);
 
-  // ── Fetch the current user from the backend using a stored token ──
-  const loadUser = async (token) => {
-    if (!token) {
-      setSession(null);
-      setUser(null);
-      return;
-    }
-
+  // ── Fetch the current user from the backend using the HTTP-only cookie ──
+  const loadUser = async () => {
     try {
       const res = await fetch(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
 
       if (!res.ok) {
-        // Token missing/expired/invalid — drop it
-        localStorage.removeItem(TOKEN_KEY);
+        // Cookie missing/expired/invalid
         setSession(null);
         setUser(null);
         return;
       }
 
       const userData = await res.json();
-      setSession({ access_token: token });
+      setSession({ active: true });
       setUser(userData);
     } catch (err) {
       console.error("Failed to load user:", err.message);
@@ -44,8 +35,7 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    loadUser(token);
+    loadUser();
   }, []);
 
   // ── SIGN UP ──
@@ -53,6 +43,7 @@ export function AuthProvider({ children }) {
     const res = await fetch(`${API_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ name, email, number, location, password }),
     });
 
@@ -62,12 +53,10 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || "Registration failed. Please try again.");
     }
 
-    const { token, ...authUser } = data;
-    localStorage.setItem(TOKEN_KEY, token);
-    setSession({ access_token: token });
-    setUser(authUser);
+    setSession({ active: true });
+    setUser(data);
 
-    return authUser;
+    return data;
   };
 
   // ── SIGN IN ──
@@ -75,6 +64,7 @@ export function AuthProvider({ children }) {
     const res = await fetch(`${API_URL}/auth/signin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 
@@ -84,33 +74,34 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || "Something went wrong. Please try again.");
     }
 
-    const { token, ...authUser } = data;
-    localStorage.setItem(TOKEN_KEY, token);
-    setSession({ access_token: token });
-    setUser(authUser);
+    setSession({ active: true });
+    setUser(data);
 
-    return authUser;
+    return data;
   };
 
   // ── SIGN OUT ──
   const signOut = async () => {
-    const token = localStorage.getItem(TOKEN_KEY);
     try {
-      if (token) {
-        await fetch(`${API_URL}/auth/signout`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+      // credentials: "include" ensures the httpOnly JWT cookie is sent so
+      // authMiddleware can identify req.user.id and the backend can delete
+      // the matching session:<id> key from Redis.
+      await fetch(`${API_URL}/auth/signout`, {
+        method: "POST",
+        credentials: "include",
+      });
     } catch (err) {
-      // Stateless JWT — nothing server-side actually depends on this
-      // succeeding. Clear local state regardless.
+      // Stateless-cookie-wise there's nothing else the frontend can do if
+      // this fails — the Redis key deletion is a best-effort server-side
+      // step. Clear local state and redirect regardless.
       console.error("Signout request failed:", err.message);
     }
 
-    localStorage.removeItem(TOKEN_KEY);
     setSession(null);
     setUser(null);
+
+    // NOTE: adjust this path to match your actual sign-in route.
+    window.location.href = "/signin";
   };
 
   const value = {
@@ -120,8 +111,7 @@ export function AuthProvider({ children }) {
     user,
     session,
     refresh: async () => {
-      const token = localStorage.getItem(TOKEN_KEY);
-      await loadUser(token);
+      await loadUser();
     },
   };
 

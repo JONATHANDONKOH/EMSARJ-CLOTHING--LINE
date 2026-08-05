@@ -3,7 +3,7 @@ import { IconUsers } from "../common/Icons";
 import { Modal } from "../common/Modal";
 import { useAuth } from "../../context/authContext";
 
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 
 export function UsersView() {
@@ -23,7 +23,7 @@ export function UsersView() {
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/users`, {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`Failed to fetch users (${res.status})`);
@@ -42,7 +42,7 @@ export function UsersView() {
     try {
       const res = await fetch(`${API_URL}/api/users/${userId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`Failed to delete user (${res.status})`);

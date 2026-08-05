@@ -4,6 +4,8 @@ import { useAuth } from "../context/authContext";
 
 import TopNav from "../components/common/TopNav";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const STATUS_COLORS = {
   pending:   { bg: "#fef3c7", color: "#92400e" },
   paid:      { bg: "#d1fae5", color: "#065f46" },
@@ -11,7 +13,7 @@ const STATUS_COLORS = {
 };
 
 export default function Orders() {
-  const { user }   = useAuth();
+  const { user, session } = useAuth();
   const navigate   = useNavigate();
 
   const [orders, setOrders]                 = useState([]);
@@ -20,49 +22,34 @@ export default function Orders() {
   const [expandedOrders, setExpandedOrders] = useState({});
 
   useEffect(() => {
+    if (session === undefined) return; // still resolving auth state
     if (!user) { navigate("/signin"); return; }
     fetchOrders();
-  }, [user, navigate]);
+  }, [user, navigate, session]);
 
   async function fetchOrders() {
     setLoading(true);
+    setError("");
 
-    // ── Use getSession not getUser ──
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { navigate("/signin"); return; }
+    try {
+      // Fetch orders with items from Express backend
+      const res = await fetch(`${API_URL}/orders/user/${user.id}/receipt`, {
+        credentials: "include",
+      });
 
-    const { data, error } = await supabase
-      .from("orders")
-      .select(`
-        id,
-        first_name,
-        last_name,
-        email,
-        phone_number,
-        subtotal,
-        delivery_fee,
-        total,
-        status,
-        payment_reference,
-        created_at,
-        orderItems (
-          id,
-          product_name,
-          size,
-          qty,
-          price
-        )
-      `)
-      .eq("user_id", session.user.id)
-      .order("created_at", { ascending: false });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || `Failed to fetch orders (${res.status})`);
+      }
 
-    if (error) {
-      console.error(error);
-      setError("Could not load your orders.");
-    } else {
+      const data = await res.json();
       setOrders(data || []);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setError(err.message || "Could not load your orders.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   function toggleOrder(orderId) {
@@ -149,7 +136,7 @@ export default function Orders() {
                       {/* Items */}
                       <div className="order-receipt-items">
                         <p className="order-receipt-label">Items</p>
-                        {(order.orderItems || []).map((item) => (
+                        {(order.items || []).map((item) => (
                           <div className="order-receipt-item-row" key={item.id}>
                             <div className="order-receipt-item-info">
                               <span className="order-receipt-item-name">{item.product_name}</span>

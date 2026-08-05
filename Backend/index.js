@@ -4,6 +4,7 @@ dotenv.config();
 // dotenv.config() must run before anything below is required
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const productRoutes    = require("./Routers/ProductsRoute");
 const orderRoutes      = require("./Routers/OrdersRoute");
@@ -13,6 +14,7 @@ const categoryRoutes   = require("./Routers/CategoryRoute");
 const usersRoutes      = require("./Routers/UsersRoute");
 const uploadRoutes     = require("./Routers/UploadRoute");
 const authRoutes       = require("./Routers/AuthRoute");
+const emailRoutes      = require("./Routers/EmailRoute"); // ← Add this line
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,10 +24,9 @@ const PORT = process.env.PORT || 5000;
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
   "https://emsarj.net",
-  "https://www.emsarj.net",   // ← add this
+  "https://www.emsarj.net",
   "https://emsarj-clothing-line.vercel.app"
 ];
-
 
 app.use(cors({
   origin: ALLOWED_ORIGINS,
@@ -33,6 +34,10 @@ app.use(cors({
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// ── Cookie parsing ───────────────────────────────────────
+// Must be registered before any route that reads req.cookies (e.g. authMiddleware).
+app.use(cookieParser());
 
 // ── Body parsing ─────────────────────────────────────────
 // Skip JSON parsing for Paystack webhook to preserve raw body
@@ -53,6 +58,7 @@ app.use("/payments", paymentRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/auth", authRoutes);
+app.use("/api/email", emailRoutes); // ← Add this line - mounts email routes at /api/email
 
 // ── Start Server ─────────────────────────────────────────
 app.listen(PORT, () => {

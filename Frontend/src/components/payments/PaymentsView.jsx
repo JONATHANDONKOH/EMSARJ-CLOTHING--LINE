@@ -4,14 +4,13 @@ import { IconCreditCard } from "../common/Icons";
 import { Modal } from "../common/Modal";
 
 // Base URL for the Express backend. Adjust the env var name if yours differs.
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // Mapping for status colors and method icons
 const statusColors = {
   completed: "#10b981",
   pending: "#f59e0b",
   failed: "#ef4444",
-  refunded: "#8b5cf6",
 };
 
 const methodIcons = {
@@ -32,7 +31,7 @@ export function PaymentsView({ userRole }) {
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/payments`, {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`Failed to fetch payments (${res.status})`);
@@ -60,7 +59,7 @@ export function PaymentsView({ userRole }) {
     try {
       const res = await fetch(`${API_URL}/api/payments/${paymentId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`Failed to delete payment (${res.status})`);
@@ -117,7 +116,7 @@ export function PaymentsView({ userRole }) {
 
       {/* Filter */}
       <div style={{ marginBottom: "1.5rem", display: "flex", gap: "8px" }}>
-        {["all", "completed", "pending", "failed", "refunded"].map(f => (
+        {["all", "completed", "pending", "failed"].map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             padding: "6px 12px", borderRadius: "6px", border: "none", cursor: "pointer",
             background: filter === f ? "#3b82f6" : "rgba(255,255,255,0.05)",

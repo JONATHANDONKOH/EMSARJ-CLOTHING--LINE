@@ -6,7 +6,7 @@ import { ProductForm } from "./ProductForm";
 import { useAuth } from "../../context/authContext";
 
 
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 
 
@@ -80,17 +80,15 @@ export function ProductsView() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
           },
+          credentials: "include",
           body: JSON.stringify({ image_url: product.image_url }),
         });
       }
 
       const res = await fetch(`${API_URL}/products/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`Failed to delete product (status ${res.status})`);

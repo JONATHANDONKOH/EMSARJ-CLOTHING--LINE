@@ -1,27 +1,42 @@
 const jwt = require("jsonwebtoken");
+const redis = require("../utils/cache");
 
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
+// Must match SESSION_TTL_SECONDS in AuthController.js — this is the TTL
+// sliding renewal resets back to on every authenticated request.
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing or malformed Authorization header" });
-  }
+async function authMiddleware(req, res, next) {
+  const token = req.cookies?.token;
 
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "No token provided" });
-  }
+  if (!token) return res.status(401).json({ error: "No token provided" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const cacheKey = `session:${decoded.id}`;
 
-    // decoded = { id, role, iat, exp } — matches the payload signToken()
-    // puts in every JWT at signup/signin. role rides along in the token
-    // itself, so roleMiddleware("admin") can check req.user.role directly
-    // without a DB round trip on every request.
-    req.user = { id: decoded.id, role: decoded.role };
+    // 🔹 Redis is the source of truth for "is this session active". A
+    // valid JWT signature is necessary but not sufficient — the session
+    // must also still exist in Redis.
+    const cachedUser = await redis.get(cacheKey);
 
+    if (!cachedUser) {
+      // No active session in Redis — signed out, expired from inactivity,
+      // or evicted. Reject rather than recreating from the JWT, since that
+      // would let a logged-out (but still-unexpired) JWT keep working.
+      return res.status(401).json({ error: "Session expired. Please sign in again." });
+    }
+
+    // 🔹 Sliding renewal: an active user's session TTL resets to 7 days on
+    // every authenticated request, so it expires 7 days after their *last*
+    // activity rather than 7 days after login. If this fails, don't block
+    // the request over it — worst case the session expires a bit earlier
+    // than expected, which just means an extra re-login, not a security
+    // hole.
+    redis.expire(cacheKey, SESSION_TTL_SECONDS).catch((err) => {
+      console.error("Session renewal error:", err);
+    });
+
+    req.user = JSON.parse(cachedUser);
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError") {

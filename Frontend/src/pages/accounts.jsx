@@ -32,7 +32,7 @@ export default function Account() {
 
     try {
       const res = await fetch(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        credentials: "include",
       });
 
       const data = await res.json().catch(() => ({}));
@@ -78,8 +78,8 @@ export default function Account() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           name:     form.name,
           number:   form.number,

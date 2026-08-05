@@ -6,6 +6,12 @@ const roleMiddleware = require("../Middleware/RoleMiddleware");
 
 // All order routes require a signed-in user.
 router.post("/", authMiddleware, orderController.createOrder);
+
+// NEW: Get orders with items for receipt display
+// This must come BEFORE /user/:userId to avoid route conflicts
+router.get("/user/:userId/receipt", authMiddleware, orderController.getOrdersWithItemsByUser);
+
+// Get orders without items (original behavior)
 router.get("/user/:userId", authMiddleware, orderController.getOrdersByUser);
 
 // Admin only — declared before /:id so "GET /orders" (no id) isn't ambiguous

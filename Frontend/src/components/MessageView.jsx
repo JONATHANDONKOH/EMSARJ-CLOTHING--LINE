@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
 
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export function MessagesView() {
   const { session } = useAuth();
@@ -13,7 +13,7 @@ export function MessagesView() {
   const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
-    if (!session?.access_token) return;
+    if (!session) return;
     fetchMessages();
   }, [session]);
 
@@ -22,7 +22,7 @@ export function MessagesView() {
     setError("");
     try {
       const res = await fetch(`${API_URL}/messages/admin`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        credentials: "include",
       });
       if (!res.ok) throw new Error(`Failed to fetch messages (status ${res.status})`);
       const data = await res.json();
@@ -43,7 +43,7 @@ export function MessagesView() {
     try {
       const res = await fetch(`${API_URL}/messages/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        credentials: "include",
       });
       if (!res.ok) throw new Error(`Failed to delete message (status ${res.status})`);
 

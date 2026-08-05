@@ -6,13 +6,13 @@ import TopNav from "../components/common/TopNav";
 
 const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
-async function verifyPayment(orderId, reference, token) {
+async function verifyPayment(orderId, reference) {
   const res = await fetch(`${API_URL}/payments/verify/${orderId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify({ reference }),
   });
   const data = await res.json().catch(() => ({}));
@@ -54,7 +54,7 @@ export default function PaymentSuccess() {
     }
 
     ranRef.current = true;
-    verifyPayment(orderId, reference, session.access_token)
+    verifyPayment(orderId, reference)
       .then(() => {
         clearCart();
         setStatus("success");

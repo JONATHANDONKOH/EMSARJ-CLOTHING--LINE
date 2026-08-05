@@ -9,7 +9,7 @@ import { useAuth } from "../../context/authContext";
 // No product management happens here.
 // ─────────────────────────────────────────────────────────────
 
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export function CategoriesView() {
   const [categories, setCategories] = useState([]);
@@ -61,8 +61,8 @@ export function CategoriesView() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ name: trimmed }),
       });
 
@@ -89,9 +89,7 @@ export function CategoriesView() {
     try {
       const res = await fetch(`${API_URL}/categories/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`Failed to delete category (status ${res.status})`);

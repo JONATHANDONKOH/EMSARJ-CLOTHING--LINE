@@ -119,6 +119,24 @@ export function IconEyeOff({ size = 16 }) {
   );
 }
 
+export function IconBell({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 17h5l-1.4-1.4a1.9 1.9 0 01-.6-1.4V11a6 6 0 10-12 0v3.2a1.9 1.9 0 01-.6 1.4L4 17h5" />
+      <path d="M9 17a3 3 0 006 0" />
+    </svg>
+  );
+}
+
+export function IconClock({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
 export function IconMail({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
