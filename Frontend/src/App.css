@@ -25,7 +25,7 @@
 /* Top bar row (Row 1) */
 .top-bar {
   height: 42px;
-  
+  color: #fff;
 }
 /* =====================
    SITE HEADER — Mobile adjustments
@@ -108,7 +108,7 @@
   align-items: center;
   gap: 16px;
   box-sizing: border-box;
-  
+  color: #fff;
 }
 
 .top-bar-spacer {
@@ -141,7 +141,7 @@
 
 .site-header .cat-nav,
 .site-header .desc-bar,
-.site-header .top-bar { background:#faf7f7; }
+.site-header .top-bar { background:#DD0000 ; }
 
 
 .site-header .cat-flip-item { background: transparent; color: #ffffff; }
@@ -203,9 +203,10 @@
   height: 30px;
   width: 300px;
   border: none;
-  border-bottom: 2px solid #333;
+  border-bottom: 2px solid rgba(255,255,255,0.6);
   outline: none;
   background: transparent;
+  color: #fff;
   font-size: 14px;
   padding: 0 8px;
 }
@@ -214,6 +215,8 @@
   outline: none;
   box-shadow: none;
 }
+
+.cartsearch::placeholder { color: rgba(255,255,255,0.75); }
 
 .sb-wrapper {
   position: relative;
@@ -293,10 +296,10 @@
 .cart-icon-btn {
   position: relative; background: none; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #333; transition: color 0.3s ease;
+  color: #fff; transition: color 0.2s ease;
   padding: 0; width: 28px; height: 28px;
 }
-.cart-icon-btn:hover { color: black; }
+.cart-icon-btn:hover { color: #fff; }
 .cart-icon-btn:hover svg { transform: translateY(-1px); transition: transform 0.2s ease; }
 
 /* Profile button + dropdown */
@@ -304,9 +307,9 @@
   background: none; border: none; cursor: pointer;
   padding: 0; width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
-  color: #333; transition: color 0.3s ease;
+  color: #fff; transition: color 0.2s ease;
 }
-.profile-icon-btn:hover { color: black; }
+.profile-icon-btn:hover { color: #fff; }
 .profile-icon-btn:hover svg { transform: translateY(-1px); transition: transform 0.2s ease; }
 
 .profile-menu-wrap {
@@ -357,9 +360,9 @@
   position: relative;
   background: none; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #333; padding: 0; width: 28px; height: 28px;
+  color: #fff; padding: 0; width: 28px; height: 28px;
 }
-.wishlist-icon-btn:hover { color: black; }
+.wishlist-icon-btn:hover { color: #fff; }
 
 .wishlist-badge {
   position: absolute; top: -8px; right: -8px;
