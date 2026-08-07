@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 
 export function UsersView() {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
@@ -15,9 +15,9 @@ export function UsersView() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (session === undefined) return; // still resolving auth state
+    if (user === undefined) return; // still resolving auth state
     fetchUsers();
-  }, [session]);
+  }, [user]);
 
   const fetchUsers = async () => {
     try {
