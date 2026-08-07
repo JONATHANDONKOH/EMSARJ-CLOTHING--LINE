@@ -6,7 +6,7 @@ import ghanaFlag from "../../assets/ghana flag.jpg";
 import SearchBar from "../../ui/searchbar";
 import { useAuth } from "../../context/authContext";
 import { useWishlist } from "../../wishlistContext/wishlistprovider";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export default function TopNav() {
   const navigate = useNavigate();

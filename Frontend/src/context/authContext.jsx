@@ -7,8 +7,8 @@ const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(undefined); // undefined = still resolving, null = signed out
-  const [user, setUser]       = useState(null);
+  // undefined = still resolving, null = signed out, object = signed in
+  const [user, setUser] = useState(undefined);
 
   // ── Fetch the current user from the backend using the HTTP-only cookie ──
   const loadUser = async () => {
@@ -19,17 +19,14 @@ export function AuthProvider({ children }) {
 
       if (!res.ok) {
         // Cookie missing/expired/invalid
-        setSession(null);
         setUser(null);
         return;
       }
 
       const userData = await res.json();
-      setSession({ active: true });
       setUser(userData);
     } catch (err) {
       console.error("Failed to load user:", err.message);
-      setSession(null);
       setUser(null);
     }
   };
@@ -53,7 +50,6 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || "Registration failed. Please try again.");
     }
 
-    setSession({ active: true });
     setUser(data);
 
     return data;
@@ -74,7 +70,6 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || "Something went wrong. Please try again.");
     }
 
-    setSession({ active: true });
     setUser(data);
 
     return data;
@@ -97,7 +92,6 @@ export function AuthProvider({ children }) {
       console.error("Signout request failed:", err.message);
     }
 
-    setSession(null);
     setUser(null);
 
     // NOTE: adjust this path to match your actual sign-in route.
@@ -109,7 +103,6 @@ export function AuthProvider({ children }) {
     signIn,
     signOut,
     user,
-    session,
     refresh: async () => {
       await loadUser();
     },

@@ -759,7 +759,7 @@ ul li:hover { text-decoration: underline; }
   100% { transform: translateY(0px)   rotate(-1deg); }
 }
 
-.card-img-wrap { position: relative; width: 100%; background-color: #ffffff; overflow: hidden; border-radius: 10px; }
+.card-img-wrap { position: relative; width: 100%; background-color: #ffffff; overflow: hidden; border:10px;border-radius: 10px; }
 .girlscrop { height: 340px; width: 100%; object-fit: contain; display: block; transition: transform 0.4s ease; animation: hang 4s ease-in-out infinite; transform-origin: top center; }
 .card:hover .girlscrop { animation-play-state: paused; transform: scale(1.03); }
 .card:nth-child(1) .girlscrop { animation-delay: 0s; }

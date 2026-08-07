@@ -14,7 +14,7 @@ const categoryRoutes   = require("./Routers/CategoryRoute");
 const usersRoutes      = require("./Routers/UsersRoute");
 const uploadRoutes     = require("./Routers/UploadRoute");
 const authRoutes       = require("./Routers/AuthRoute");
-const emailRoutes      = require("./Routers/EmailRoute"); // ← Add this line
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -58,7 +58,7 @@ app.use("/payments", paymentRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/auth", authRoutes);
-app.use("/api/email", emailRoutes); // ← Add this line - mounts email routes at /api/email
+// ← Add this line - mounts email routes at /api/email
 
 // ── Start Server ─────────────────────────────────────────
 app.listen(PORT, () => {
