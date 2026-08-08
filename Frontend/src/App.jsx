@@ -13,7 +13,7 @@ import Orders from "./pages/orders";
 import WishlistPage from "./pages/WishlistPage";
 import Shop from "./pages/shop";
 import PreorderPage from "./pages/PreorderPage"; // Import the Preorder page
-import Subscribe from "./pages/Subscribe"; // Maintenance-mode lock page
+import Subscribe from "./pages/subscribe"; // Maintenance-mode lock page
 import TopNav from "./components/common/TopNav";
 import AutoPlayAudio from "./components/common/AutoPlayAudio";
 import { CartProvider } from "./cartContext/cartprovider";
