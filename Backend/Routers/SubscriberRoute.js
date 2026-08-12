@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const SubscriberController = require("../Controllers/subscriberController");
+const SubscriberController = require("../Controllers/SubscriberController");
 const authMiddleware = require("../Middleware/Authmiddleware"); // same one /messages/admin already uses
 const roleMiddleware = require("../Middleware/RoleMiddleware");
 
