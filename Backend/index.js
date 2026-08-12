@@ -14,7 +14,7 @@ const categoryRoutes   = require("./Routers/CategoryRoute");
 const usersRoutes      = require("./Routers/UsersRoute");
 const uploadRoutes     = require("./Routers/UploadRoute");
 const authRoutes       = require("./Routers/AuthRoute");
-const subscriberRoutes = require("./Routers/SubscriberRoute");
+const subscriberRoutes = require("./Routers/BroadcastingRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
