@@ -1,5 +1,5 @@
 const { Resend } = require("resend");
-const SubscriberModel = require("../Models/subscribermodule");
+const SubscriberModel = require("../Models/SubscriberModule");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
