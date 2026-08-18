@@ -22,7 +22,7 @@ import EmsarjFooter from "./components/Emsarjfooter";
 
 // Set to true to lock the entire site behind the Subscribe page.
 // Set back to false to reopen the site to everyone.
-const SITE_LOCKED = true;
+const SITE_LOCKED = false;
 
 function AppContent() {
   const location = useLocation();
