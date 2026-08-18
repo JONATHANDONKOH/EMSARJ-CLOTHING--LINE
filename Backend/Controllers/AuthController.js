@@ -1,23 +1,17 @@
 const jwt = require("jsonwebtoken");
 const User = require("../Models/UsersModule");
-const redis = require("../utils/cache");
-
-// Single source of truth for session lifetime — JWT expiry, cookie maxAge,
-// and Redis TTL all derive from this so they can't silently drift apart.
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 const signToken = (user) =>
   jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
+    expiresIn: "24h",
   });
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "none",
-  maxAge: SESSION_TTL_SECONDS * 1000, // ms — 7 days, aligned with JWT + Redis
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
 };
-
 // Same identity as COOKIE_OPTIONS minus maxAge — res.clearCookie() needs to
 // be called with matching httpOnly/secure/sameSite for the browser to
 // actually match and remove the cookie; maxAge is irrelevant for clearing.
@@ -39,14 +33,6 @@ exports.signup = async (req, res) => {
 
     const user = await User.create({ name, email, location, number, password });
     const token = signToken(user);
-
-    // Establish the Redis session immediately, so authMiddleware finds a
-    // valid session on the very first protected request after signup.
-    await redis.set(
-      `session:${user.id}`,
-      JSON.stringify({ id: user.id, role: user.role }),
-      { EX: SESSION_TTL_SECONDS }
-    );
 
     res.cookie("token", token, COOKIE_OPTIONS);
     res.status(201).json(user);
@@ -74,14 +60,6 @@ exports.signin = async (req, res) => {
     const { password_hash, ...publicUser } = user;
     const token = signToken(publicUser);
 
-    // Establish the Redis session immediately — this is what makes Redis
-    // the active-session source of truth from the moment of login.
-    await redis.set(
-      `session:${publicUser.id}`,
-      JSON.stringify({ id: publicUser.id, role: publicUser.role }),
-      { EX: SESSION_TTL_SECONDS }
-    );
-
     res.cookie("token", token, COOKIE_OPTIONS);
     res.status(200).json(publicUser);
   } catch (err) {
@@ -91,20 +69,11 @@ exports.signin = async (req, res) => {
 };
 
 // POST /auth/signout
-// Runs behind authMiddleware (see AuthRoute.js), so req.user is set and we
-// can invalidate the Redis session — not just clear the cookie. This is
-// what makes the old JWT unusable afterward: authMiddleware will reject it
-// on the next request since session:<id> is gone, even though the JWT
-// itself is still cryptographically valid for up to 7 more days.
+// Runs behind authMiddleware (see AuthRoute.js), so req.user is set. With
+// Redis removed, sign-out is now just clearing the cookie — the JWT itself
+// stays cryptographically valid until it naturally expires (up to 7 days),
+// but the browser will no longer send it after this.
 exports.signout = async (req, res) => {
-  try {
-    await redis.del(`session:${req.user.id}`);
-  } catch (err) {
-    // Don't block signout on a Redis hiccup — the cookie is still cleared
-    // below. Log for visibility.
-    console.error("Signout Redis error:", err);
-  }
-
   res.clearCookie("token", CLEAR_COOKIE_OPTIONS);
   res.status(200).json({ message: "Signed out" });
 };
