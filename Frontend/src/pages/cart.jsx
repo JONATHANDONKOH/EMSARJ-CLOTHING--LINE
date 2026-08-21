@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../cartContext/cartprovider";
-import { useAuth } from "../context/authContext";
 import TopNav from "../components/common/TopNav";
 
 const DELIVERY_FEE = 45;
@@ -66,7 +65,6 @@ function parseSizes(raw) {
 // ── PaymentModal ─────────────────────────────────────────────────────────────
 
 function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onClose }) {
-  const { session } = useAuth();
   const [form, setForm]       = useState({ firstName: "", lastName: "", phone: "", email: "" });
   const [errors, setErrors]   = useState({});
   const [loading, setLoading] = useState(false);
@@ -90,12 +88,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
   async function handleSubmit() {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
-
-    // ── Layer 2: safety net session check ──
-    if (!session) {
-      setErrors({ submit: "Session expired. Please sign in again." });
-      return;
-    }
 
     setLoading(true);
     try {
@@ -125,7 +117,11 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
         }
       });
 
-      // 1. Create order + items (pending) — server computes the real total
+      // 1. Create order + items (pending) — server computes the real total.
+      //    authMiddleware on the backend is the source of truth for auth;
+      //    the HTTP-only JWT cookie rides along via credentials: "include".
+      //    An unauthenticated request comes back as a 401 here, which the
+      //    catch block below surfaces through errors.submit.
       const order = await createOrder({
         first_name:   form.firstName.trim(),
         last_name:    form.lastName.trim(),
@@ -298,7 +294,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
 export default function Cart() {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, clearCart } = useCart();
-  const { session } = useAuth();
 
   React.useEffect(() => {
     if (cartItems.length === 0) navigate("/");
@@ -310,7 +305,6 @@ export default function Cart() {
   const [sizeError, setSizeError]               = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [authError, setAuthError]               = useState("");
-  const [payoutLoading, setPayoutLoading]       = useState(false);
 
   function getItemTotalQty(itemId) {
     const qtys  = sizeQtys[itemId] || {};
@@ -355,7 +349,7 @@ export default function Cart() {
     });
   }
 
-  async function handlePayout() {
+  function handlePayout() {
     setAuthError("");
 
     // 1. Check sizes
@@ -365,16 +359,9 @@ export default function Cart() {
     });
     if (Object.keys(errors).length > 0) { setSizeError(errors); return; }
 
-    // 2. Check live session
-    setPayoutLoading(true);
-    setPayoutLoading(false);
-
-    if (!session) {
-      setAuthError("You must be signed in to place an order.");
-      return;
-    }
-
-    // 3. Open modal
+    // 2. Open modal — the backend's authMiddleware is the source of truth
+    //    for authentication. An unauthenticated /orders request comes back
+    //    as a 401, which PaymentModal surfaces via errors.submit.
     setShowPaymentModal(true);
   }
 
@@ -573,9 +560,9 @@ export default function Cart() {
                   <button
                     className="cart-payout-btn-split"
                     onClick={handlePayout}
-                    disabled={cartItems.length === 0 || payoutLoading}
+                    disabled={cartItems.length === 0}
                   >
-                    {payoutLoading ? "Checking…" : "Pay out"}
+                    Pay out
                   </button>
 
                   {Object.values(sizeError).some(Boolean) && (

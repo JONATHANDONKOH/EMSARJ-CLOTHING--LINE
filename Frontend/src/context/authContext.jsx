@@ -79,16 +79,13 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     try {
       // credentials: "include" ensures the httpOnly JWT cookie is sent so
-      // authMiddleware can identify req.user.id and the backend can delete
-      // the matching session:<id> key from Redis.
+      // the backend can clear it. Sign-out is now purely cookie-based —
+      // no server-side session store to invalidate.
       await fetch(`${API_URL}/auth/signout`, {
         method: "POST",
         credentials: "include",
       });
     } catch (err) {
-      // Stateless-cookie-wise there's nothing else the frontend can do if
-      // this fails — the Redis key deletion is a best-effort server-side
-      // step. Clear local state and redirect regardless.
       console.error("Signout request failed:", err.message);
     }
 
