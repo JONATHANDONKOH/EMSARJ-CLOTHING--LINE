@@ -15,6 +15,7 @@ const usersRoutes      = require("./Routers/UsersRoute");
 const uploadRoutes     = require("./Routers/UploadRoute");
 const authRoutes       = require("./Routers/AuthRoute");
 const subscriberRoutes = require("./Routers/BroadcastingRoute");
+const profileRoutes    = require("./Routers/ProfileRoute"); // ← NEW import
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,7 +51,6 @@ app.use((req, res, next) => {
 });
 
 // ── Routers ─────────────────────────────────────────────
-// ── Routers ─────────────────────────────────────────────
 app.use("/upload", uploadRoutes);
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
@@ -61,6 +61,7 @@ app.use("/api/users", usersRoutes);
 app.use("/auth", authRoutes);
 app.use("/messages", subscriberRoutes);
 app.use("/api/email", subscriberRoutes); // alias for email subscription routes
+app.use("/api/profile", profileRoutes);  // ← NEW route for profile
 
 // ── Start Server ─────────────────────────────────────────
 app.listen(PORT, () => {
