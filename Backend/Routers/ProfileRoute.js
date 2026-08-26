@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { getProfile, updateProfile } = require("../Controllers/ProfileController");
-const authMiddleware = require("../Middleware/AuthMiddleware");
+const authMiddleware = require("../Middleware/authMiddleware");
 const roleMiddleware = require("../Middleware/  RoleMiddleware");
 
 // GET /profile — must be authenticated and have role "user"

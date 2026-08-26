@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const orderController = require("../Controllers/OrdersController");
-const authMiddleware = require("../Middleware/AuthMiddleware");
+const authMiddleware = require("../Middleware/authMiddleware");
 const roleMiddleware = require("../Middleware/RoleMiddleware");
 
 // All order routes require a signed-in user.
