@@ -1,4 +1,4 @@
-const User = require("../Models/User");
+const User = require("../Models/UsersModule");
 
 // GET /profile — returns the signed-in user's basic profile fields.
 // Relies on authMiddleware having set req.user (from the JWT) beforehand.
