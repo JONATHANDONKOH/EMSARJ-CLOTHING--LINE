@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const BroadcastingController = require("../Controllers/BroadcastingController");
-const authMiddleware = require("../Middleware/Authmiddleware"); // same one /messages/admin already uses
+const authMiddleware = require("../Middleware/AuthMiddleware"); // same one /messages/admin already uses
 const roleMiddleware = require("../Middleware/RoleMiddleware");
 
 // Public

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const categoryController = require("../Controllers/CategoryController");
-const authMiddleware = require("../Middleware/Authmiddleware");
+const authMiddleware = require("../Middleware/AuthMiddleware");
 const roleMiddleware = require("../Middleware/RoleMiddleware");
 
 // Public routes
