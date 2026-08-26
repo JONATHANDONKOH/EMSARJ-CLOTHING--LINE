@@ -235,23 +235,6 @@ export default function TopNav() {
                     className="profile-menu-item"
                     role="menuitem"
                     tabIndex={0}
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      navigate("/messages");
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        setProfileMenuOpen(false);
-                        navigate("/messages");
-                      }
-                    }}
-                  >
-                    Messages
-                  </div>
-                  <div
-                    className="profile-menu-item"
-                    role="menuitem"
-                    tabIndex={0}
                     onClick={handleLogout}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -331,15 +314,6 @@ export default function TopNav() {
                     }}
                   >
                     Orders
-                  </div>
-                  <div
-                    className="mobile-menu-auth-item"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      navigate("/messages");
-                    }}
-                  >
-                    Messages
                   </div>
                   <div
                     className="mobile-menu-auth-item mobile-menu-auth-item--logout"

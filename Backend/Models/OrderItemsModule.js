@@ -6,6 +6,11 @@ const OrderItem = {
   /**
    * Bulk-insert order items in one query.
    * `items`: [{ product_id, product_name, size, qty, price }, ...]
+   * IMPORTANT: this module trusts whatever product_name/price it's given —
+   * it does NOT re-verify them. It's the caller's job to ensure that data
+   * came from the products table, not from req.body. OrdersController.createOrder
+   * builds these items after looking each product_id up in `products`, so
+   * by the time they reach here they're already trustworthy.
    * `client` is optional — pass a checked-out pg client to run inside the
    * same transaction as the parent order insert (see OrdersController.createOrder).
    */

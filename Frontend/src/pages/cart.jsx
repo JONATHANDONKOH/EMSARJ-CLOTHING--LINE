@@ -10,14 +10,17 @@ const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-
 
 // Creates the order AND its items in one call — the backend runs both
 // inserts in a single transaction (see OrdersController.createOrder).
-async function createOrder({ first_name, last_name, phone_number, email, subtotal, items }) {
+// NOTE: items only carry product_id/size/qty. product_name and price are
+// NOT sent from the browser — the backend looks both up from the products
+// table so a tampered cart can never change what gets charged.
+async function createOrder({ first_name, last_name, phone_number, email, items }) {
   const res = await fetch(`${API_URL}/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify({ first_name, last_name, email, phone_number, subtotal, items }),
+    body: JSON.stringify({ first_name, last_name, email, phone_number, items }),
   });
 
   const data = await res.json().catch(() => ({}));
@@ -91,7 +94,10 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
 
     setLoading(true);
     try {
-      // Build order items (product_id required for the products(id) FK)
+      // Build order items — the browser only says WHAT the customer wants
+      // (product_id, size, qty). product_name and price are deliberately
+      // left out: the backend fetches both from the products table so a
+      // devtools-edited cart can never change what actually gets charged.
       const items = [];
       cartItems.forEach((item) => {
         const activeSizes = selectedSizes[item.id] || [];
@@ -99,25 +105,23 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
           activeSizes.forEach((size) => {
             const qty = sizeQtys[item.id]?.[size] ?? 1;
             items.push({
-              product_id:   item.id,
-              product_name: item.name,
+              product_id: item.id,
               size,
               qty,
-              price:        item.price * qty,
             });
           });
         } else {
           items.push({
-            product_id:   item.id,
-            product_name: item.name,
-            size:         null,
-            qty:          1,
-            price:        item.price,
+            product_id: item.id,
+            size:       null,
+            qty:        1,
           });
         }
       });
 
-      // 1. Create order + items (pending) — server computes the real total.
+      // 1. Create order + items (pending) — server looks up real product
+      //    name/price by product_id and computes the real total. It never
+      //    trusts anything price-related from this request body.
       //    authMiddleware on the backend is the source of truth for auth;
       //    the HTTP-only JWT cookie rides along via credentials: "include".
       //    An unauthenticated request comes back as a 401 here, which the
@@ -127,7 +131,6 @@ function PaymentModal({ cartItems, selectedSizes, sizeQtys, subtotal, total, onC
         last_name:    form.lastName.trim(),
         email:        form.email.trim(),
         phone_number: form.phone.trim(),
-        subtotal,
         items,
       });
 
@@ -306,6 +309,10 @@ export default function Cart() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [authError, setAuthError]               = useState("");
 
+  // NOTE: subtotal/total below are for on-page display ONLY. The browser
+  // value is never sent as an authoritative amount — /orders recomputes the
+  // subtotal from the products table, and /payments/initialize recomputes
+  // the charge from the order that created. See PaymentModal.handleSubmit.
   function getItemTotalQty(itemId) {
     const qtys  = sizeQtys[itemId] || {};
     const total = Object.values(qtys).reduce((s, q) => s + q, 0);
