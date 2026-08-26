@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const usersController = require("../Controllers/UsersController");
-const authMiddleware = require("../Middleware/AuthMiddleware");
+const authMiddleware = require("../Middleware/authMiddleware");
 const roleMiddleware = require("../Middleware/RoleMiddleware");
 
 // Admin only — mount this router at /api/users in index.js
