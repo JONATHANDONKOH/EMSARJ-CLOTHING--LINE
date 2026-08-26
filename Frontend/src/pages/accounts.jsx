@@ -6,34 +6,35 @@ import TopNav from "../components/common/TopNav";
 const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export default function Account() {
-  const { user, session, refresh } = useAuth();
-  const navigate  = useNavigate();
+  const { user, refresh } = useAuth();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    name:     "",
-    email:    "",
-    number:   "",
+    name: "",
+    email: "",
+    number: "",
     location: "",
   });
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (session === undefined) return; // auth still resolving
-    if (!session || !user) { navigate("/signin"); return; }
+    if (!user) {
+      navigate("/signin");
+      return;
+    }
     fetchProfile();
-  }, [session, user, navigate]);
+  }, [user, navigate]);
 
   async function fetchProfile() {
     setLoading(true);
-
     try {
-      const res = await fetch(`${API_URL}/auth/me`, {
-        credentials: "include",
-      });
+      const res = await fetch(`${API_URL}/profile`, {
+  credentials: "include", // cookie-based auth
+});
 
       const data = await res.json().catch(() => ({}));
 
@@ -42,16 +43,15 @@ export default function Account() {
       }
 
       setForm({
-        name:     data.name     || "",
-        email:    data.email    || "",
-        number:   data.number   || "",
+        name: data.name || "",
+        email: data.email || "",
+        number: data.number || "",
         location: data.location || "",
       });
     } catch (err) {
       console.error("Failed to fetch profile:", err.message);
       setError("Could not load your profile.");
     }
-
     setLoading(false);
   }
 
@@ -67,25 +67,18 @@ export default function Account() {
     setMessage("");
     setError("");
 
-    if (!session) {
-      setError("Session expired. Please sign in again.");
-      setSaving(false);
-      return;
-    }
-
     try {
-      const res = await fetch(`${API_URL}/auth/me`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          name:     form.name,
-          number:   form.number,
-          location: form.location,
-        }),
-      });
+     const res = await fetch(`${API_URL}/profile`, {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({
+    name: form.name,
+    number: form.number,
+    location: form.location,
+  }),
+});
+
 
       const data = await res.json().catch(() => ({}));
 
@@ -94,9 +87,7 @@ export default function Account() {
       }
 
       setMessage("Profile updated successfully.");
-      // Keep authContext's `user` (used elsewhere, e.g. TopNav) in sync
-      // with what was just saved.
-      await refresh();
+      await refresh(); // sync authContext
     } catch (err) {
       console.error("Failed to update profile:", err.message);
       setError(err.message || "Failed to update your profile. Please try again.");
@@ -105,23 +96,22 @@ export default function Account() {
     setSaving(false);
   }
 
-  if (loading) return (
-    <div className="account-page">
-      <TopNav />
-      <div className="account-loading">Loading your profile...</div>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="account-page">
+        <TopNav />
+        <div className="account-loading">Loading your profile...</div>
+      </div>
+    );
 
   return (
     <div className="account-page">
       <TopNav />
-
       <div className="account-container">
         <h1 className="account-title">My Account</h1>
         <p className="account-subtitle">Manage your profile information</p>
 
         <form className="account-form" onSubmit={handleSubmit}>
-
           <div className="account-field">
             <label className="account-label">Full Name</label>
             <input
@@ -172,17 +162,12 @@ export default function Account() {
             />
           </div>
 
-          {error   && <p className="account-error">{error}</p>}
+          {error && <p className="account-error">{error}</p>}
           {message && <p className="account-success">{message}</p>}
 
-          <button
-            className="account-save-btn"
-            type="submit"
-            disabled={saving}
-          >
+          <button className="account-save-btn" type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save Changes"}
           </button>
-
         </form>
       </div>
     </div>
