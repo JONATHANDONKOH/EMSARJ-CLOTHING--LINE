@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import TopNav from "../components/common/TopNav";
 
-const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+// Always include /api so it matches backend routes
+const API_URL =
+  import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com/api";
 
 export default function Account() {
   const { user, refresh } = useAuth();
@@ -33,8 +35,8 @@ export default function Account() {
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/profile`, {
-  credentials: "include", // cookie-based auth
-});
+        credentials: "include", // cookie-based auth
+      });
 
       const data = await res.json().catch(() => ({}));
 
@@ -68,29 +70,32 @@ export default function Account() {
     setError("");
 
     try {
-     const res = await fetch(`${API_URL}/profile`, {
-  method: "PUT",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({
-    name: form.name,
-    number: form.number,
-    location: form.location,
-  }),
-});
-
+      const res = await fetch(`${API_URL}/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: form.name,
+          number: form.number,
+          location: form.location,
+        }),
+      });
 
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        throw new Error(data.message || "Failed to update your profile. Please try again.");
+        throw new Error(
+          data.message || "Failed to update your profile. Please try again."
+        );
       }
 
       setMessage("Profile updated successfully.");
       await refresh(); // sync authContext
     } catch (err) {
       console.error("Failed to update profile:", err.message);
-      setError(err.message || "Failed to update your profile. Please try again.");
+      setError(
+        err.message || "Failed to update your profile. Please try again."
+      );
     }
 
     setSaving(false);
