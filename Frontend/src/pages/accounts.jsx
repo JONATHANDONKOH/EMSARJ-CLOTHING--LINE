@@ -26,7 +26,8 @@ export default function Account() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!user) {
+    if (user === undefined) return; // authContext still checking — wait
+    if (user === null) {
       navigate("/signin");
       return;
     }
