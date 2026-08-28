@@ -3,12 +3,11 @@ const router = express.Router();
 
 const { getProfile, updateProfile } = require("../Controllers/ProfileController");
 const authMiddleware = require("../Middleware/AuthMiddleware");
-const roleMiddleware = require("../Middleware/RoleMiddleware");
 
-// GET /profile — must be authenticated and have role "user"
-router.get("/", authMiddleware, roleMiddleware("user"), getProfile);
+// GET /profile — any authenticated user
+router.get("/", authMiddleware, getProfile);
 
-// PUT /profile — must be authenticated and have role "user"
-router.put("/", authMiddleware, roleMiddleware("user"), updateProfile);
+// PUT /profile — any authenticated user
+router.put("/", authMiddleware, updateProfile);
 
 module.exports = router;
