@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import TopNav from "../components/common/TopNav";
 
-// Always include /api so it matches backend routes
-const API_URL =
-  import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com/api";
+// Self-correcting: works whether VITE_UPLOAD_API_URL ends in /api, has a
+// trailing slash, or is missing entirely — always resolves to exactly one /api.
+const RAW_BASE =
+  import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
+const API_URL = RAW_BASE.replace(/\/api\/?$/, "").replace(/\/$/, "") + "/api";
 
 export default function Account() {
   const { user, refresh } = useAuth();
