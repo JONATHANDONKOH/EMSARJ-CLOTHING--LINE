@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Add Link import
+import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../cartContext/cartprovider";
 import WishlistHeartButton from "../ui/WishlistHeartButton";
 
 /* =====================================================================
   CONFIG
   ===================================================================== */
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 
 /* =====================================================================
@@ -20,28 +20,14 @@ function resolveImageUrl(imageUrl) {
   return imageUrl;
 }
 
-// Groups a flat products array by name — if two products share a name,
-// the second one's image becomes the "back" image shown on hover.
-// Returns [{ product, hoverImgUrl }].
+// Builds display items directly from each product's own hover_image_url —
+// no more pairing two same-named products together. Each product is now
+// independent: it shows a hover image only if it was uploaded for it.
 function buildDisplayItems(products) {
-  const nameMap = {};
-  const nameOrder = [];
-  products.forEach((p) => {
-    const key = (p.name || "").trim().toLowerCase();
-    if (!nameMap[key]) {
-      nameMap[key] = [];
-      nameOrder.push(key);
-    }
-    nameMap[key].push(p);
-  });
-
-  return nameOrder.map((key) => {
-    const [primary, duplicate] = nameMap[key];
-    return {
-      product: primary,
-      hoverImgUrl: duplicate ? resolveImageUrl(duplicate.image_url) : null,
-    };
-  });
+  return products.map((product) => ({
+    product,
+    hoverImgUrl: resolveImageUrl(product.hover_image_url),
+  }));
 }
 
 // Splits display items into rows of `perRow`, capped at `maxRows`.
@@ -50,13 +36,11 @@ function chunkRows(items, perRow = 4, maxRows = 3) {
 
   if (!items || items.length === 0) return rows;
 
-  // If items count is less than perRow, just return one row with all items
   if (items.length < perRow) {
     rows.push(items.slice(0, items.length));
     return rows;
   }
 
-  // For 4+ items, chunk them into rows of perRow, capped at maxRows
   const maxItems = Math.min(items.length, maxRows * perRow);
   for (let i = 0; i < maxItems && rows.length < maxRows; i += perRow) {
     rows.push(items.slice(i, Math.min(i + perRow, maxItems)));
@@ -89,7 +73,6 @@ function useProductFetch(endpoint) {
     load();
   }, [load]);
 
-  // Re-fetch when the tab becomes visible again (bfcache restore, etc.)
   useEffect(() => {
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") load();
@@ -103,10 +86,6 @@ function useProductFetch(endpoint) {
 
 /* =====================================================================
   HERO / PREORDER SECTION
-  Uses the .emsarj-hero__* classes already defined in app.css — those
-  classes handle absolute positioning for the badge/dots and responsive
-  breakpoints. Data comes from /products/hero (curated by the admin
-  "Preorder" checkbox — stored as show_on_hero in the DB).
   ===================================================================== */
 
 function HeroSection({ heroImages, heroProducts }) {
@@ -171,13 +150,12 @@ function HeroSection({ heroImages, heroProducts }) {
             <a href="#" className="emsarj-hero__btn" onClick={goToProduct}>
               Details <span>→</span>
             </a>
-            
-            {/* ADDED: View All Preorders link */}
-            <Link 
-              to="/preorder" 
-              className="emsarj-hero__btn" 
-              style={{ 
-                background: "transparent", 
+
+            <Link
+              to="/preorder"
+              className="emsarj-hero__btn"
+              style={{
+                background: "transparent",
                 border: "2px solid #fff",
                 color: "#fff",
                 padding: "12px 24px",
@@ -205,16 +183,6 @@ function HeroSection({ heroImages, heroProducts }) {
 
 /* =====================================================================
   DUAL-IMAGE CARD (front shown by default, back revealed on hover)
-
-  NOTE: This is the ONLY card markup now, used at every breakpoint.
-  There used to be a separate hand-styled "isTablet" branch here that
-  hardcoded its own fonts, currency format (GHC vs ₵), aspect-ratio box,
-  and wishlist-button position — which is why tablet looked disconnected
-  from desktop. That branch has been removed. This single markup relies
-  entirely on the .card / .card-img-wrap / .girlscrop / .card-hover-btn /
-  .card-info classes in app.css, whose existing @media blocks already
-  handle mobile, tablet, and desktop sizing consistently — so tablet now
-  automatically inherits desktop's exact colors, fonts, and behavior.
   ===================================================================== */
 
 function DualImageCard({ product, hoverImgUrl, onNavigate, onAddToCart, alreadyAdded, wishlistProduct }) {
@@ -328,11 +296,6 @@ function CategoryCard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ── Measure the real fixed-header height instead of guessing a pixel
-  // value. .site-header is allowed to wrap/grow (esp. on mobile), so a
-  // hardcoded paddingTop could be shorter than the header and let it
-  // cover the top of the hero (badge included). Re-measure on resize
-  // so rotating a phone or resizing the window keeps it accurate.
   const [headerHeight, setHeaderHeight] = useState(88);
 
   useEffect(() => {
@@ -351,8 +314,6 @@ function CategoryCard() {
 
   const contentTopPadding = Math.max(72, headerHeight - (isMobile ? 8 : 16));
 
-  // ── Three independent feeds — one per landing-page section ──
-  // hero → PREORDER, featured → NEW PRODUCT, trending → PRODUCTS
   const hero = useProductFetch("/products/hero");
   const featured = useProductFetch("/products/featured");
   const trending = useProductFetch("/products/trending");
@@ -387,7 +348,7 @@ function CategoryCard() {
       addToCart({ id: product.id, name: product.name, price: product.price, image: imgUrl, sizes: product.sizes });
     };
 
-    // If there's a hover image, use the dual-image card
+    // If this product has a hover_image_url, use the dual-image card
     if (hoverImgUrl) {
       return (
         <DualImageCard
@@ -402,8 +363,7 @@ function CategoryCard() {
       );
     }
 
-    // Single image card — same markup at every breakpoint (see note above
-    // DualImageCard); desktop's exact look now carries through to tablet.
+    // No second image — single-image card, same markup at every breakpoint.
     const currentPrice = Number(product.price) || 0;
     const originalPrice = currentPrice + 50;
 
@@ -433,20 +393,13 @@ function CategoryCard() {
 
   const heroImages = hero.items.map((p) => resolveImageUrl(p.image_url));
 
-  // NEW PRODUCT (featured) — capped to 4 products / 3 rows / 12 cards.
   const featuredDisplayItems = buildDisplayItems(featured.items).slice(0, 4);
   const featuredRows = chunkRows(featuredDisplayItems, 4, 3);
 
-  // PRODUCTS (trending) — capped to 12 cards max (3 rows of 4).
-  // No slice() before chunking: chunkRows itself stops at maxRows, so up
-  // to 12 distinct products are shown rather than only the first 4.
   const productsDisplayItems = buildDisplayItems(trending.items);
   const productsRows = chunkRows(productsDisplayItems, 4, 3);
 
   return (
-    // Pushes the whole landing page down so it clears the fixed TopNav
-    // (.main-nav-row is 64px + a categories marquee row on desktop).
-    // Tweak these two values if it's still touching the nav or too far off.
     <div style={{ paddingTop: `${contentTopPadding}px` }}>
       {!hero.loading && heroImages.length > 0 && (
         <HeroSection heroImages={heroImages} heroProducts={hero.items} />

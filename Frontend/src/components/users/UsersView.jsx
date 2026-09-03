@@ -3,8 +3,7 @@ import { IconUsers } from "../common/Icons";
 import { Modal } from "../common/Modal";
 import { useAuth } from "../../context/authContext";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export function UsersView() {
   const { user } = useAuth();

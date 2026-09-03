@@ -9,7 +9,7 @@ import { useAuth } from "../../context/authContext";
 // No product management happens here.
 // ─────────────────────────────────────────────────────────────
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 export function CategoriesView() {
   const [categories, setCategories] = useState([]);

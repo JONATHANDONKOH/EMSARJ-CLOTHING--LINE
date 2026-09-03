@@ -3,75 +3,61 @@
    ===================== */
 .site-header {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 200;
-  background-color: #949090;
+  background-color: #F0E8FF;
   width: 100%;
   box-sizing: border-box;
   transition: height 0.15s ease;
-  
 }
 
 /* Reduce TopNav height */
 .site-header .top-bar,
 .site-header .cat-nav {
-  /* baseline; overridden by per-row rules below */
   height: auto;
 }
-
-/* Make header overall shorter on all screens */
-.site-header .top-bar,
 
 /* Top bar row (Row 1) */
 .top-bar {
   height: 42px;
-  color: #fff;
-}
-/* =====================
-   SITE HEADER — Mobile adjustments
-   ===================== */
-
-/* Remove height constraint on small screens */
-@media (max-width: 600px) {
-  .site-header .top-bar,
-  .top-bar {
-    height: auto !important;
-    min-height: 42px;
-    padding: 8px 12px;
-    flex-wrap: wrap;
-  }
-
-  .site-header .cat-nav {
-    height: auto !important;
-    min-height: 56px;
-  }
-}
-
-/* =====================
-   SITE HEADER — Base styles (unchanged)
-   ===================== */
-.site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  background-color: #070606;
-  width: 100%;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
   box-sizing: border-box;
-  transition: height 0.15s ease;
-  
+  background: #F0E8FF;
+  color: #1a1a1a;
 }
 
-.site-header .cat-nav {
-  height: auto;
-  
+.top-bar-spacer {
+  flex: 1;
+}
+
+/* Row 2 - now empty but kept for spacing */
+.desc-bar {
+  padding: 0;
+  text-align: center;
+  box-sizing: border-box;
+  background: #F0E8FF;
+}
+
+/* Row 3 - Desktop: Logo and search on same row */
+.cat-nav {
+  height: 56px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+  background: #F0E8FF;
 }
 
 .site-header .cat-nav,
 .site-header .desc-bar,
 .site-header .top-bar {
-  background: #e9e7e9;
+  background: #F0E8FF;
 }
 
 .site-header .cat-flip-item {
@@ -100,84 +86,25 @@
   color: inherit;
 }
 
-/* Top bar row (Row 1) */
-.top-bar {
-  height: 42px;
-  padding: 0 40px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-sizing: border-box;
-  color: #fff;
-}
+/* =====================
+   SITE HEADER — Mobile adjustments
+   ===================== */
 
-.top-bar-spacer {
-  flex: 1;
-}
+@media (max-width: 600px) {
+  .site-header .top-bar,
+  .top-bar {
+    height: auto !important;
+    min-height: 42px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    background: #F0E8FF;
+  }
 
-/* Row 2 - now empty but kept for spacing */
-.desc-bar {
-  padding: 0;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-/* Row 3 - Desktop: Logo and search on same row */
-.cat-nav {
-  height: 56px;
-  padding: 0 40px;
-  display: flex;
-  align-items: center;
-  position: relative;
-  box-sizing: border-box;
-  background: #ffffff;
-}
-/* Category nav row (Row 3) */
-.cat-nav {
-  height: 56px;
-
-}
-
-
-.site-header .cat-nav,
-.site-header .desc-bar,
-.site-header .top-bar { background:#e90a0a ; }
-
-
-.site-header .cat-flip-item { background: transparent; color: #ffffff; }
-.site-header .nav-item { color: #000; }
-.site-header .nav-item:hover { color: #000; text-decoration: underline; }
-.site-header .mobile-search-drawer { background: #fff; }
-.site-header .discription { color: #000; }
-.site-header .nav-logo { color: inherit; }
-
-/* Row 1 */
-.top-bar {
-  height: 42px;
-  padding: 0 40px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-sizing: border-box;
-}
-.top-bar-spacer { flex: 1; }
-
-/* Row 2 - now empty but kept for spacing */
-.desc-bar {
-  padding: 0;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-/* Row 3 - Desktop: Logo and search on same row */
-.cat-nav {
-  height: 56px;
-  padding: 0 40px;
-  display: flex;
-  align-items: center;
-  position: relative;
-  box-sizing: border-box;
-  background: #ffffff;
+  .site-header .cat-nav {
+    height: auto !important;
+    min-height: 56px;
+    background: #F0E8FF;
+  }
 }
 
 .nav-spacer { flex: 1; }
@@ -203,10 +130,10 @@
   height: 30px;
   width: 300px;
   border: none;
-  border-bottom: 2px solid rgba(255,255,255,0.6);
+  border-bottom: 2px solid rgba(17,17,17,0.7);
   outline: none;
   background: transparent;
-  color: #fff;
+  color: #111;
   font-size: 14px;
   padding: 0 8px;
 }
@@ -216,7 +143,7 @@
   box-shadow: none;
 }
 
-.cartsearch::placeholder { color: rgba(255,255,255,0.75); }
+.cartsearch::placeholder { color: rgba(17,17,17,0.7); }
 
 .sb-wrapper {
   position: relative;
@@ -271,13 +198,13 @@
 .nav-item {
   font-size: 14px;
   font-weight: 500;
-  color: #8d8a8a;
+  color: #111;
   cursor: pointer;
   transition: color 0.2s ease;
   white-space: nowrap;
   user-select: none;
 }
-.nav-item:hover { color: #fff8f8; text-decoration: underline; }
+.nav-item:hover { color: #111; text-decoration: underline; }
 
 /* Country flag */
 .country-flag-btn {
@@ -296,10 +223,10 @@
 .cart-icon-btn {
   position: relative; background: none; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; transition: color 0.2s ease;
+  color: #111; transition: color 0.2s ease;
   padding: 0; width: 28px; height: 28px;
 }
-.cart-icon-btn:hover { color: #fff; }
+.cart-icon-btn:hover { color: #111; }
 .cart-icon-btn:hover svg { transform: translateY(-1px); transition: transform 0.2s ease; }
 
 /* Profile button + dropdown */
@@ -307,9 +234,9 @@
   background: none; border: none; cursor: pointer;
   padding: 0; width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; transition: color 0.2s ease;
+  color: #111; transition: color 0.2s ease;
 }
-.profile-icon-btn:hover { color: #fff; }
+.profile-icon-btn:hover { color: #111; }
 .profile-icon-btn:hover svg { transform: translateY(-1px); transition: transform 0.2s ease; }
 
 .profile-menu-wrap {
@@ -360,9 +287,9 @@
   position: relative;
   background: none; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #333; padding: 0; width: 28px; height: 28px;
+  color: #111; padding: 0; width: 28px; height: 28px;
 }
-.wishlist-icon-btn:hover { color: black; }
+.wishlist-icon-btn:hover { color: #111; }
 
 .wishlist-badge {
   position: absolute; top: -8px; right: -8px;
@@ -1101,7 +1028,7 @@ ul li:hover { text-decoration: underline; }
 /* =====================
    CATEGORIES MARQUEE ROW
    ===================== */
-.cat-nav-scroll { width: 100%; overflow-x: auto; scrollbar-width: none; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; box-sizing: border-box; cursor: grab; user-select: none; }
+.cat-nav-scroll { width: 100%; overflow-x: auto; scrollbar-width: none; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; background: #000; box-sizing: border-box; cursor: grab; user-select: none; }
 .cat-nav-scroll::-webkit-scrollbar { display: none; }
 .cat-nav-scroll:active { cursor: grabbing; }
 
@@ -1122,12 +1049,19 @@ ul li:hover { text-decoration: underline; }
 }
 .cat-flip-item {
   font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
-  color: #333; padding: 10px 18px; cursor: pointer; white-space: nowrap;
-  border-right: 1px solid #f0f0f0; transition: background 0.15s, color 0.15s;
+  color: #fff; padding: 10px 18px; cursor: pointer; white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.14); transition: background 0.15s, color 0.15s;
   opacity: 0; transform: rotateX(90deg) translateY(-20px); transform-origin: top center;
 }
 .cat-flip-item--visible { animation: catBackflip 0.55s cubic-bezier(0.34,1.4,0.64,1) forwards; }
-.cat-flip-item:hover { background: #111; color: #fff; text-decoration: none; }
+.cat-flip-item:hover { background: #fff; color: #111; text-decoration: none; }
+
+/* ensure marquee text stays white on all sizes */
+.cat-nav-scroll .cat-flip-item,
+.cat-nav-scroll .gendergories-scroll,
+.cat-nav-scroll .gendergories-scroll * {
+  color: #fff !important;
+}
 
 /* =====================
    MOBILE SEARCH TOGGLE + DRAWER
@@ -1204,6 +1138,11 @@ ul li:hover { text-decoration: underline; }
   .site-header .cat-nav,
   .site-header .desc-bar {
     background-color: #faf7f7 !important;
+  }
+
+  .site-header .cat-nav-scroll,
+  .cat-nav-scroll {
+    background-color: #000 !important;
   }
 
   .cat-nav {
@@ -1552,10 +1491,10 @@ body { background-color: #f8f8f8; }
 /* =====================================================================
    FOOTER
    ===================================================================== */
-.emsarj-footer { position: relative; width: 100%; background: #e90a0a; border-top: 3px solid #111; overflow: hidden; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 10px 48px 6px 48px; box-sizing: border-box; font-family: inherit; gap: 0; z-index: 50; }
+.emsarj-footer { position: relative; width: 100%; background: #F0E8FF; border-top: 1px solid rgba(26,26,26,0.15); overflow: hidden; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 10px 48px 6px 48px; box-sizing: border-box; font-family: inherit; gap: 0; z-index: 50; }
 /* Removed the black arc at the footer bottom */
 .emsarj-footer::before { content: none; }
-.footer-headline, .footer-sub, .footer-copyright p, .social-icon-btn, .footer-bottom p { color: #fff; }
+.footer-headline, .footer-sub, .footer-copyright p, .social-icon-btn, .footer-bottom p { color: #1a1a1a; }
 .sparkle { position: absolute; color: #ffffff; pointer-events: none; animation: sparkle-pulse 2s ease-in-out infinite; z-index: 1; line-height: 1; }
 .sparkle-1 { top: 20px;  left: 32px;  font-size: 14px; animation-delay: 0s; }
 .sparkle-2 { top: 55px;  left: 64px;  font-size: 26px; animation-delay: 0.4s; }
@@ -1583,7 +1522,14 @@ body { background-color: #f8f8f8; }
 .footer-bottom p { margin: 0; font-size: 12px; color: #fff !important; font-family: Arial, sans-serif; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; position: relative; top: -10px; }
 
 @media (max-width: 600px) {
-  .emsarj-footer { flex-direction: column; align-items: center; padding: 10px 20px 6px; gap: 10px; text-align: center; }
+  .emsarj-footer {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 20px 6px;
+    gap: 10px;
+    text-align: center;
+    background: #F0E8FF;
+  }
   .footer-content { padding-left: 0; padding-bottom: 0; align-items: center; }
   .footer-socials { justify-content: center; }
   .footer-right { flex-direction: column; align-items: center; }
@@ -1718,7 +1664,7 @@ body { background-color: #f8f8f8; }
 .footer-headline {
   font-size: 20px;
   font-weight: 400;
-  color: #fff;
+  color: #1a1a1a;
   margin: 0 0 24px 0;
   letter-spacing: 0.5px;
   font-family: 'Georgia', 'Times New Roman', serif;
@@ -1730,14 +1676,14 @@ body { background-color: #f8f8f8; }
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
-  border-bottom: 1px solid #fff;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.5);
   padding-bottom: 8px;
 }
 
 .email-label {
   font-size: 13px;
   font-weight: 400;
-  color: #fff;
+  color: #1a1a1a;
   letter-spacing: 2px;
   min-width: 55px;
   flex-shrink: 0;
@@ -1751,11 +1697,11 @@ body { background-color: #f8f8f8; }
   font-size: 13px;
   letter-spacing: 0.4px;
   outline: none;
-  color: #fff;
+  color: #1a1a1a;
 }
 
 .footer-email-input::placeholder {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(26, 26, 26, 0.65);
   font-weight: 300;
   font-style: italic;
 }
@@ -1764,7 +1710,7 @@ body { background-color: #f8f8f8; }
   background: none;
   border: none;
   cursor: pointer;
-  color: #fff;
+  color: #1a1a1a;
   padding: 0 0 0 8px;
   transition: transform 0.2s ease;
   display: inline-flex;
@@ -1783,7 +1729,7 @@ body { background-color: #f8f8f8; }
   display: block;
   font-size: 13px;
   font-weight: 400;
-  color: #fff;
+  color: #1a1a1a;
   margin-bottom: 10px;
   letter-spacing: 2px;
 }
@@ -1795,7 +1741,7 @@ body { background-color: #f8f8f8; }
 }
 
 .social-icon-btn {
-  color: #fff;
+  color: #1a1a1a;
   opacity: 0.9;
   transition: transform 0.2s ease, color 0.2s ease, opacity 0.2s ease;
   display: inline-flex;
@@ -1806,7 +1752,7 @@ body { background-color: #f8f8f8; }
 
 .social-icon-btn:hover {
   transform: scale(1.15);
-  color: #fff;
+  color: #1a1a1a;
   opacity: 1;
 }
 
@@ -1818,7 +1764,7 @@ body { background-color: #f8f8f8; }
 
 .footer-copyright p {
   font-size: 11px;
-  color: #fff;
+  color: #1a1a1a;
   letter-spacing: 0.5px;
   font-weight: 300;
   margin: 0;

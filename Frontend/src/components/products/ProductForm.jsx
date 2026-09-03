@@ -2,15 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { SIZES } from "../../constants";
 import { InputField } from "../common/InputField";
 import { IconImage, IconCheck } from "../common/Icons";
-import { useAuth } from "../../context/authContext";
-// adjust path if your auth context lives elsewhere
 
 // Your Express/Cloudinary/Neon backend.
 // Put VITE_API_URL=http://localhost:5000 in your frontend .env for local dev,
 // and swap it to your deployed backend URL in production.
-
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// NOTE: server.js mounts routes with no /api prefix (/upload, /products,
+// /categories, etc.) — this must stay the plain VITE_API_URL pattern.
+const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
 
 
 export function ProductForm({
@@ -24,6 +22,11 @@ export function ProductForm({
   const [sizes, setSizes]               = useState(initial.sizes     || []);
   const [imagePreview, setImagePreview] = useState(initial.image_url || null);
   const [imageFile, setImageFile]       = useState(null);
+
+  // Second (hover/back) image — optional
+  const [hoverPreview, setHoverPreview] = useState(initial.hover_image_url || null);
+  const [hoverFile, setHoverFile]       = useState(null);
+
   const [categoryId, setCategoryId]     = useState(
     initial.category_id ? String(initial.category_id) : ""
   );
@@ -34,7 +37,7 @@ export function ProductForm({
   const [errors, setErrors]             = useState({});
   const [loading, setLoading]           = useState(false);
   const fileRef                         = useRef();
-  const { session }                     = useAuth();
+  const hoverFileRef                    = useRef();
 
   useEffect(() => {
     async function fetchCategories() {
@@ -64,6 +67,22 @@ export function ProductForm({
     reader.readAsDataURL(file);
   }
 
+  function handleHoverImage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setHoverFile(file);
+    const reader = new FileReader();
+    reader.onload = ev => setHoverPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  function clearHoverImage(e) {
+    e.stopPropagation();
+    setHoverFile(null);
+    setHoverPreview(null);
+    if (hoverFileRef.current) hoverFileRef.current.value = "";
+  }
+
   function validate() {
     const errs = {};
     if (!name.trim())                                      errs.name     = "Product name is required";
@@ -75,11 +94,11 @@ export function ProductForm({
   }
 
   // ── Cloudinary upload via Express backend (cookie-authenticated) ─────
+  // Auth here is an httpOnly cookie set by the server on sign-in and sent
+  // automatically via credentials: "include" — there's no client-held
+  // session/token object to check beforehand. A 401 from the server is
+  // the real signal that the cookie is missing, invalid, or expired.
   async function uploadImage(file) {
-    if (!session) {
-      throw new Error("You must be signed in to upload images.");
-    }
-
     const formData = new FormData();
     formData.append("image", file); // must match multer field name: upload.single("image")
 
@@ -116,12 +135,20 @@ export function ProductForm({
 
     setLoading(true);
     try {
-      // ── Step 1: upload image if new one was picked ─────────────
+      // ── Step 1: upload images if new ones were picked ─────────────
       let image_url = initial.image_url || null;
       if (imageFile) {
         image_url = await uploadImage(imageFile);
-        // Deleting the old Cloudinary image on replace is handled server-side
-        // by the /delete route, wired up from ProductsView on actual removal.
+      }
+
+      // Second image is optional. If the user picked a new file, upload it.
+      // If they cleared it (had one, removed it, didn't pick a new one),
+      // send null so the backend clears the column.
+      let hover_image_url = initial.hover_image_url || null;
+      if (hoverFile) {
+        hover_image_url = await uploadImage(hoverFile);
+      } else if (!hoverPreview) {
+        hover_image_url = null;
       }
 
       const payload = {
@@ -129,13 +156,12 @@ export function ProductForm({
         price:       parseFloat(price),
         sizes,
         image_url,
+        hover_image_url,
         category_id: categoryId,
         show_on_hero: showOnHero,
         featured,
         trending,
       };
-
-      console.log("ProductForm payload being sent:", payload); // TEMP — remove after debugging
 
       // ── Step 2: create or update via Express/Neon ───────────────
       const isEdit = Boolean(initial.id);
@@ -209,7 +235,7 @@ export function ProductForm({
         error={errors.price}
       />
 
-      {/* IMAGE */}
+      {/* PRIMARY IMAGE */}
       <div style={{ marginBottom: "1rem" }}>
         <label style={{
           display: "block", fontSize: "13px",
@@ -242,6 +268,51 @@ export function ProductForm({
         {errors.image && (
           <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#ef4444" }}>{errors.image}</p>
         )}
+      </div>
+
+      {/* SECOND / HOVER IMAGE — optional, shown on card hover */}
+      <div style={{ marginBottom: "1rem" }}>
+        <label style={{
+          display: "block", fontSize: "13px",
+          fontWeight: 500, color: "#94a3b8", marginBottom: "6px",
+        }}>
+          Hover Image <span style={{ color: "#475569", fontWeight: 400 }}>(optional — shown on hover)</span>
+        </label>
+        <div
+          onClick={() => hoverFileRef.current.click()}
+          style={{
+            position: "relative",
+            border: `2px dashed ${hoverPreview ? "#3b82f6" : "rgba(255,255,255,0.12)"}`,
+            borderRadius: "10px", padding: "1.25rem",
+            cursor: "pointer", textAlign: "center",
+            background: hoverPreview ? "rgba(59,130,246,0.05)" : "rgba(255,255,255,0.02)",
+            transition: "all 0.15s",
+          }}
+        >
+          {hoverPreview ? (
+            <>
+              <img src={hoverPreview} alt="hover preview"
+                style={{ maxHeight: "120px", borderRadius: "6px", objectFit: "cover" }} />
+              <button
+                type="button"
+                onClick={clearHoverImage}
+                style={{
+                  position: "absolute", top: "8px", right: "8px",
+                  background: "rgba(0,0,0,0.6)", color: "#fff",
+                  border: "none", borderRadius: "6px",
+                  fontSize: "11px", padding: "4px 8px", cursor: "pointer",
+                }}
+              >Remove</button>
+            </>
+          ) : (
+            <div style={{ color: "#475569" }}>
+              <IconImage size={28} />
+              <p style={{ margin: "6px 0 0", fontSize: "13px" }}>Click to upload a second image</p>
+            </div>
+          )}
+        </div>
+        <input ref={hoverFileRef} type="file" accept="image/*"
+          onChange={handleHoverImage} style={{ display: "none" }} />
       </div>
 
       {/* CATEGORY */}
