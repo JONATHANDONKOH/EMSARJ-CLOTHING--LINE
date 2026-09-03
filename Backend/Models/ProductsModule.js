@@ -1,7 +1,7 @@
 const pool = require("../Config/db");
 
 const PUBLIC_FIELDS =
-  "id, name, price, sizes, image_url, category_id, show_on_hero, featured, trending, created_at";
+  "id, name, price, sizes, image_url, hover_image_url, category_id, show_on_hero, featured, trending, created_at";
 
 const Product = {
   async create({ 
@@ -9,6 +9,7 @@ const Product = {
     price, 
     sizes, 
     image_url, 
+    hover_image_url,
     category_id, 
     show_on_hero, 
     featured, 
@@ -27,6 +28,7 @@ const Product = {
       price,
       JSON.stringify(sizes ?? []),
       image_url,
+      hover_image_url,
       category_id,
       show_on_hero,
       featured,
@@ -36,8 +38,8 @@ const Product = {
     const { rows } = await pool.query(
       `
       INSERT INTO products
-      (name, price, sizes, image_url, category_id, show_on_hero, featured, trending)
-      VALUES ($1,$2,$3::jsonb,$4,$5::uuid,$6,$7,$8)
+      (name, price, sizes, image_url, hover_image_url, category_id, show_on_hero, featured, trending)
+      VALUES ($1,$2,$3::jsonb,$4,$5,$6::uuid,$7,$8,$9)
       RETURNING id
       `,
       [
@@ -45,6 +47,7 @@ const Product = {
         price,
         JSON.stringify(sizes ?? []),
         image_url,
+        hover_image_url ?? null,
         category_id,   // must be a valid UUID string
         show_on_hero,
         featured,
@@ -146,7 +149,7 @@ const Product = {
     return rows;
   },
 
-  async update(id, { name, price, sizes, image_url, category_id, show_on_hero, featured, trending }) {
+  async update(id, { name, price, sizes, image_url, hover_image_url, category_id, show_on_hero, featured, trending }) {
     const { rows } = await pool.query(
       `UPDATE products
        SET
@@ -154,10 +157,11 @@ const Product = {
          price = COALESCE($3, price),
          sizes = COALESCE($4::jsonb, sizes),
          image_url = COALESCE($5, image_url),
-         category_id = COALESCE($6::uuid, category_id),
-         show_on_hero = COALESCE($7, show_on_hero),
-         featured = COALESCE($8, featured),
-         trending = COALESCE($9, trending)
+         hover_image_url = $6,
+         category_id = COALESCE($7::uuid, category_id),
+         show_on_hero = COALESCE($8, show_on_hero),
+         featured = COALESCE($9, featured),
+         trending = COALESCE($10, trending)
        WHERE id = $1
        RETURNING ${PUBLIC_FIELDS}`,
       [
@@ -166,6 +170,7 @@ const Product = {
         price,
         sizes !== undefined ? JSON.stringify(sizes) : null,
         image_url,
+        hover_image_url !== undefined ? hover_image_url : null,
         category_id,   // must be a valid UUID string
         show_on_hero !== undefined ? show_on_hero : null,
         featured !== undefined ? featured : null,

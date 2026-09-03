@@ -128,7 +128,7 @@ exports.getProductsByCategory = async (req, res) => {
 // POST /products
 exports.createProduct = async (req, res) => {
   try {
-    const { name, price, sizes, image_url, category_id, show_on_hero, featured, trending } = req.body;
+    const { name, price, sizes, image_url, hover_image_url, category_id, show_on_hero, featured, trending } = req.body;
     if (!name || !price || !image_url || !category_id) {
       return res.status(400).json({ message: "Missing required product fields" });
     }
@@ -138,6 +138,7 @@ exports.createProduct = async (req, res) => {
       price,
       sizes,
       image_url,
+      hover_image_url,
       category_id,
       show_on_hero: toBoolean(show_on_hero),
       featured: toBoolean(featured),
@@ -156,13 +157,14 @@ exports.createProduct = async (req, res) => {
 // PUT /products/:id
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, price, sizes, image_url, category_id, show_on_hero, featured, trending } = req.body;
+    const { name, price, sizes, image_url, hover_image_url, category_id, show_on_hero, featured, trending } = req.body;
 
     const product = await Product.update(req.params.id, {
       name,
       price,
       sizes,
       image_url,
+      hover_image_url,
       category_id,
       show_on_hero: show_on_hero !== undefined ? toBoolean(show_on_hero) : undefined,
       featured: featured !== undefined ? toBoolean(featured) : undefined,
@@ -193,6 +195,6 @@ exports.deleteProduct = async (req, res) => {
     res.status(200).json({ message: "Product deleted" });
   } catch (err) {
     console.error("Delete product error:", err);
-    res.status(500).json({ message: "Failed to delete product." });
+    res.status(500).json({ message: "Failed to update product." });
   }
 };

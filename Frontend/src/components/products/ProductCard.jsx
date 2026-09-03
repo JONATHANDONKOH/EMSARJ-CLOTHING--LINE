@@ -4,12 +4,13 @@ import { IconEdit, IconTrash, IconImage } from "../common/Icons";
 export function ProductCard({ product, onEdit, onDelete }) {
   const [hover, setHover] = useState(false);
 
-  const sizes        = product?.sizes       || [];
-  const imageUrl     = product?.image_url   || null;
-  const categoryName = product?.categories?.name || null;
-  const productName  = product?.name        || "Unnamed";
-  const productPrice = product?.price       ?? 0;
-  const stockQty     = product?.stock_quantity ?? null;
+  const sizes         = product?.sizes            || [];
+  const imageUrl      = product?.image_url        || null;
+  const hoverImageUrl = product?.hover_image_url   || null;
+  const categoryName  = product?.categories?.name  || null;
+  const productName   = product?.name              || "Unnamed";
+  const productPrice  = product?.price             ?? 0;
+  const stockQty      = product?.stock_quantity    ?? null;
 
   const isOutOfStock = stockQty !== null && stockQty <= 0;
   const isLowStock   = stockQty !== null && stockQty > 0 && stockQty <= 10;
@@ -31,11 +32,32 @@ export function ProductCard({ product, onEdit, onDelete }) {
       {/* IMAGE */}
       <div style={{ aspectRatio: "1", background: "#0f172a", overflow: "hidden", position: "relative" }}>
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={productName}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
+          <>
+            {/* Base image */}
+            <img
+              src={imageUrl}
+              alt={productName}
+              style={{
+                position: "absolute", top: 0, left: 0,
+                width: "100%", height: "100%", objectFit: "cover",
+                opacity: hover && hoverImageUrl ? 0 : 1,
+                transition: "opacity 0.3s ease",
+              }}
+            />
+            {/* Hover image — only rendered/shown if one exists */}
+            {hoverImageUrl && (
+              <img
+                src={hoverImageUrl}
+                alt={`${productName} alternate`}
+                style={{
+                  position: "absolute", top: 0, left: 0,
+                  width: "100%", height: "100%", objectFit: "cover",
+                  opacity: hover ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                }}
+              />
+            )}
+          </>
         ) : (
           <div style={{
             width: "100%", height: "100%", display: "flex",
@@ -93,8 +115,6 @@ export function ProductCard({ product, onEdit, onDelete }) {
           const discountAmount = 50;
           const discounted = Math.max(0, current - discountAmount);
 
-          // Always render discount UI (even if discounted === current)
-          // to ensure it is visible.
           return (
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "0 0 6px" }}>
               <span style={{ fontSize: "13px", fontWeight: 800, color: "#10b981" }}>
