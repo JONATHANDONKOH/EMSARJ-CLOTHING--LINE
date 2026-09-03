@@ -3,7 +3,6 @@ import { IconPlus, IconPackage } from "../common/Icons";
 import { Modal } from "../common/Modal";
 import { ProductCard } from "./ProductCard";
 import { ProductForm } from "./ProductForm";
-import { useAuth } from "../../context/authContext";
 
 
 const API_URL = import.meta.env.VITE_UPLOAD_API_URL || "https://emsarj-clothing-line.onrender.com";
@@ -18,7 +17,7 @@ export function ProductsView() {
   const [editProduct, setEditProduct]     = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting]           = useState(false);
-  const { session }                       = useAuth();
+  const [deleteError, setDeleteError]     = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -71,6 +70,7 @@ export function ProductsView() {
   async function handleDelete(id) {
     const product = products.find(p => p.id === id);
     setDeleting(true);
+    setDeleteError("");
     try {
       // Clean up the Cloudinary image first (your Express /delete route +
       // extractPublicId helper). Adjust the body shape if your route expects
@@ -91,12 +91,16 @@ export function ProductsView() {
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error(`Failed to delete product (status ${res.status})`);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.message || `Failed to delete product (status ${res.status})`);
+      }
 
       setProducts(prev => prev.filter(p => p.id !== id));
       setDeleteConfirm(null);
     } catch (err) {
       console.error("deleteProduct error:", err);
+      setDeleteError(err.message || "Something went wrong deleting this product.");
     } finally {
       setDeleting(false);
     }
@@ -174,7 +178,7 @@ export function ProductsView() {
               key={product.id}
               product={product}
               onEdit={() => setEditProduct(product)}
-              onDelete={() => setDeleteConfirm(product)}
+              onDelete={() => { setDeleteError(""); setDeleteConfirm(product); }}
             />
           ))}
         </div>
@@ -210,6 +214,14 @@ export function ProductsView() {
             Delete <strong style={{ color: "#f1f5f9" }}>"{deleteConfirm.name}"</strong>?
             Its image will also be removed from storage. This cannot be undone.
           </p>
+          {deleteError && (
+            <p style={{
+              margin: "0 0 12px", fontSize: "13px", color: "#ef4444",
+              background: "rgba(239,68,68,0.1)", padding: "8px 12px", borderRadius: "6px",
+            }}>
+              {deleteError}
+            </p>
+          )}
           <div style={{ display: "flex", gap: "10px" }}>
             <button
               onClick={() => setDeleteConfirm(null)}
